@@ -15,11 +15,19 @@
 	</style>
 </head>
 <body>
-	<webview id="vw" src="http://bilibili.com/video/av166666" preload="./inject.js"></webview>
+	<webview id="vw" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
 	<script>
+		const ipc = require('electron').ipcRenderer;
 		var vw = document.getElementById('vw');
 		vw.addEventListener('did-finish-load', function() {
-			vw.openDevTools();
+			// vw.openDevTools();
+		});
+		vw.addEventListener('load-commit', function() {
+			if( vw.getURL().indexOf('video/av') > -1 ) {
+				ipc.send('asynchronous-message', 'video');
+			} else {
+				ipc.send('asynchronous-message', 'default');
+			}
 		});
 	</script>
 </body>

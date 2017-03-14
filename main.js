@@ -1,5 +1,6 @@
 const electron = require('electron');
 const app = electron.app;
+const ipc = electron.ipcMain;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -7,7 +8,7 @@ let mw = null;
 
 function openMainWindow() {
   // Create the browser window.
-  mw = new electron.BrowserWindow({width: 680, height: 440});
+  mw = new electron.BrowserWindow({width: 375, height: 500});
   mw.loadURL('file://' + __dirname + '/index.html');
   // mw.webContents.openDevTools();
   mw.on('closed', () => {
@@ -37,5 +38,28 @@ app.on('activate', () => {
   }
 });
 
-// In this file you can include the rest of your app's specific main process
-// code. You can also put them in separate files and require them here.
+// resize window based on loaded url
+(function() {
+
+  let sizeMap = {
+        'video': [300, 187],
+        'default': [375, 500]
+      },
+      lastStatus = 'default';
+
+  ipc.on('asynchronous-message', (ev, arg) => {
+    if( arg != lastStatus ) {
+      let currentSize = mw.getSize(),
+          leftTopPosition = mw.getPosition(),
+          rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
+          targetSize = ( arg in sizeMap ) ? sizeMap[arg] : sizeMap.default,
+          targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
+
+      mw.setBounds({
+        x: targetPosition[0], y: targetPosition[1], width: targetSize[0], height: targetSize[1]
+      }, true);
+      lastStatus = arg;
+    }
+  });
+
+})();
