@@ -1,0 +1,14 @@
+{
+  "name": "bilimini",
+  "version": "1.0.0",
+  "description": "Hide!bilibili",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/chitosai/bilimini",
+  "author": "TheC",
+  "devDependencies": {
+    "electron": "^1.4.1"
+  }
+}

@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+	<meta charset="UTF-8">
+	<title>Bilibili v.mini</title>
+	<style>
+		html, body{
+			margin: 0;
+			height: 100%;
+		}
+		webview{
+			width: 100%;
+			height: 100%;
+		}
+	</style>
+</head>
+<body>
+	<webview id="vw" src="http://bilibili.com/video/av166666" preload="./inject.js"></webview>
+	<script>
+		var vw = document.getElementById('vw');
+		vw.addEventListener('did-finish-load', function() {
+			vw.openDevTools();
+		});
+	</script>
+</body>
+</html>
