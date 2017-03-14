@@ -5,6 +5,8 @@
 	<title>Bilibili v.mini</title>
 	<style>
 		html, body{
+			font-size: 12px;
+			font-family: 'PingFangSC-Regular', 'Microsoft Yahei';
 			margin: 0;
 			height: 100%;
 		}
@@ -12,10 +14,65 @@
 			width: 100%;
 			height: 100%;
 		}
+		#topbar{
+			background: #f25d8e;
+			box-sizing: border-box;
+			line-height: 36px;
+			padding: 0 1em;
+			position: fixed;
+			top: -36px;
+			left: 0;
+			width: 100%;
+			transition: top .1s ease;
+		}
+		body:hover #topbar{
+			top: 0;
+			opacity: 1;
+		}
+		#iconbar{
+			position: absolute;
+			top: 11px
+		}
+		.iconBtn{
+			background: #fb93ab;
+			border-radius: 14px;
+			color: #f25d8e;
+			cursor: pointer;
+			font-size: 7px;
+			width: 14px;
+			height: 14px;
+			text-align: center;
+			transition: all .2s ease;
+		}
+		.iconBtn:hover{
+			background: #fff;
+		}
+		#navi-back{
+			line-height: 15px;
+			text-indent: -1px;
+		}
+		#dragzone{
+			-webkit-app-region: drag;
+			color: #ffacbf;
+			cursor: move;
+			text-align: center;
+			width: 50%;
+			margin: 0 auto;
+		}
+		#dragzone:hover{
+			color: #fff;
+		}
 	</style>
 </head>
 <body>
 	<webview id="vw" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
+	<div id="loading"></div>
+	<div id="topbar">
+		<div id="iconbar">
+			<div id="navi-back" class="iconBtn" title="后退">◀</div>
+		</div>
+		<div id="dragzone">这里可以拖拽</div>
+	</div>
 	<script>
 		const ipc = require('electron').ipcRenderer;
 		const userAgent = {

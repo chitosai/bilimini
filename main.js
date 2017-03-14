@@ -8,7 +8,7 @@ let mw = null;
 
 function openMainWindow() {
   // Create the browser window.
-  mw = new electron.BrowserWindow({width: 375, height: 500});
+  mw = new electron.BrowserWindow({width: 375, height: 500, frame: false});
   mw.loadURL('file://' + __dirname + '/index.html');
   // mw.webContents.openDevTools();
   mw.on('closed', () => {
