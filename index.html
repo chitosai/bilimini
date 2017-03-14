@@ -18,12 +18,22 @@
 	<webview id="vw" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
 	<script>
 		const ipc = require('electron').ipcRenderer;
+		const userAgent = {
+			desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
+			mobile: 'bilimini Mobile like (iPhone or Android) whatever'
+		};
+		const videoUrlPattern = /video\/av(\d+)/;
+
 		var vw = document.getElementById('vw');
 		vw.addEventListener('did-finish-load', function() {
 			// vw.openDevTools();
 		});
-		vw.addEventListener('load-commit', function() {
-			if( vw.getURL().indexOf('video/av') > -1 ) {
+		vw.addEventListener('will-navigate', function(e) {
+			let m;
+			if( m = videoUrlPattern.exec(e.url) ) {
+				vw.loadURL('http://bilibili.com/video/av' + m[1], {
+					userAgent: userAgent.desktop
+				});
 				ipc.send('asynchronous-message', 'video');
 			} else {
 				ipc.send('asynchronous-message', 'default');
