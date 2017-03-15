@@ -7,21 +7,25 @@
 </head>
 <body>
 	<webview id="wv" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
-	<div id="loading"></div>
-	<div id="topbar">
-		<div id="icon-bar">
-			<span id="navi-back" class="top-btn icon-btn disabled" title="后退">◀</span>
-			<span id="navi-forward" class="top-btn icon-btn disabled" title="前进">◀</span>
-			<span id="navi-goto" class="top-btn" title="转跳到">av</span>
+	<div id="wrapper">
+		<div id="loading"></div>
+		<div id="topbar">
+			<div id="icon-bar">
+				<span id="navi-back" class="top-btn icon-btn" :disabled="!naviCanGoBack" @click="naviBack">◀</span>
+				<span id="navi-forward" class="top-btn icon-btn" :disabled="!naviCanGoForward" @click="naviForward">◀</span>
+				<span id="navi-goto" class="top-btn" title="转跳到" @click="naviGotoShow">av</span>
+			</div>
+			<div id="dragzone">这里可以拖拽</div>
 		</div>
-		<div id="dragzone">这里可以拖拽</div>
+		<div :class="{globalOverlay: 1, active: showGlobalOverlay}" @click="naviGotoHide">
+			<div id="input-layer" :class="{active: naviGotoInputShow}" @click.stop>
+				<input type="text" id="input" placeholder="输入要前往的av号或者视频地址" v-model="naviGotoTarget" @keyup.enter="naviGoto"><!--
+				--><span id="input-finish" @click="naviGoto">确认</span>
+			</div>
+		</div>
 	</div>
-	<div id="input-layer">
-		<input type="text" id="input" placeholder="输入要前往的av号或者视频地址"><!--
-		--><span id="input-finish">确认</span>
-	</div>
-	<div id="mask"></div>
 	<script>
+		const vue = require('vue/dist/vue.js');
 		const ipc = require('electron').ipcRenderer;
 		const userAgent = {
 			desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
@@ -30,14 +34,65 @@
 		const videoUrlPrefix = 'http://bilibili.com/video/av';
 		const videoUrlPattern = /video\/av(\d+)/;
 		const wv = document.getElementById('wv');
-		const naviBack = document.getElementById('navi-back'),
-					naviForward = document.getElementById('navi-forward');
+
+		const v = new vue({
+			el: '#wrapper',
+			data: {
+				naviGotoTarget: '',
+				naviGotoInputShow: false,
+				naviCanGoBack: false,
+				naviCanGoForward: false,
+				showGlobalOverlay: false
+			},
+			methods: {
+				// 后退
+				naviBack: function() {
+					wv.goBack();
+				},
+				// 前进
+				naviForward: function() {
+					wv.goForward();
+				},
+				// 通过url或av号跳转
+				naviGotoShow: function() {
+					this.naviGotoTarget = '';
+					this.naviGotoInputShow = true;
+					this.showGlobalOverlay = true;
+				},
+				naviGotoHide: function() {
+					this.naviGotoInputShow = this.showGlobalOverlay = false;
+				},
+				naviGoto: function() {
+					var target = this.naviGotoTarget;
+					if( target.startsWith('http') && target.indexOf('bilibili.com') > -1 ) {
+						// is Url
+						if( target.indexOf('video/av') > -1 ) {
+							wv.loadURL(target, {
+								userAgent: userAgent.desktop
+							});
+						} else {
+							wv.loadURL(target);
+						}
+						this.naviGotoHide();
+					} else if( /^(\d+)$/.test(target) ) {
+						// is avid
+						wv.loadURL(videoUrlPrefix + target, {
+							userAgent: userAgent.desktop
+						});
+						this.naviGotoHide();
+					} else {
+						// not a valid input
+						alert('你确定输入的是b站链接或者av号吗？');
+					}
+				}
+			}
+		});
 
 		wv.addEventListener('did-finish-load', function() {
 			// wv.openDevTools();
 			// 判断是否能前进/后退
-			wv.canGoBack() ? naviBack.classList.remove('disabled') : naviBack.classList.add('disabled');
-			wv.canGoForward() ? naviForward.classList.remove('disabled') : naviForward.classList.add('disabled');
+			v.naviCanGoBack = wv.canGoBack();
+			v.naviCanGoForward = wv.canGoForward();
 
 			if( wv.getURL().indexOf('video/av') > -1 ) {
 				ipc.send('asynchronous-message', 'video');
@@ -55,59 +110,6 @@
 				});
 			}
 		});
-
-		// 前进 / 后退
-		naviBack.addEventListener('click', () => {
-			wv.goBack();
-		});
-		naviForward.addEventListener('click', () => {
-			wv.goForward();
-		});
-
-		// av号跳转
-		const inputLayer = document.getElementById('input-layer'),
-					input = document.getElementById('input');
-		document.getElementById('navi-goto').addEventListener('click', () => {
-			input.value = '';
-			inputLayer.classList.add('active');
-			Mask.show();
-		});
-		document.getElementById('input-finish').addEventListener('click', () => {
-			var target = input.value;
-			if( target.startsWith('http') && target.indexOf('bilibili.com') > -1 ) {
-				// is Url
-				if( target.indexOf('video/av') > -1 ) {
-					wv.loadURL(target, {
-						userAgent: userAgent.desktop
-					});
-				} else {
-					wv.loadURL(target);
-				}
-				inputLayer.classList.remove('active');
-				Mask.hide();
-			} else if( /^(\d+)$/.test(target) ) {
-				// is avid
-				wv.loadURL(videoUrlPrefix + target, {
-					userAgent: userAgent.desktop
-				});
-				inputLayer.classList.remove('active');
-				Mask.hide();
-			} else {
-				// not a valid input
-				alert('你确定输入的是b站链接或者av号吗？');
-			}
-		});
-
-		// 通用组件：阴影遮罩
-		const Mask = {
-			node: document.getElementById('mask'),
-			show: () => {
-				Mask.node.classList.add('active');
-			},
-			hide: () => {
-				Mask.node.classList.remove('active');
-			}
-		};
 	</script>
 </body>
 </html>

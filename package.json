@@ -11,8 +11,9 @@
   "repository": "https://github.com/chitosai/bilimini",
   "author": "TheC",
   "devDependencies": {
-    "electron": "1.6.2",
-    "electron-builder": "next"
+    "electron": "^1.6.2",
+    "electron-builder": "next",
+    "vue": "^2.2.4"
   },
   "build": {
     "appId": "285790125@qq.com",

@@ -5,7 +5,7 @@ html, body{
 	margin: 0;
 	height: 100%;
 }
-#mask{
+.globalOverlay{
 	background: rgba(0, 0, 0, .7);
 	position: fixed;
 	top: 0;
@@ -16,7 +16,7 @@ html, body{
 	transition: opacity .2s ease;
 	z-index: 9;
 }
-#mask.active{
+.globalOverlay.active{
 	left: 0;
 	opacity: 1;
 }
@@ -54,10 +54,10 @@ body:hover #topbar{
 .top-btn:hover{
 	background: #fff;
 }
-.top-btn.disabled{
+.top-btn[disabled]{
 	opacity: .5;
 }
-.top-btn.disabled:hover{
+.top-btn[disabled]:hover{
 	background: #fb93ab;
 }
 .icon-btn{
@@ -91,10 +91,6 @@ body:hover #topbar{
 	line-height: 22px;
 	width: 50%;
 	margin: 7px auto;
-}
-#dragzone:hover{
-	background: #fb93ab;
-	text-indent: -999999px;
 }
 
 /* webview */
