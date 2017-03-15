@@ -98,7 +98,8 @@ app.on('activate', () => {
 
 // 老板键
 function bindGloablShortcut() {
-  shortcut.register('Command+p', () => {
+  let hotkey = platform == 'win' ? 'Ctrl+p' : 'Command+p';
+  shortcut.register(hotkey, () => {
     if( !mw ) return false;
     if( mw.isVisible() ) {
       mw.hide();
