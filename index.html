@@ -9,7 +9,7 @@
 	<webview id="wv" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
 	<div id="wrapper">
 		<div id="loading"></div>
-		<div id="topbar">
+		<div id="topbar" :class="{active: showTopBar}">
 			<div id="icon-bar">
 				<span id="navi-back" class="top-btn icon-btn" :disabled="!naviCanGoBack" @click="naviBack">◀</span>
 				<span id="navi-forward" class="top-btn icon-btn" :disabled="!naviCanGoForward" @click="naviForward">◀</span>
@@ -38,6 +38,7 @@
 		const v = new Vue({
 			el: '#wrapper',
 			data: {
+				showTopBar: false,
 				naviGotoTarget: '',
 				naviGotoInputShow: false,
 				naviCanGoBack: false,
@@ -110,6 +111,15 @@
 				});
 			}
 		});
+
+		if( process.platform.startsWith('win') ) {
+			document.body.classList.add('windows');
+			// windows下frameless window没法正确检测到mouseout事件，所以只能用focus/blur来代替了
+			ipc.on('mousein', () => v.showTopBar = true);
+			ipc.on('mouseout', () => v.showTopBar = false)
+		} else if( process.platform == 'darwin' ) {
+			document.body.classList.add('macos');
+		}
 	</script>
 </body>
 </html>

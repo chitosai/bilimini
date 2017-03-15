@@ -3,6 +3,8 @@ const app = electron.app;
 const ipc = electron.ipcMain;
 const shortcut = electron.globalShortcut;
 
+const platform = process.platform.startsWith('win') ? 'win' : process.platform;
+
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mw = null;
@@ -13,7 +15,29 @@ function openMainWindow() {
   mw.setAlwaysOnTop(true, 'torn-off-menu');
   mw.on('closed', () => {
     mw = null;
+    // clearInterval(winMouseOutDirtyCheck);
   });
+
+  // frameless window在windows下无法正常触发，
+  // 只能用dirty check做个workaround了
+  let lastStatus = 'in';
+  if( platform == 'win' ) {
+    var winMouseOutDirtyCheck = setInterval(function() {
+      let mousePos = electron.screen.getCursorScreenPoint(),
+          windowPos = mw.getPosition(),
+          windowSize = mw.getSize();
+      if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
+          (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + windowSize[1]) ) {
+        if( lastStatus == 'out' ) {
+          mw.webContents.send('mousein');
+          lastStatus = 'in';
+        }
+      } else if( lastStatus == 'in' ) {
+        mw.webContents.send('mouseout');
+        lastStatus = 'out';
+      }
+    }, 600);
+  }
   // mw.webContents.openDevTools();
 }
 
