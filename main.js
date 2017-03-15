@@ -8,13 +8,13 @@ const shortcut = electron.globalShortcut;
 let mw = null;
 
 function openMainWindow() {
-  // Create the browser window.
   mw = new electron.BrowserWindow({width: 375, height: 500, frame: false});
   mw.loadURL('file://' + __dirname + '/index.html');
-  // mw.webContents.openDevTools();
+  mw.setAlwaysOnTop(true, 'torn-off-menu');
   mw.on('closed', () => {
     mw = null;
   });
+  // mw.webContents.openDevTools();
 }
 
 function init() {
@@ -75,6 +75,7 @@ app.on('activate', () => {
 // 老板键
 function bindGloablShortcut() {
   shortcut.register('Command+p', () => {
+    if( !mw ) return false;
     if( mw.isVisible() ) {
       mw.hide();
     } else {
