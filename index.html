@@ -29,27 +29,50 @@
 			top: 0;
 			opacity: 1;
 		}
-		#iconbar{
+		#icon-bar{
 			position: absolute;
-			top: 11px
+			top: 0;
+			left: 10px;
 		}
-		.iconBtn{
+		.top-btn{
 			background: #fb93ab;
-			border-radius: 14px;
 			color: #f25d8e;
 			cursor: pointer;
+			display: inline-block;
+			vertical-align: middle;
+			margin-right: 2px;
+			transition: all .2s ease;
+		}
+		.top-btn:hover{
+			background: #fff;
+		}
+		.top-btn.disabled{
+			opacity: .5;
+		}
+		.top-btn.disabled:hover{
+			background: #fb93ab;
+		}
+		.icon-btn{
+			border-radius: 14px;
 			font-size: 7px;
 			width: 14px;
 			height: 14px;
 			text-align: center;
-			transition: all .2s ease;
-		}
-		.iconBtn:hover{
-			background: #fff;
 		}
 		#navi-back{
 			line-height: 15px;
 			text-indent: -1px;
+		}
+		#navi-forward{
+			line-height: 15px;
+			text-indent: -1px;
+			transform: rotate(180deg);
+		}
+		#navi-goto{
+			border-radius: 3px;
+			font-size: 14px;
+			line-height: 15px;
+			padding: 0 5px;
 		}
 		#dragzone{
 			-webkit-app-region: drag;
@@ -65,11 +88,13 @@
 	</style>
 </head>
 <body>
-	<webview id="vw" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
+	<webview id="wv" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
 	<div id="loading"></div>
 	<div id="topbar">
-		<div id="iconbar">
-			<div id="navi-back" class="iconBtn" title="后退">◀</div>
+		<div id="icon-bar">
+			<span id="navi-back" class="top-btn icon-btn disabled" title="后退">◀</span>
+			<span id="navi-forward" class="top-btn icon-btn disabled" title="前进">◀</span>
+			<span id="navi-goto" class="top-btn" title="转跳到">av</span>
 		</div>
 		<div id="dragzone">这里可以拖拽</div>
 	</div>
@@ -80,21 +105,39 @@
 			mobile: 'bilimini Mobile like (iPhone or Android) whatever'
 		};
 		const videoUrlPattern = /video\/av(\d+)/;
+		const wv = document.getElementById('wv');
+		const naviBack = document.getElementById('navi-back'),
+					naviForward = document.getElementById('navi-forward');
+					
+		wv.addEventListener('did-finish-load', function() {
+			// wv.openDevTools();
+			// 判断是否能前进/后退
+			wv.canGoBack() ? naviBack.classList.remove('disabled') : naviBack.classList.add('disabled');
+			wv.canGoForward() ? naviForward.classList.remove('disabled') : naviForward.classList.add('disabled');
 
-		var vw = document.getElementById('vw');
-		vw.addEventListener('did-finish-load', function() {
-			// vw.openDevTools();
-		});
-		vw.addEventListener('will-navigate', function(e) {
-			let m;
-			if( m = videoUrlPattern.exec(e.url) ) {
-				vw.loadURL('http://bilibili.com/video/av' + m[1], {
-					userAgent: userAgent.desktop
-				});
+			if( wv.getURL().indexOf('video/av') > -1 ) {
 				ipc.send('asynchronous-message', 'video');
 			} else {
 				ipc.send('asynchronous-message', 'default');
 			}
+		});
+
+		// 当用户点到视频播放页时跳到桌面版页面，同时缩小窗口尺寸
+		wv.addEventListener('will-navigate', function(e) {
+			let m = videoUrlPattern.exec(e.url);
+			if( m ) {
+				wv.loadURL('http://bilibili.com/video/av' + m[1], {
+					userAgent: userAgent.desktop
+				});
+			}
+		});
+
+		// 前进 / 后退
+		naviBack.addEventListener('click', () => {
+			wv.goBack();
+		});
+		naviForward.addEventListener('click', () => {
+			wv.goForward();
 		});
 	</script>
 </body>
