@@ -1,6 +1,7 @@
 const electron = require('electron');
 const app = electron.app;
 const ipc = electron.ipcMain;
+const shortcut = electron.globalShortcut;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
@@ -16,10 +17,15 @@ function openMainWindow() {
   });
 }
 
+function init() {
+  openMainWindow();
+  bindGloablShortcut();
+}
+
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.
 // Some APIs can only be used after this event occurs.
-app.on('ready', openMainWindow);
+app.on('ready', init);
 
 // Quit when all windows are closed.
 app.on('window-all-closed', () => {
@@ -35,6 +41,8 @@ app.on('activate', () => {
   // dock icon is clicked and there are no other windows open.
   if( mw === null ) {
     openMainWindow();
+  } else {
+    mw.show();
   }
 });
 
@@ -63,3 +71,14 @@ app.on('activate', () => {
   });
 
 })();
+
+// 老板键
+function bindGloablShortcut() {
+  shortcut.register('Command+p', () => {
+    if( mw.isVisible() ) {
+      mw.hide();
+    } else {
+      mw.showInactive();
+    }
+  });
+}
