@@ -3,89 +3,7 @@
 <head>
 	<meta charset="UTF-8">
 	<title>Bilibili v.mini</title>
-	<style>
-		html, body{
-			font-size: 12px;
-			font-family: 'PingFangSC-Regular', 'Microsoft Yahei';
-			margin: 0;
-			height: 100%;
-		}
-		webview{
-			width: 100%;
-			height: 100%;
-		}
-		#topbar{
-			background: #f25d8e;
-			box-sizing: border-box;
-			line-height: 36px;
-			padding: 0 1em;
-			position: fixed;
-			top: -36px;
-			left: 0;
-			width: 100%;
-			transition: top .1s ease;
-		}
-		body:hover #topbar{
-			top: 0;
-			opacity: 1;
-		}
-		#icon-bar{
-			position: absolute;
-			top: 0;
-			left: 10px;
-		}
-		.top-btn{
-			background: #fb93ab;
-			color: #f25d8e;
-			cursor: pointer;
-			display: inline-block;
-			vertical-align: middle;
-			margin-right: 2px;
-			transition: all .2s ease;
-		}
-		.top-btn:hover{
-			background: #fff;
-		}
-		.top-btn.disabled{
-			opacity: .5;
-		}
-		.top-btn.disabled:hover{
-			background: #fb93ab;
-		}
-		.icon-btn{
-			border-radius: 14px;
-			font-size: 7px;
-			width: 14px;
-			height: 14px;
-			text-align: center;
-		}
-		#navi-back{
-			line-height: 15px;
-			text-indent: -1px;
-		}
-		#navi-forward{
-			line-height: 15px;
-			text-indent: -1px;
-			transform: rotate(180deg);
-		}
-		#navi-goto{
-			border-radius: 3px;
-			font-size: 14px;
-			line-height: 15px;
-			padding: 0 5px;
-		}
-		#dragzone{
-			-webkit-app-region: drag;
-			color: #ffacbf;
-			cursor: move;
-			text-align: center;
-			width: 50%;
-			margin: 0 auto;
-		}
-		#dragzone:hover{
-			color: #fff;
-		}
-	</style>
+	<link rel="stylesheet" href="main.css">
 </head>
 <body>
 	<webview id="wv" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
@@ -98,17 +16,23 @@
 		</div>
 		<div id="dragzone">这里可以拖拽</div>
 	</div>
+	<div id="input-layer">
+		<input type="text" id="input" placeholder="输入要前往的av号或者视频地址"><!--
+		--><span id="input-finish">确认</span>
+	</div>
+	<div id="mask"></div>
 	<script>
 		const ipc = require('electron').ipcRenderer;
 		const userAgent = {
 			desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
 			mobile: 'bilimini Mobile like (iPhone or Android) whatever'
 		};
+		const videoUrlPrefix = 'http://bilibili.com/video/av';
 		const videoUrlPattern = /video\/av(\d+)/;
 		const wv = document.getElementById('wv');
 		const naviBack = document.getElementById('navi-back'),
 					naviForward = document.getElementById('navi-forward');
-					
+
 		wv.addEventListener('did-finish-load', function() {
 			// wv.openDevTools();
 			// 判断是否能前进/后退
@@ -126,7 +50,7 @@
 		wv.addEventListener('will-navigate', function(e) {
 			let m = videoUrlPattern.exec(e.url);
 			if( m ) {
-				wv.loadURL('http://bilibili.com/video/av' + m[1], {
+				wv.loadURL(videoUrlPrefix + m[1], {
 					userAgent: userAgent.desktop
 				});
 			}
@@ -139,6 +63,51 @@
 		naviForward.addEventListener('click', () => {
 			wv.goForward();
 		});
+
+		// av号跳转
+		const inputLayer = document.getElementById('input-layer'),
+					input = document.getElementById('input');
+		document.getElementById('navi-goto').addEventListener('click', () => {
+			input.value = '';
+			inputLayer.classList.add('active');
+			Mask.show();
+		});
+		document.getElementById('input-finish').addEventListener('click', () => {
+			var target = input.value;
+			if( target.startsWith('http') && target.indexOf('bilibili.com') > -1 ) {
+				// is Url
+				if( target.indexOf('video/av') > -1 ) {
+					wv.loadURL(target, {
+						userAgent: userAgent.desktop
+					});
+				} else {
+					wv.loadURL(target);
+				}
+				inputLayer.classList.remove('active');
+				Mask.hide();
+			} else if( /^(\d+)$/.test(target) ) {
+				// is avid
+				wv.loadURL(videoUrlPrefix + target, {
+					userAgent: userAgent.desktop
+				});
+				inputLayer.classList.remove('active');
+				Mask.hide();
+			} else {
+				// not a valid input
+				alert('你确定输入的是b站链接或者av号吗？');
+			}
+		});
+
+		// 通用组件：阴影遮罩
+		const Mask = {
+			node: document.getElementById('mask'),
+			show: () => {
+				Mask.node.classList.add('active');
+			},
+			hide: () => {
+				Mask.node.classList.remove('active');
+			}
+		};
 	</script>
 </body>
 </html>
