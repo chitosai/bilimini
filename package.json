@@ -12,8 +12,7 @@
   "author": "TheC",
   "devDependencies": {
     "electron": "^1.6.2",
-    "electron-builder": "next",
-    "vue": "^2.2.4"
+    "electron-builder": "next"
   },
   "build": {
     "appId": "285790125@qq.com",

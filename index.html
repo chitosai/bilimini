@@ -24,8 +24,8 @@
 			</div>
 		</div>
 	</div>
+	<script src="js/vue.min.js"></script>
 	<script>
-		const vue = require('vue/dist/vue.js');
 		const ipc = require('electron').ipcRenderer;
 		const userAgent = {
 			desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
@@ -35,7 +35,7 @@
 		const videoUrlPattern = /video\/av(\d+)/;
 		const wv = document.getElementById('wv');
 
-		const v = new vue({
+		const v = new Vue({
 			el: '#wrapper',
 			data: {
 				naviGotoTarget: '',
