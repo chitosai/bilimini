@@ -6,7 +6,10 @@
 	<link rel="stylesheet" href="main.css">
 </head>
 <body>
+	<!-- webview -->
 	<webview id="wv" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
+
+	<!-- app UI -->
 	<div id="wrapper">
 		<div id="loading"></div>
 		<div id="topbar" :class="{active: showTopBar}">
@@ -27,6 +30,8 @@
 			</div>
 		</div>
 	</div>
+
+	<!-- scripts -->
 	<script src="js/vue.min.js"></script>
 	<script>
 		const ipc = require('electron').ipcRenderer;
@@ -39,6 +44,7 @@
 		const videoUrlPattern = /video\/av(\d+)/;
 		const wv = document.getElementById('wv');
 
+		// UI逻辑
 		const v = new Vue({
 			el: '#wrapper',
 			data: {
@@ -97,20 +103,42 @@
 			}
 		});
 
+		// 根据用户访问的url决定app窗口尺寸
+		var currentWindowType = 'default';
+		const sizeMap = {
+      'mini': [300, 187],
+      'default': [375, 500]
+    };
 		wv.addEventListener('did-finish-load', function() {
 			// wv.openDevTools();
 			// 判断是否能前进/后退
 			v.naviCanGoBack = wv.canGoBack();
 			v.naviCanGoForward = wv.canGoForward();
 
+			// resize window based on loaded url
+			let targetWindowType;
 			if( wv.getURL().indexOf('video/av') > -1 ) {
-				ipc.send('asynchronous-message', 'video');
+				targetWindowType = 'mini';
 			} else {
-				ipc.send('asynchronous-message', 'default');
+				targetWindowType = 'default';
+			}
+			if( targetWindowType != currentWindowType ) {
+				let mw = remote.getCurrentWindow(),
+						currentSize = mw.getSize(),
+	          leftTopPosition = mw.getPosition(),
+	          rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
+	          targetSize = ( targetWindowType in sizeMap ) ? sizeMap[targetWindowType] : sizeMap.default,
+	          targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
+
+	      mw.setBounds({
+	        x: targetPosition[0], y: targetPosition[1], width: targetSize[0], height: targetSize[1]
+	      }, true);
+
+	      currentWindowType = targetWindowType;
 			}
 		});
 
-		// 当用户点到视频播放页时跳到桌面版页面，同时缩小窗口尺寸
+		// 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
 		wv.addEventListener('will-navigate', function(e) {
 			let m = videoUrlPattern.exec(e.url);
 			if( m ) {
@@ -120,13 +148,29 @@
 			}
 		});
 
+		// 给body加上platform flag
 		if( process.platform.startsWith('win') ) {
-			document.body.classList.add('windows');
-			// windows下frameless window没法正确检测到mouseout事件，所以只能用focus/blur来代替了
-			ipc.on('mousein', () => v.showTopBar = true);
-			ipc.on('mouseout', () => v.showTopBar = false)
+			document.body.classList.add('win');
+			mouseStateDirtyCheck();
 		} else if( process.platform == 'darwin' ) {
 			document.body.classList.add('macos');
+		}
+
+		// windows下frameless window没法正确检测到mouseout事件，只能根据光标位置做个dirtyCheck了
+		function mouseStateDirtyCheck() {
+			var getMousePosition = remote.screen.getCursorScreenPoint,
+					mw = remote.getCurrentWindow();
+			setInterval(function() {
+	      let mousePos = getMousePosition(),
+	          windowPos = mw.getPosition(),
+	          windowSize = mw.getSize();
+	      if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
+	          (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + windowSize[1]) ) {
+	        v.showTopBar = true;
+	      } else {
+	      	v.showTopBar = false;
+	      }
+	    }, 600);
 		}
 	</script>
 </body>

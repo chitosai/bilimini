@@ -15,30 +15,8 @@ function openMainWindow() {
   mw.setAlwaysOnTop(true, 'torn-off-menu');
   mw.on('closed', () => {
     mw = null;
-    // clearInterval(winMouseOutDirtyCheck);
   });
-
-  // frameless window在windows下无法正常触发，
-  // 只能用dirty check做个workaround了
-  let lastStatus = 'in';
-  if( platform == 'win' ) {
-    var winMouseOutDirtyCheck = setInterval(function() {
-      let mousePos = electron.screen.getCursorScreenPoint(),
-          windowPos = mw.getPosition(),
-          windowSize = mw.getSize();
-      if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
-          (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + windowSize[1]) ) {
-        if( lastStatus == 'out' ) {
-          mw.webContents.send('mousein');
-          lastStatus = 'in';
-        }
-      } else if( lastStatus == 'in' ) {
-        mw.webContents.send('mouseout');
-        lastStatus = 'out';
-      }
-    }, 600);
-  }
-  // mw.webContents.openDevTools();
+  mw.webContents.openDevTools();
 }
 
 function init() {
@@ -69,32 +47,6 @@ app.on('activate', () => {
     mw.show();
   }
 });
-
-// resize window based on loaded url
-(function() {
-
-  let sizeMap = {
-        'video': [300, 187],
-        'default': [375, 500]
-      },
-      lastStatus = 'default';
-
-  ipc.on('asynchronous-message', (ev, arg) => {
-    if( arg != lastStatus ) {
-      let currentSize = mw.getSize(),
-          leftTopPosition = mw.getPosition(),
-          rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
-          targetSize = ( arg in sizeMap ) ? sizeMap[arg] : sizeMap.default,
-          targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
-
-      mw.setBounds({
-        x: targetPosition[0], y: targetPosition[1], width: targetSize[0], height: targetSize[1]
-      }, true);
-      lastStatus = arg;
-    }
-  });
-
-})();
 
 // 老板键
 function bindGloablShortcut() {
