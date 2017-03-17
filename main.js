@@ -2,6 +2,7 @@ const electron = require('electron');
 const app = electron.app;
 const ipc = electron.ipcMain;
 const shortcut = electron.globalShortcut;
+const Menu = electron.Menu;
 
 const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 
@@ -16,12 +17,13 @@ function openMainWindow() {
   mw.on('closed', () => {
     mw = null;
   });
-  mw.webContents.openDevTools();
+  // mw.webContents.openDevTools();
 }
 
 function init() {
   openMainWindow();
   bindGloablShortcut();
+  initMenu();
 }
 
 // This method will be called when Electron has finished
@@ -47,6 +49,46 @@ app.on('activate', () => {
     mw.show();
   }
 });
+
+// 菜单
+function initMenu() {
+  // 本来我们是不需要菜单的，但是因为mac上app必须有菜单，所以只在mac上做一下
+  if( platform != 'darwin' ) return;
+  var template = [{
+      label: app.getName(),
+      submenu: [
+        { role: 'about' },
+        { type: 'separator' },
+        { type: 'separator' },
+        { role: 'hide' },
+        { role: 'hideothers' },
+        { role: 'unhide' },
+        { type: 'separator' },
+        { role: 'quit' }
+      ]
+    }, {
+      label: 'Debug',
+      submenu: [
+        {
+          label: 'Open Renderrer Console',
+          click() { mw.webContents.openDevTools(); }
+        },
+        {
+          label: 'Open Webview Console',
+          click() { mw.webContents.send('openWebviewDevTools'); }
+        }
+      ]
+    }, {
+      role: 'window',
+      submenu: [
+        { role: 'minimize' },
+        { role: 'close' }
+      ]
+    }
+  ];
+  var menu = Menu.buildFromTemplate(template);
+  Menu.setApplicationMenu(menu);
+}
 
 // 老板键
 function bindGloablShortcut() {

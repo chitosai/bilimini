@@ -185,12 +185,20 @@
 	    }, 600);
 		}
 
+		// 点击菜单「webview console」时打开webview
+		function openWebviewConsoleOnMenuClick() {
+			ipc.on('openWebviewDevTools', () => {
+				wv.openDevTools();
+			});
+		}
+
 		window.addEventListener('DOMContentLoaded', function() {
 			detectPlatform();
 			resizeWindowOnNavigation();
 			checkGoBackAndForwardStateOnNavigation();
 			switchDesktopOnNavigationToVideoPage();
 			initMouseStateDirtyCheck();
+			openWebviewConsoleOnMenuClick();
 		});
 	</script>
 </body>
