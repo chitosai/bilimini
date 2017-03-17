@@ -103,61 +103,73 @@
 			}
 		});
 
+		// 给body加上platform flag
+		function detectPlatform() {
+			if( process.platform.startsWith('win') ) {
+				window.platform = 'win';
+				document.body.classList.add('win');
+			} else if( process.platform == 'darwin' ) {
+				window.platform = 'darwin';
+				document.body.classList.add('macos');
+			}
+		}
+
 		// 根据用户访问的url决定app窗口尺寸
-		var currentWindowType = 'default';
-		const sizeMap = {
-      'mini': [300, 187],
-      'default': [375, 500]
-    };
-		wv.addEventListener('did-finish-load', function() {
-			// wv.openDevTools();
-			// 判断是否能前进/后退
-			v.naviCanGoBack = wv.canGoBack();
-			v.naviCanGoForward = wv.canGoForward();
+		function resizeWindowOnNavigation() {
+			var currentWindowType = 'default';
+			const sizeMap = {
+	      'mini': [300, 187],
+	      'default': [375, 500]
+	    };
+			wv.addEventListener('did-finish-load', function() {
+				let targetWindowType;
+				if( wv.getURL().indexOf('video/av') > -1 ) {
+					targetWindowType = 'mini';
+				} else {
+					targetWindowType = 'default';
+				}
+				if( targetWindowType != currentWindowType ) {
+					let mw = remote.getCurrentWindow(),
+							currentSize = mw.getSize(),
+		          leftTopPosition = mw.getPosition(),
+		          rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
+		          targetSize = ( targetWindowType in sizeMap ) ? sizeMap[targetWindowType] : sizeMap.default,
+		          targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
 
-			// resize window based on loaded url
-			let targetWindowType;
-			if( wv.getURL().indexOf('video/av') > -1 ) {
-				targetWindowType = 'mini';
-			} else {
-				targetWindowType = 'default';
-			}
-			if( targetWindowType != currentWindowType ) {
-				let mw = remote.getCurrentWindow(),
-						currentSize = mw.getSize(),
-	          leftTopPosition = mw.getPosition(),
-	          rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
-	          targetSize = ( targetWindowType in sizeMap ) ? sizeMap[targetWindowType] : sizeMap.default,
-	          targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
+		      mw.setBounds({
+		        x: targetPosition[0], y: targetPosition[1], width: targetSize[0], height: targetSize[1]
+		      }, true);
 
-	      mw.setBounds({
-	        x: targetPosition[0], y: targetPosition[1], width: targetSize[0], height: targetSize[1]
-	      }, true);
+		      currentWindowType = targetWindowType;
+				}
+			});
+		}
 
-	      currentWindowType = targetWindowType;
-			}
-		});
+		// 判断是否能前进/后退
+		function checkGoBackAndForwardStateOnNavigation() {
+			wv.addEventListener('did-finish-load', function() {
+				v.naviCanGoBack = wv.canGoBack();
+				v.naviCanGoForward = wv.canGoForward();
+			});
+		}
 
 		// 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
-		wv.addEventListener('will-navigate', function(e) {
-			let m = videoUrlPattern.exec(e.url);
-			if( m ) {
-				wv.loadURL(videoUrlPrefix + m[1], {
-					userAgent: userAgent.desktop
-				});
-			}
-		});
-
-		// 给body加上platform flag
-		if( process.platform.startsWith('win') ) {
-			document.body.classList.add('win');
-			mouseStateDirtyCheck();
-		} else if( process.platform == 'darwin' ) {
-			document.body.classList.add('macos');
+		function switchDesktopOnNavigationToVideoPage() {
+			wv.addEventListener('will-navigate', function(e) {
+				let m = videoUrlPattern.exec(e.url);
+				if( m ) {
+					wv.loadURL(videoUrlPrefix + m[1], {
+						userAgent: userAgent.desktop
+					});
+				}
+			});
 		}
 
 		// windows下frameless window没法正确检测到mouseout事件，只能根据光标位置做个dirtyCheck了
-		function mouseStateDirtyCheck() {
+		function initMouseStateDirtyCheck() {
+			if( platform != 'win' ) {
+				return false;
+			}
 			var getMousePosition = remote.screen.getCursorScreenPoint,
 					mw = remote.getCurrentWindow();
 			setInterval(function() {
@@ -172,6 +184,14 @@
 	      }
 	    }, 600);
 		}
+
+		window.addEventListener('DOMContentLoaded', function() {
+			detectPlatform();
+			resizeWindowOnNavigation();
+			checkGoBackAndForwardStateOnNavigation();
+			switchDesktopOnNavigationToVideoPage();
+			initMouseStateDirtyCheck();
+		});
 	</script>
 </body>
 </html>
