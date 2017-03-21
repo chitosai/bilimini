@@ -57,14 +57,21 @@ function initMenu() {
   var template = [{
       label: app.getName(),
       submenu: [
-        { role: 'about' },
-        { type: 'separator' },
-        { type: 'separator' },
         { role: 'hide' },
         { role: 'hideothers' },
         { role: 'unhide' },
         { type: 'separator' },
         { role: 'quit' }
+      ]
+    }, {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'delete' },
+        { role: 'selectall' }
       ]
     }, {
       label: 'Debug',
