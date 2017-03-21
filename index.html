@@ -179,8 +179,10 @@
 	      if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
 	          (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + windowSize[1]) ) {
 	        v.showTopBar = true;
+	      	wv.classList.add('slideDown');
 	      } else {
 	      	v.showTopBar = false;
+	      	wv.classList.remove('slideDown');
 	      }
 	    }, 600);
 		}
