@@ -99,7 +99,7 @@ function initMenu() {
 
 // 老板键
 function bindGloablShortcut() {
-  shortcut.register('alt+p', () => {
+  shortcut.register('alt+w', () => {
     if( !mw ) return false;
     if( mw.isVisible() ) {
       mw.hide();
