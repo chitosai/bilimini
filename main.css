@@ -19,6 +19,9 @@ body.macos #wrapper:hover,
 		-webkit-app-region: drag; 没有生效 */
 	top: 36px;
 }
+#wrapper.showAbout{
+	top: 211px !important;
+}
 .globalOverlay{
 	background: rgba(0, 0, 0, .7);
 	position: fixed;
@@ -28,11 +31,40 @@ body.macos #wrapper:hover,
 	width: 100%;
 	height: 100%;
 	transition: opacity .2s ease;
-	z-index: 9;
+	z-index: 10;
 }
 .globalOverlay.active{
 	left: 0;
 	opacity: 1;
+}
+
+/* about */
+#about{
+	background: #f25d8e;
+	box-sizing: border-box;
+	text-align: center;
+	padding: 10px;
+	position: absolute;
+	top: -211px;
+	width: 100%;
+	z-index: 9;
+}
+#about-title{
+	color: #ffacbf;
+	font-size: 1.3em;
+	font-weight: bold;
+	line-height: 2em;
+}
+#about p{
+	color: #fb93ab;
+	line-height: 1.7em;
+	margin: 0;
+}
+#about a{
+	color: #ffacbf;
+}
+#about-overlay{
+	z-index: 2;
 }
 
 /* topbar*/
@@ -45,6 +77,7 @@ body.macos #wrapper:hover,
 	top: -36px;
 	left: 0;
 	width: 100%;
+	z-index: 9;
 }
 #icon-bar-left{
 	position: absolute;
@@ -96,9 +129,13 @@ body.macos #wrapper:hover,
 	line-height: 15px;
 	padding: 0 5px;
 }
-#app-close{
-	font-size: 12px;
+#app-about{
+	font-size: 10px;
 	line-height: 14px;
+}
+#app-close{
+	font-size: 11px;
+	line-height: 13px;
 }
 #dragzone{
   -webkit-user-select: none;

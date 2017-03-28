@@ -16,6 +16,16 @@
 		<!-- loading -->
 		<div id="loading"></div>
 
+		<!-- about -->
+		<div id="about">
+			<div><img src="build/icon.png"></div>
+			<div id="about-title">藏起来！哔哩哔哩</div>
+			<p>Tip：按Alt+w（ Mac下Option+w ）可以快速隐藏此程序</p>
+			<p>Made by <a href="http://weibo.com/chitosai" target="_blank">@千歳</a> with LOVE</p>
+			<p>代码开源于<a href="https://github.com/chitosai/bilimini">Github</a></p>
+		</div>
+		<div id="about-overlay" :class="{globalOverlay: 1, active: showAboutOverlay}" @click="hideAbout"></div>
+
 		<!-- topbar -->
 		<div id="topbar">
 			<div id="icon-bar-left">
@@ -25,12 +35,13 @@
 			</div>
 			<div id="dragzone">这里可以拖拽</div>
 			<div id="icon-bar-right">
+				<span id="app-about" class="top-btn icon-btn" @click="showAbout">?</span>
 				<span id="app-close" class="top-btn icon-btn" @click="turnOff">x</span>
 			</div>
 		</div>
 
 		<!-- overlay -->
-		<div :class="{globalOverlay: 1, active: showGlobalOverlay}" @click="naviGotoHide">
+		<div :class="{globalOverlay: 1, active: showNaviGotoOverlay}" @click="naviGotoHide">
 			<div id="input-layer" :class="{active: naviGotoInputShow}" @click.stop>
 				<input type="text" id="input" placeholder="输入要前往的av号或者视频地址" v-model="naviGotoTarget" @keyup.enter="naviGoto"><!--
 				--><span id="input-finish" @click="naviGoto">确认</span>

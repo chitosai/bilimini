@@ -6,7 +6,7 @@ const userAgent = {
 };
 const videoUrlPrefix = 'http://bilibili.com/video/av';
 const videoUrlPattern = /video\/av(\d+)/;
-let wv;
+let wv, wrapper;
 
 // UI逻辑
 const v = new Vue({
@@ -16,7 +16,8 @@ const v = new Vue({
 		naviGotoInputShow: false,
 		naviCanGoBack: false,
 		naviCanGoForward: false,
-		showGlobalOverlay: false
+		showNaviGotoOverlay: false,
+		showAboutOverlay: false
 	},
 	methods: {
 		// 后退
@@ -31,10 +32,10 @@ const v = new Vue({
 		naviGotoShow: function() {
 			this.naviGotoTarget = '';
 			this.naviGotoInputShow = true;
-			this.showGlobalOverlay = true;
+			this.showNaviGotoOverlay = true;
 		},
 		naviGotoHide: function() {
-			this.naviGotoInputShow = this.showGlobalOverlay = false;
+			this.naviGotoInputShow = this.showNaviGotoOverlay = false;
 		},
 		naviGoto: function() {
 			var target = this.naviGotoTarget;
@@ -58,6 +59,15 @@ const v = new Vue({
 				// not a valid input
 				alert('你确定输入的是b站链接或者av号吗？');
 			}
+		},
+		// 关于
+		showAbout: function() {
+			this.showAboutOverlay = true;
+			wrapper.classList.add('showAbout');
+		},
+		hideAbout: function() {
+			this.showAboutOverlay = false;
+			wrapper.classList.remove('showAbout');
 		},
 		// 关鸡
 		turnOff: function() {
@@ -138,8 +148,7 @@ function initMouseStateDirtyCheck() {
 	setInterval(function() {
     let mousePos = getMousePosition(),
         windowPos = mw.getPosition(),
-        windowSize = mw.getSize(),
-        wrapper = document.getElementById('wrapper');
+        windowSize = mw.getSize();
     if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
         (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + windowSize[1]) ) {
     	wrapper.classList.add('showTopBar');
@@ -157,6 +166,7 @@ function openWebviewConsoleOnMenuClick() {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
+	wrapper = document.getElementById('wrapper');
 	wv = document.getElementById('wv');
 	detectPlatform();
 	resizeWindowOnNavigation();
