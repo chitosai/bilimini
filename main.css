@@ -9,10 +9,15 @@ html, body{
 #wrapper{
 	transition: all .2s ease;
 	height: 100%;
+	position: relative;
+	top: 0;
 }
 body.macos #wrapper:hover,
 #wrapper.showTopBar{
-	transform: translate3d(0, 36px, 0);
+	/* transform: translate3d(0, 36px, 0); */
+	/* 不能用transform来做这个动画效果..貌似translate3d不会触发reflow，造成topBar的里的dragzone的
+		-webkit-app-region: drag; 没有生效 */
+	top: 36px;
 }
 .globalOverlay{
 	background: rgba(0, 0, 0, .7);
