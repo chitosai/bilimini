@@ -6,6 +6,14 @@ html, body{
 	height: 100%;
 	overflow: hidden;
 }
+#wrapper{
+	transition: all .2s ease;
+	height: 100%;
+}
+body.macos #wrapper:hover,
+#wrapper.showTopBar{
+	transform: translate3d(0, 36px, 0);
+}
 .globalOverlay{
 	background: rgba(0, 0, 0, .7);
 	position: fixed;
@@ -28,16 +36,10 @@ html, body{
 	box-sizing: border-box;
 	line-height: 36px;
 	padding: 0 1em;
-	position: fixed;
+	position: absolute;
 	top: -36px;
 	left: 0;
 	width: 100%;
-	transition: top .2s ease;
-}
-#topbar.active,
-body.macos:hover #topbar{
-	top: 0;
-	opacity: 1;
 }
 #icon-bar-left{
 	position: absolute;
@@ -94,6 +96,7 @@ body.macos:hover #topbar{
 	line-height: 14px;
 }
 #dragzone{
+  -webkit-user-select: none;
 	-webkit-app-region: drag;
 	border-radius: 3px;
 	color: #ffacbf;
@@ -108,11 +111,6 @@ body.macos:hover #topbar{
 #wv{
 	width: 100%;
 	height: 100%;
-	transition: transform .2s ease;
-}
-#wv.slideDown,
-body.macos:hover #wv{
-	transform: translate3d(0, 36px, 0);
 }
 
 /* input */

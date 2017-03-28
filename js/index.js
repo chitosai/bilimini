@@ -6,13 +6,12 @@ const userAgent = {
 };
 const videoUrlPrefix = 'http://bilibili.com/video/av';
 const videoUrlPattern = /video\/av(\d+)/;
-const wv = document.getElementById('wv');
+let wv;
 
 // UI逻辑
 const v = new Vue({
 	el: '#wrapper',
 	data: {
-		showTopBar: false,
 		naviGotoTarget: '',
 		naviGotoInputShow: false,
 		naviCanGoBack: false,
@@ -139,14 +138,13 @@ function initMouseStateDirtyCheck() {
 	setInterval(function() {
     let mousePos = getMousePosition(),
         windowPos = mw.getPosition(),
-        windowSize = mw.getSize();
+        windowSize = mw.getSize(),
+        wrapper = document.getElementById('wrapper');
     if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
         (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + windowSize[1]) ) {
-      v.showTopBar = true;
-    	wv.classList.add('slideDown');
+    	wrapper.classList.add('showTopBar');
     } else {
-    	v.showTopBar = false;
-    	wv.classList.remove('slideDown');
+    	wrapper.classList.remove('showTopBar');
     }
   }, 600);
 }
@@ -159,6 +157,7 @@ function openWebviewConsoleOnMenuClick() {
 }
 
 window.addEventListener('DOMContentLoaded', function() {
+	wv = document.getElementById('wv');
 	detectPlatform();
 	resizeWindowOnNavigation();
 	checkGoBackAndForwardStateOnNavigation();
