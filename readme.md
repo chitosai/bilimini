@@ -10,6 +10,10 @@
 
 ![demo](https://github.com/chitosai/bilimini/blob/master/images/demo.gif)
 
+下载地址：[百度网盘](https://pan.baidu.com/s/1jIHnRk6)
+
+--
+
 ## For Developers
 
 ```
