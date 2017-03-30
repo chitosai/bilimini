@@ -12,9 +12,13 @@
 
 ## For Developers
 
+```
 npm install   
-npm run
+npm start
+```
 
 使用electron-builder打包：
 
+```
 npm run dist
+```
