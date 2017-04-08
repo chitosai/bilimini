@@ -79,6 +79,9 @@ body.macos #wrapper:hover,
 	width: 100%;
 	z-index: 9;
 }
+body.win #topbar{
+	top: -37px;
+}
 #icon-bar-left{
 	position: absolute;
 	top: -1px;
