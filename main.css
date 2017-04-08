@@ -79,7 +79,7 @@ body.macos #wrapper:hover,
 	width: 100%;
 	z-index: 9;
 }
-body.win #topbar{
+body.win .showAbout #topbar{
 	top: -37px;
 }
 #icon-bar-left{
