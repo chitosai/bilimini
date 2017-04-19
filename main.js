@@ -1,7 +1,7 @@
 const electron = require('electron');
 const app = electron.app;
 const ipc = electron.ipcMain;
-const shortcut = electron.globalShortcut;
+const globalShortcut = electron.globalShortcut;
 const Menu = electron.Menu;
 
 const platform = process.platform.startsWith('win') ? 'win' : process.platform;
@@ -99,7 +99,8 @@ function initMenu() {
 
 // 老板键
 function bindGloablShortcut() {
-  shortcut.register('alt+w', () => {
+  let shortcut = platform == 'win' ? 'ctrl+e' : 'alt+w';
+  let bindRes = globalShortcut.register(shortcut, () => {
     if( !mw ) return false;
     if( mw.isVisible() ) {
       mw.hide();
@@ -107,4 +108,7 @@ function bindGloablShortcut() {
       mw.showInactive();
     }
   });
+  if( !bindRes ) {
+    console.log('Fail to bind globalShortcut');
+  }
 }
