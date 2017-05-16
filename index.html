@@ -11,7 +11,7 @@
 	<div id="wrapper">
 
 		<!-- webview -->
-		<webview id="wv" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
+    <webview id="wv" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./inject.js"></webview>
 
 		<!-- loading -->
 		<div id="loading"></div>
@@ -35,6 +35,7 @@
 			</div>
 			<div id="dragzone">这里可以拖拽</div>
 			<div id="icon-bar-right">
+				<span id="app-close" class="top-btn icon-btn" @click="toggleDanmaku">弹</span>
 				<span id="app-about" class="top-btn icon-btn" @click="showAbout">?</span>
 				<span id="app-close" class="top-btn icon-btn" @click="turnOff">x</span>
 			</div>

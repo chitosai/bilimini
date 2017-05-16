@@ -72,7 +72,17 @@ const v = new Vue({
 		// 关鸡
 		turnOff: function() {
 			remote.getCurrentWindow().close();
-		}
+		},
+    toggleDanmaku: function() {
+      wv.executeJavaScript(`document.getElementsByName('ctlbar_danmuku_on').length`, function(result){
+        let isDanmakuOn = result == 1;
+        if (isDanmakuOn) {
+          wv.executeJavaScript(`document.querySelector('.bilibili-player-iconfont-danmaku-off').click()`)
+        } else {
+          wv.executeJavaScript(`document.querySelector('.bilibili-player-iconfont-danmaku').click()`)
+        }
+      });
+    }
 	}
 });
 
