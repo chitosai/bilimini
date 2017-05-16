@@ -73,6 +73,8 @@ const v = new Vue({
 		turnOff: function() {
 			remote.getCurrentWindow().close();
 		},
+		// 显示、隐藏弹幕快捷键
+		// pull request #1. Thanks to bumaociyuan
     toggleDanmaku: function() {
       wv.executeJavaScript(`document.getElementsByName('ctlbar_danmuku_on').length`, function(result){
         let isDanmakuOn = result == 1;
