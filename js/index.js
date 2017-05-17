@@ -167,7 +167,7 @@ function initMouseStateDirtyCheck() {
     } else {
     	wrapper.classList.remove('showTopBar');
     }
-  }, 600);
+  }, 300);
 }
 
 // 点击菜单「webview console」时打开webview
