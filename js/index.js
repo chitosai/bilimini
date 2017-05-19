@@ -46,14 +46,14 @@ const v = new Vue({
 				alert('你确定输入的是b站链接或者av号吗？');
 				return
 			}
-			var reg = /(av)*(\d+)/ // 兼容纯数字的av号，或者"...av123421..."
+			var reg = /(av)*(\d+.*)/ // 兼容纯数字的av号，或者"...av123421..."
 			var matchResult = target.match(reg)
 			if(!matchResult) {
 				alert('没有识别到合法的av号')
 				return
 			}
-			var avid = matchResult[2]
-			wv.loadURL(videoUrlPrefix + avid, {
+			var avidWithSuffix = matchResult[2] // 这里可能带有分P号，如"3083367/index_5.html"
+			wv.loadURL(videoUrlPrefix + avidWithSuffix, {
 				userAgent: userAgent.desktop
 			});
 			this.naviGotoHide();
