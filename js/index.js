@@ -39,26 +39,24 @@ const v = new Vue({
 		},
 		naviGoto: function() {
 			var target = this.naviGotoTarget;
-			if( target.startsWith('http') && target.indexOf('bilibili.com') > -1 ) {
-				// is Url
-				if( target.indexOf('video/av') > -1 ) {
-					wv.loadURL(target, {
-						userAgent: userAgent.desktop
-					});
-				} else {
-					wv.loadURL(target);
-				}
-				this.naviGotoHide();
-			} else if( /^(\d+)$/.test(target) ) {
-				// is avid
-				wv.loadURL(videoUrlPrefix + target, {
-					userAgent: userAgent.desktop
-				});
-				this.naviGotoHide();
-			} else {
+			var isUrl = /^http/
+			var isAvid = /^(\d+)$/
+			if(!isUrl.test(target) && !isAvid.test(target)) {
 				// not a valid input
 				alert('你确定输入的是b站链接或者av号吗？');
+				return
 			}
+			var reg = /(av)*(\d+.*)/ // 兼容纯数字的av号，或者"...av123421..."
+			var matchResult = target.match(reg)
+			if(!matchResult) {
+				alert('没有识别到合法的av号')
+				return
+			}
+			var avidWithSuffix = matchResult[2] // 这里可能带有分P号，如"3083367/index_5.html"
+			wv.loadURL(videoUrlPrefix + avidWithSuffix, {
+				userAgent: userAgent.desktop
+			});
+			this.naviGotoHide();
 		},
 		// 关于
 		showAbout: function() {
@@ -75,25 +73,25 @@ const v = new Vue({
 		},
 		// 显示、隐藏弹幕快捷键
 		// pull request #1. Thanks to bumaociyuan
-    toggleDanmaku: function() {
-      wv.executeJavaScript(`document.getElementsByName('ctlbar_danmuku_on').length`, function(result){
-        let isDanmakuOn = result == 1;
-        if (isDanmakuOn) {
-          wv.executeJavaScript(`document.querySelector('.bilibili-player-iconfont-danmaku-off').click()`)
-        } else {
-          wv.executeJavaScript(`document.querySelector('.bilibili-player-iconfont-danmaku').click()`)
-        }
-      });
-    }
+		toggleDanmaku: function() {
+			wv.executeJavaScript(`document.getElementsByName('ctlbar_danmuku_on').length`, function(result) {
+				let isDanmakuOn = result == 1;
+				if(isDanmakuOn) {
+					wv.executeJavaScript(`document.querySelector('.bilibili-player-iconfont-danmaku-off').click()`)
+				} else {
+					wv.executeJavaScript(`document.querySelector('.bilibili-player-iconfont-danmaku').click()`)
+				}
+			});
+		}
 	}
 });
 
 // 给body加上platform flag
 function detectPlatform() {
-	if( process.platform.startsWith('win') ) {
+	if(process.platform.startsWith('win')) {
 		window.platform = 'win';
 		document.body.classList.add('win');
-	} else if( process.platform == 'darwin' ) {
+	} else if(process.platform == 'darwin') {
 		window.platform = 'darwin';
 		document.body.classList.add('macos');
 	}
@@ -103,29 +101,29 @@ function detectPlatform() {
 function resizeWindowOnNavigation() {
 	var currentWindowType = 'default';
 	const sizeMap = {
-    'mini': [300, 187],
-    'default': [375, 500]
-  };
+		'mini': [300, 187],
+		'default': [375, 500]
+	};
 	wv.addEventListener('did-finish-load', function() {
 		let targetWindowType;
-		if( wv.getURL().indexOf('video/av') > -1 ) {
+		if(wv.getURL().indexOf('video/av') > -1) {
 			targetWindowType = 'mini';
 		} else {
 			targetWindowType = 'default';
 		}
-		if( targetWindowType != currentWindowType ) {
+		if(targetWindowType != currentWindowType) {
 			let mw = remote.getCurrentWindow(),
-					currentSize = mw.getSize(),
-          leftTopPosition = mw.getPosition(),
-          rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
-          targetSize = ( targetWindowType in sizeMap ) ? sizeMap[targetWindowType] : sizeMap.default,
-          targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
+				currentSize = mw.getSize(),
+				leftTopPosition = mw.getPosition(),
+				rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
+				targetSize = (targetWindowType in sizeMap) ? sizeMap[targetWindowType] : sizeMap.default,
+				targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
 
-      mw.setBounds({
-        x: targetPosition[0], y: targetPosition[1], width: targetSize[0], height: targetSize[1]
-      }, true);
+			mw.setBounds({
+				x: targetPosition[0], y: targetPosition[1], width: targetSize[0], height: targetSize[1]
+			}, true);
 
-      currentWindowType = targetWindowType;
+			currentWindowType = targetWindowType;
 		}
 	});
 }
@@ -142,7 +140,7 @@ function checkGoBackAndForwardStateOnNavigation() {
 function switchDesktopOnNavigationToVideoPage() {
 	wv.addEventListener('will-navigate', function(e) {
 		let m = videoUrlPattern.exec(e.url);
-		if( m ) {
+		if(m) {
 			wv.loadURL(videoUrlPrefix + m[1], {
 				userAgent: userAgent.desktop
 			});
@@ -152,22 +150,22 @@ function switchDesktopOnNavigationToVideoPage() {
 
 // windows下frameless window没法正确检测到mouseout事件，只能根据光标位置做个dirtyCheck了
 function initMouseStateDirtyCheck() {
-	if( platform != 'win' ) {
+	if(platform != 'win') {
 		return false;
 	}
 	var getMousePosition = remote.screen.getCursorScreenPoint,
-			mw = remote.getCurrentWindow();
+		mw = remote.getCurrentWindow();
 	setInterval(function() {
-    let mousePos = getMousePosition(),
-        windowPos = mw.getPosition(),
-        windowSize = mw.getSize();
-    if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
-        (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + windowSize[1]) ) {
-    	wrapper.classList.add('showTopBar');
-    } else {
-    	wrapper.classList.remove('showTopBar');
-    }
-  }, 300);
+		let mousePos = getMousePosition(),
+			windowPos = mw.getPosition(),
+			windowSize = mw.getSize();
+		if((mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
+			(mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + windowSize[1])) {
+			wrapper.classList.add('showTopBar');
+		} else {
+			wrapper.classList.remove('showTopBar');
+		}
+	}, 300);
 }
 
 // 点击菜单「webview console」时打开webview
