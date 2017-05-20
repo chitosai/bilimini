@@ -26,6 +26,15 @@ var Config = {
     'windowSizeDefault': [375, 500]
 };
 
+// 初始化时读取用户设置
+function loadUserConfig() {
+    // 读取用户拖的视频播放窗口尺寸
+    var windowSizeMini = Config.load('windowSizeMini');
+    if( windowSizeMini ) {
+        Config.windowSizeMini = windowSizeMini;
+    }
+}
+
 // 保存用户浏览记录
 var _history = {
     stack: ['http://m.bilibili.com/index.html'], 
@@ -152,9 +161,24 @@ function detectPlatform() {
     }
 }
 
+// 当用户拖拽窗口时保存窗口尺寸
+function saveWindowSizeOnResize() {
+    var saveWindowSizeTimer;
+    window.addEventListener('resize', function() {
+        clearTimeout(saveWindowSizeTimer);
+        saveWindowSizeTimer = setTimeout(function() {
+            // 暂时只保存视频播放页的尺寸
+            if( currentWindowType == 'windowSizeMini' ) {
+                Config[currentWindowType] = [window.innerWidth, window.innerHeight];
+                Config.set(currentWindowType, [window.innerWidth, window.innerHeight]);
+            }
+        }, 600);
+    });
+}
+
 // 根据用户访问的url决定app窗口尺寸
+var currentWindowType = 'default';
 function resizeWindowOnNavigation() {
-    var currentWindowType = 'default';
     wv.addEventListener('did-finish-load', function() {
         let targetWindowType;
         if (wv.getURL().indexOf('video/av') > -1) {
@@ -234,9 +258,10 @@ function redirectWhenOpenUrlInNewTab() {
 window.addEventListener('DOMContentLoaded', function() {
     wrapper = document.getElementById('wrapper');
     wv = document.getElementById('wv');
-    // loadUserConfig();
+    loadUserConfig();
     detectPlatform();
     resizeWindowOnNavigation();
+    saveWindowSizeOnResize();
     checkGoBackAndForwardStateOnNavigation();
     switchDesktopOnNavigationToVideoPage();
     initMouseStateDirtyCheck();
