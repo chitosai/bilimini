@@ -8,6 +8,50 @@ const videoUrlPrefix = 'http://bilibili.com/video/av';
 const videoUrlPattern = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/;
 let wv, wrapper;
 
+// 保存用户浏览记录
+var _history = {
+    stack: ['http://m.bilibili.com/index.html'], 
+    pos: 0,
+    go: function(target, noNewHistory) {
+        let m;
+        if (m = videoUrlPattern.exec(target)) {
+            wv.loadURL(videoUrlPrefix + m[1], {
+                userAgent: userAgent.desktop
+            });
+            !noNewHistory && _history.add(videoUrlPrefix + m[1]);
+        } else {
+            wv.loadURL(target, {
+                userAgent: userAgent.mobile
+            });
+            !noNewHistory && _history.add(target);
+        }
+    },
+    add: function(url) {
+        // 丢掉当前位置往后的history
+        _history.stack.length = _history.pos + 1;
+        _history.stack.push(url);
+        _history.pos++;
+    },
+    goBack: function() {
+        if( !_history.canGoBack() ) {
+            return false;
+        }
+        _history.go(_history.stack[--_history.pos], true);
+    },
+    goForward: function() {
+        if( !_history.canGoForward() ) {
+            return false;
+        }
+        _history.go(_history.stack[++_history.pos], true);
+    },
+    canGoBack: function() {
+        return _history.pos > 0;
+    },
+    canGoForward: function() {
+        return _history.pos + 1 < _history.stack.length;
+    }
+};
+
 // UI逻辑
 const v = new Vue({
     el: '#wrapper',
@@ -22,11 +66,11 @@ const v = new Vue({
     methods: {
         // 后退
         naviBack: function() {
-            wv.goBack();
+            _history.goBack();
         },
         // 前进
         naviForward: function() {
-            wv.goForward();
+            _history.goForward();
         },
         // 通过url或av号跳转
         naviGotoShow: function() {
@@ -39,22 +83,12 @@ const v = new Vue({
         },
         naviGoto: function() {
             var target = this.naviGotoTarget;
+            // 包含bilibili.com的字符串和纯数字是合法的跳转目标
             if (target.startsWith('http') && target.indexOf('bilibili.com') > -1) {
-                // 只要是包含av号的url，一律跳pc地址
-                let m;
-                if (m = videoUrlPattern.exec(target)) {
-                    wv.loadURL(videoUrlPrefix + m[1], {
-                        userAgent: userAgent.desktop
-                    });
-                } else {
-                    wv.loadURL(target);
-                }
+                _history.go(target);
                 this.naviGotoHide();
             } else if (/^(\d+)$/.test(target)) {
-                // is avid
-                wv.loadURL(videoUrlPrefix + target, {
-                    userAgent: userAgent.desktop
-                });
+                _history.go(videoUrlPrefix + target);
                 this.naviGotoHide();
             } else {
                 // not a valid input
@@ -137,20 +171,15 @@ function resizeWindowOnNavigation() {
 // 判断是否能前进/后退
 function checkGoBackAndForwardStateOnNavigation() {
     wv.addEventListener('did-finish-load', function() {
-        v.naviCanGoBack = wv.canGoBack();
-        v.naviCanGoForward = wv.canGoForward();
+        v.naviCanGoBack = _history.canGoBack();
+        v.naviCanGoForward = _history.canGoForward();
     });
 }
 
 // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
 function switchDesktopOnNavigationToVideoPage() {
     wv.addEventListener('will-navigate', function(e) {
-        let m = videoUrlPattern.exec(e.url);
-        if (m) {
-            wv.loadURL(videoUrlPrefix + m[1], {
-                userAgent: userAgent.desktop
-            });
-        }
+       _history.go(e.url);
     });
 }
 
