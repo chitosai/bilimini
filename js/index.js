@@ -210,6 +210,13 @@ function openWebviewConsoleOnMenuClick() {
     });
 }
 
+// webview中点击target="_blank"的链接时在当前webview打开
+function redirectWhenOpenUrlInNewTab() {
+    wv.addEventListener('new-window', function(ev) {
+        _history.go(ev.url);
+    });
+}
+
 window.addEventListener('DOMContentLoaded', function() {
     wrapper = document.getElementById('wrapper');
     wv = document.getElementById('wv');
@@ -219,4 +226,5 @@ window.addEventListener('DOMContentLoaded', function() {
     switchDesktopOnNavigationToVideoPage();
     initMouseStateDirtyCheck();
     openWebviewConsoleOnMenuClick();
+    redirectWhenOpenUrlInNewTab();
 });
