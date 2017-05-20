@@ -8,6 +8,24 @@ const videoUrlPrefix = 'http://bilibili.com/video/av';
 const videoUrlPattern = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/;
 let wv, wrapper;
 
+// 保存用户设置
+var Config = {
+    load: function(key) {
+        return localStorage.getItem(key);
+    },
+    set: function(key, value) {
+        if( typeof key == 'object' ) {
+            for( let _k of key ) {
+                window.localStorage.setItem(_k, key[_k]);
+            }
+        } else if( typeof key == 'string' && value ) {
+            window.localStorage.setItem(key, value);
+        }
+    },
+    'windowSizeMini': [300, 187],
+    'windowSizeDefault': [375, 500]
+};
+
 // 保存用户浏览记录
 var _history = {
     stack: ['http://m.bilibili.com/index.html'], 
@@ -137,23 +155,19 @@ function detectPlatform() {
 // 根据用户访问的url决定app窗口尺寸
 function resizeWindowOnNavigation() {
     var currentWindowType = 'default';
-    const sizeMap = {
-        'mini': [300, 187],
-        'default': [375, 500]
-    };
     wv.addEventListener('did-finish-load', function() {
         let targetWindowType;
         if (wv.getURL().indexOf('video/av') > -1) {
-            targetWindowType = 'mini';
+            targetWindowType = 'windowSizeMini';
         } else {
-            targetWindowType = 'default';
+            targetWindowType = 'windowSizeDefault';
         }
         if (targetWindowType != currentWindowType) {
             let mw = remote.getCurrentWindow(),
                 currentSize = mw.getSize(),
                 leftTopPosition = mw.getPosition(),
                 rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
-                targetSize = (targetWindowType in sizeMap) ? sizeMap[targetWindowType] : sizeMap.default,
+                targetSize = (targetWindowType in Config) ? Config[targetWindowType] : Config.windowSizeDefault,
                 targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
 
             mw.setBounds({
@@ -220,6 +234,7 @@ function redirectWhenOpenUrlInNewTab() {
 window.addEventListener('DOMContentLoaded', function() {
     wrapper = document.getElementById('wrapper');
     wv = document.getElementById('wv');
+    // loadUserConfig();
     detectPlatform();
     resizeWindowOnNavigation();
     checkGoBackAndForwardStateOnNavigation();
