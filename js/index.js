@@ -5,7 +5,7 @@ const userAgent = {
     mobile: 'bilimini Mobile like (iPhone or Android) whatever'
 };
 const videoUrlPrefix = 'http://bilibili.com/video/av';
-const videoUrlPattern = /video\/av(\d+)/;
+const videoUrlPattern = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/;
 let wv, wrapper;
 
 // UI逻辑
@@ -40,9 +40,10 @@ const v = new Vue({
         naviGoto: function() {
             var target = this.naviGotoTarget;
             if (target.startsWith('http') && target.indexOf('bilibili.com') > -1) {
-                // is Url
-                if (target.indexOf('video/av') > -1) {
-                    wv.loadURL(target, {
+                // 只要是包含av号的url，一律跳pc地址
+                let m;
+                if (m = videoUrlPattern.exec(target)) {
+                    wv.loadURL(videoUrlPrefix + m[1], {
                         userAgent: userAgent.desktop
                     });
                 } else {
