@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+	<meta charset="UTF-8">
+	<title>Bilibili v.mini</title>
+	<style>
+		body{
+			background: #f25d8e;
+			color: #ffacbf;
+			font-size: 12px;
+			line-height: 1.7em;
+			margin: 0;
+		}
+		.list{
+			padding: 5px;
+		}
+		.list-title{
+			color: #fff;
+			font-weight: bold;
+			margin: 5px;
+		}
+		.item{
+			border-radius: 3px;
+			cursor: pointer;
+			line-height: 2.4em;
+			text-overflow: ellipsis;
+			overflow: hidden;
+			white-space: nowrap;
+			padding: 0 5px;
+		}
+		.item:hover{
+			background: #ea8aa1;
+			color: #fff;
+		}
+	</style>
+</head>
+<body>
+	<div id="wrapper">
+		<!-- <div id="setting-panel">
+			<div class="setting">1</div>
+			<div class="setting">1</div>
+		</div> -->
+		<div id="select-part" class="list">
+			<p class="list-title">视频分Part</p>
+			<div class="item part" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span v-show="index == currentPart">● </span>{{ title }}</div>
+		</div>
+	</div>
+
+	<script src="js/vue.min.js"></script>
+	<script>
+		const ipc = require('electron').ipcRenderer;
+		const v = new Vue({
+			el: '#wrapper',
+			data: {
+				partList: null,
+				currentPart: 1
+			},
+			methods: {
+				selectPart(index) {
+					this.currentPart = index;
+					ipc.send('select-part', index);
+				}
+			}
+		});
+		// 更新分p列表
+		ipc.on('update-part', (ev, partList) => {
+			v.partList = partList;
+		});
+	</script>
+</body>
+</html>

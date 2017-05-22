@@ -53,6 +53,8 @@ var _history = {
                 userAgent: userAgent.desktop
             });
             !noNewHistory && _history.add(videoUrlPrefix + m[1]);
+            // 抓分p
+            getPartOfVideo(m[1]);
         } else if(m = bangumiUrlPattern.exec(target)) {
             // case 2 番剧，转跳对应pc页
             let url = bangumiUrl(m[1]);
@@ -61,12 +63,22 @@ var _history = {
             });
             // 因为番剧页最终目标是/blackboard/html5player.html，这里获取到的url只是中间步骤，
             // 所以就不加到history里了
+            // 抓分p
+            getPartOfBangumi(m[1]);
         } else {
             // 其他链接不做操作直接打开
             wv.loadURL(target, {
                 userAgent: userAgent.mobile
             });
             !noNewHistory && _history.add(target);
+            // 清除分p
+            ipc.send('update-part', null);
+        }
+    },
+    goPart: function(pid) {
+        let av = /av(\d+)/.exec(wv.getURL());
+        if( av ) {
+            _history.go(`${videoUrlPrefix}${av[1]}/index_${pid}.html`);
         }
     },
     add: function(url) {
@@ -94,6 +106,32 @@ var _history = {
         return _history.pos + 1 < _history.stack.length;
     }
 };
+
+var ajax = {
+    get: function(url, success, mode) {
+        var r = new XMLHttpRequest();
+        r.open("GET", url, true);
+        if( mode in userAgent ) {
+            r.setRequestHeader('userAgent', userAgent[mode]);
+        }
+        r.onreadystatechange = function () {
+            if (r.readyState != 4 || r.status != 200) return;
+            success(r.responseText);
+        };
+        r.send();
+    }
+}
+
+function getPartOfVideo(av) {
+    ajax.get(`http://m.bilibili.com/video/av${av}.html`, (res) => {
+        var m = /"pageTitle":(\{.+?\})/g.exec(res);
+        if( m ) {
+            ipc.send('update-part', JSON.parse(m[1]));
+        } else {
+            ipc.send('update-part', null);
+        }
+    }, 'mobile');
+}
 
 // UI逻辑
 const v = new Vue({
@@ -168,11 +206,8 @@ const v = new Vue({
 
 // 检查更新
 function checkUpdateOnInit() {
-    var r = new XMLHttpRequest();
-    r.open("GET", "http://rakuen.thec.me/bilimini/beacon", true);
-    r.onreadystatechange = function () {
-        if (r.readyState != 4 || r.status != 200) return;
-        var data = JSON.parse(r.responseText);
+    ajax.get('http://rakuen.thec.me/bilimini/beacon', (res) => {
+        var data = JSON.parse(res);
         // 提示更新
         if( data.version != appData.version ) {
             dialog.showMessageBox(null, {
@@ -193,8 +228,7 @@ function checkUpdateOnInit() {
                 localStorage.setItem(data.announcement, 1);
             });
         }
-    };
-    r.send();
+    });
 }
 
 // 给body加上platform flag
@@ -304,6 +338,13 @@ function redirectWhenOpenUrlInNewTab() {
     });
 }
 
+// 收到选p消息时跳p
+function redirectOnSelectPart() {
+    ipc.on('select-part', (ev, pid) => {
+        _history.goPart(pid);
+    });
+}
+
 window.addEventListener('DOMContentLoaded', function() {
     wrapper = document.getElementById('wrapper');
     wv = document.getElementById('wv');
@@ -317,4 +358,5 @@ window.addEventListener('DOMContentLoaded', function() {
     initMouseStateDirtyCheck();
     openWebviewConsoleOnMenuClick();
     redirectWhenOpenUrlInNewTab();
+    redirectOnSelectPart();
 });
