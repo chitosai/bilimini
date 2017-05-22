@@ -1,6 +1,6 @@
 window.addEventListener('DOMContentLoaded', function() {
 
-	// 自动最大化播放器
+	// 普通视频页：自动最大化播放器
 	if( window.location.href.indexOf('video/av') > -1 ) {
 		let playerInitCheck = setInterval(() => {
 			let wideScreenButton;
@@ -8,6 +8,21 @@ window.addEventListener('DOMContentLoaded', function() {
 				wideScreenButton.click();
 				clearInterval(playerInitCheck);
 			} else if( ++checkCount > 100 ) {
+				clearInterval(playerInitCheck);
+			}
+		}, 50), checkCount = 0;
+	}
+
+	// 番剧页：获取播放器iframe地址并转跳
+	if( /anime\/\d+\/play/.test(window.location.href) ) {
+		var playerInitCheck = setInterval(() => {
+			let ifr;
+			if( ifr = document.querySelector('iframe') ) {
+				if( ifr.src.indexOf('iframemessage.html') == -1 ) {
+					window.location.href = ifr.src;
+					clearInterval(playerInitCheck);
+				}
+			} else if( ++checkCount > 400 ) {
 				clearInterval(playerInitCheck);
 			}
 		}, 50), checkCount = 0;

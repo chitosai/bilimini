@@ -59,7 +59,8 @@ var _history = {
             wv.loadURL(url, {
                 userAgent: userAgent.desktop
             });
-            !noNewHistory && _history.add(url);
+            // 因为番剧页最终目标是/blackboard/html5player.html，这里获取到的url只是中间步骤，
+            // 所以就不加到history里了
         } else {
             // 其他链接不做操作直接打开
             wv.loadURL(target, {
@@ -226,8 +227,8 @@ function saveWindowSizeOnResize() {
 var currentWindowType = 'default';
 function resizeWindowOnNavigation() {
     wv.addEventListener('did-finish-load', function() {
-        let targetWindowType;
-        if (wv.getURL().indexOf('video/av') > -1) {
+        let targetWindowType, url = wv.getURL();
+        if (url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1) {
             targetWindowType = 'windowSizeMini';
         } else {
             targetWindowType = 'windowSizeDefault';
