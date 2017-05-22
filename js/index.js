@@ -1,5 +1,8 @@
 const ipc = require('electron').ipcRenderer;
 const remote = require('electron').remote;
+const dialog = remote.dialog;
+const shell = require('electron').shell;
+const appData = require('./package.json');
 const userAgent = {
     desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
     mobile: 'bilimini Mobile like (iPhone or Android) whatever'
@@ -150,6 +153,37 @@ const v = new Vue({
     }
 });
 
+// 检查更新
+function checkUpdateOnInit() {
+    var r = new XMLHttpRequest();
+    r.open("GET", "http://rakuen.thec.me/bilimini/beacon", true);
+    r.onreadystatechange = function () {
+        if (r.readyState != 4 || r.status != 200) return;
+        var data = JSON.parse(r.responseText);
+        // 提示更新
+        if( data.version != appData.version ) {
+            dialog.showMessageBox(null, {
+                buttons: ['取消', '去下载'],
+                message: `检查到新版本v${data.version}，您正在使用的版本是v${appData.version}，是否打开下载页面？`
+            }, (res, checkboxChecked) => {
+                if( res == 1 ) {
+                    shell.openExternal(`https://pan.baidu.com/s/1jIHnRk6#list/path=%2Fbilimini%2Fv${data.version}`);
+                }
+            });
+        }
+        // 显示额外的公告
+        if( data.announcement != '' && !localStorage.getItem(data.announcement) ) {
+            dialog.showMessageBox(null, {
+                buttons: ['了解'],
+                message: data.announcement
+            }, () => {
+                localStorage.setItem(data.announcement, 1);
+            });
+        }
+    };
+    r.send();
+}
+
 // 给body加上platform flag
 function detectPlatform() {
     if (process.platform.startsWith('win')) {
@@ -260,6 +294,7 @@ function redirectWhenOpenUrlInNewTab() {
 window.addEventListener('DOMContentLoaded', function() {
     wrapper = document.getElementById('wrapper');
     wv = document.getElementById('wv');
+    checkUpdateOnInit();
     loadUserConfig();
     detectPlatform();
     resizeWindowOnNavigation();
