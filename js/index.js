@@ -223,7 +223,9 @@ function switchDesktopOnNavigationToVideoPage() {
 
 // windows下frameless window没法正确检测到mouseout事件，只能根据光标位置做个dirtyCheck了
 function initMouseStateDirtyCheck() {
-    if (platform != 'win') {
+    // 从 https://github.com/chitosai/bilimini/issues/10 的反馈来看linux下也无法用css触发hover，
+    // 所以目前除了mac其他系统都开启dirtycheck
+    if (platform == 'darwin') {
         return false;
     }
     var getMousePosition = remote.screen.getCursorScreenPoint,
