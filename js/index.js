@@ -9,6 +9,8 @@ const userAgent = {
 };
 const videoUrlPrefix = 'http://bilibili.com/video/av';
 const videoUrlPattern = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/;
+const bangumiUrl = (aid, pid) => `http://bangumi.bilibili.com/anime/${aid}/play#${pid}`;
+const bangumiUrlPattern = /bangumi\/i\/(\d+)/;
 let wv, wrapper;
 
 // 保存用户设置
@@ -45,11 +47,20 @@ var _history = {
     go: function(target, noNewHistory) {
         let m;
         if (m = videoUrlPattern.exec(target)) {
+            // case 1 普通视频播放页，转跳对应pc页
             wv.loadURL(videoUrlPrefix + m[1], {
                 userAgent: userAgent.desktop
             });
             !noNewHistory && _history.add(videoUrlPrefix + m[1]);
+        } else if(m = bangumiUrlPattern.exec(target)) {
+            // case 2 番剧，转跳对应pc页
+            let url = bangumiUrl(m[1]);
+            wv.loadURL(url, {
+                userAgent: userAgent.desktop
+            });
+            !noNewHistory && _history.add(url);
         } else {
+            // 其他链接不做操作直接打开
             wv.loadURL(target, {
                 userAgent: userAgent.mobile
             });
