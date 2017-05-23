@@ -67,6 +67,23 @@ body.macos #wrapper:hover,
 	z-index: 2;
 }
 
+/* loading */
+#loading{
+	background: url('images/loading.gif') center no-repeat rgba(255, 255, 255, .75);
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: -9999px;
+	left: 0;
+	transition: transform .2s ease;
+	z-index: 12450000;
+	transform: scale3d(2, 2, 2);
+}
+#wrapper.loading #loading{
+	top: 0;
+	transform: scale3d(1, 1, 1);
+}
+
 /* topbar*/
 #topbar{
 	background: #f25d8e;
@@ -156,6 +173,9 @@ body.win .showAbout #topbar{
 #wv{
 	width: 100%;
 	height: 100%;
+}
+#wrapper.loading #wv{
+	filter: blur(2px);
 }
 
 /* input */

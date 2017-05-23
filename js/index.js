@@ -46,6 +46,8 @@ var _history = {
     stack: ['http://m.bilibili.com/index.html'], 
     pos: 0,
     go: function(target, noNewHistory) {
+        // 显示loading mask
+        wrapper.classList.add('loading');
         let m;
         if (m = videoUrlPattern.exec(target)) {
             // case 1 普通视频播放页，转跳对应pc页
@@ -293,6 +295,8 @@ function resizeWindowOnNavigation() {
 
             currentWindowType = targetWindowType;
         }
+        // 关闭loading遮罩
+        wrapper.classList.remove('loading');
     });
 }
 

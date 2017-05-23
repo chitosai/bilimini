@@ -45,11 +45,11 @@ function openInteractiveWindow() {
 function initExchangeMessageForRenderers() {
   // 转发分p数据，真的只能用这么蠢的方法实现么。。。
   ipc.on('update-part', (ev, args) => {
-    iw.webContents.send('update-part', args);
+    iw && iw.webContents.send('update-part', args);
   });
   // 转发选p消息
   ipc.on('select-part', (ev, args) => {
-    mw.webContents.send('select-part', args);
+    mw && mw.webContents.send('select-part', args);
   });
 }
 
@@ -57,8 +57,8 @@ function init() {
   openMainWindow();
   bindGloablShortcut();
   initMenu();
-  openInteractiveWindow();
   initExchangeMessageForRenderers();
+  // openInteractiveWindow();
 }
 
 // This method will be called when Electron has finished
