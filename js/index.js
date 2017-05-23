@@ -158,6 +158,7 @@ const v = new Vue({
             this.naviGotoTarget = '';
             this.naviGotoInputShow = true;
             this.showNaviGotoOverlay = true;
+            document.getElementById('av-input').focus();
         },
         naviGotoHide: function() {
             this.naviGotoInputShow = this.showNaviGotoOverlay = false;

@@ -159,7 +159,7 @@ body.win .showAbout #topbar{
 }
 
 /* input */
-#input-layer{
+#av-input-layer{
 	background: #f25d8e;
 	border-radius: 4px;
 	width: 191px;
@@ -174,27 +174,27 @@ body.win .showAbout #topbar{
 	transition: top .2s ease;
 	z-index: 10;
 }
-#input-layer.active{
+#av-input-layer.active{
 	top: 0;
 	left: 0;
 }
-#input{
+#av-input{
 	border: 0;
 	border-radius: 4px;
 	line-height: 24px;
 	outline: 0;
 	padding: 0 10px;
 }
-body.win #input{
+body.win #av-input{
 	width: 126px;
 }
-#input-finish{
+#av-input-finish{
 	color: #fb93ab;
 	cursor: pointer;
 	display: inline-block;
 	padding: 0 10px;
 	line-height: 24px;
 }
-#input-finish:hover{
+#av-input-finish:hover{
 	color: #fff;
 }

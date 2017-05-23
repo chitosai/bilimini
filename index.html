@@ -43,9 +43,9 @@
 
 		<!-- overlay -->
 		<div :class="{globalOverlay: 1, active: showNaviGotoOverlay}" @click="naviGotoHide">
-			<div id="input-layer" :class="{active: naviGotoInputShow}" @click.stop>
-				<input type="text" id="input" placeholder="输入要前往的av号或者视频地址" v-model="naviGotoTarget" @keyup.enter="naviGoto"><!--
-				--><span id="input-finish" @click="naviGoto">确认</span>
+			<div id="av-input-layer" :class="{active: naviGotoInputShow}" @click.stop>
+				<input type="text" id="av-input" placeholder="输入要前往的av号或者视频地址" v-model="naviGotoTarget" @keyup.enter="naviGoto"><!--
+				--><span id="av-input-finish" @click="naviGoto">确认</span>
 			</div>
 		</div>
 
