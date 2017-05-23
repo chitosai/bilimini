@@ -177,11 +177,13 @@ function initMenu() {
 function bindGloablShortcut() {
   let shortcut = platform == 'win' ? 'ctrl+e' : 'alt+w';
   let bindRes = globalShortcut.register(shortcut, () => {
-    if( !mw ) return false;
-    if( mw.isVisible() ) {
-      mw.hide();
-    } else {
-      mw.showInactive();
+    if( mw ) {
+      if( mw.isVisible() ) {
+        mw.hide();
+        iw && iw.isVisible() && iw.hide();
+      } else {
+        mw.showInactive();
+      }
     }
   });
   if( !bindRes ) {
