@@ -76,7 +76,7 @@ var _history = {
             wv.loadURL(target, {
                 userAgent: userAgent.desktop
             });
-            _history.add(target);
+            _history.replace(target);
         } else {
             // 其他链接不做操作直接打开
             wv.loadURL(target, {
@@ -100,7 +100,7 @@ var _history = {
             wv.loadURL(url, {
                 userAgent: userAgent.desktop
             });
-            _history.add(url);
+            _history.replace(url);
         }
     },
     add: function(url) {
