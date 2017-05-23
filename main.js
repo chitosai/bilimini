@@ -43,13 +43,16 @@ function openInteractiveWindow() {
 }
 
 function openInteractiveWindowOnMessage() {
-  ipc.on('call-interactive-window', () => {
+  // 切换、可开可关
+  ipc.on('toggle-interactive-window', () => {
     if( iw && iw.isVisible() ) {
       iw.hide();
     } else {
       openInteractiveWindow();
     }
   });
+  // 仅开启
+  ipc.on('show-interactive-window', openInteractiveWindow);
 }
 
 function initExchangeMessageForRenderers() {

@@ -146,7 +146,12 @@ function getPartOfVideo(av) {
         var m = /"pageTitle":(\{.*?\})/g.exec(res);
         if( m ) {
             try {
-                ipc.send('update-part', JSON.parse(m[1]));
+                var data = JSON.parse(m[1]);
+                ipc.send('update-part', data);
+                // 有超过1p时自动开启分p窗口
+                if( data[2] ) {
+                    ipc.send('show-interactive-window');
+                }
             } catch(e) {
                 ipc.send('update-part', null);
             }
@@ -210,8 +215,8 @@ const v = new Vue({
             wrapper.classList.remove('showAbout');
         },
         // 召唤设置页面
-        callConfigWindow: function() {
-            ipc.send('call-interactive-window');
+        toggleConfigWindow: function() {
+            ipc.send('toggle-interactive-window');
         },
         // 关鸡
         turnOff: function() {
