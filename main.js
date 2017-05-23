@@ -112,8 +112,12 @@ function initMenu() {
       label: 'Debug',
       submenu: [
         {
-          label: 'Open Renderrer Console',
+          label: 'Open Main Window Console',
           click() { mw.webContents.openDevTools(); }
+        },
+        {
+          label: 'Open Config Window Console',
+          click() { iw.webContents.openDevTools(); }
         },
         {
           label: 'Open Webview Console',
