@@ -267,17 +267,34 @@ const v = new Vue({
     }
 });
 
+// 给body加上platform flag
+function detectPlatform() {
+    if (process.platform.startsWith('win')) {
+        window.platform = 'win';
+        document.body.classList.add('win');
+    } else if (process.platform == 'darwin') {
+        window.platform = 'darwin';
+        document.body.classList.add('macos');
+    }
+}
+
 // 检查更新
 function checkUpdateOnInit() {
     ajax.get('http://rakuen.thec.me/bilimini/beacon', (res) => {
-        var data = JSON.parse(res);
+        var data = JSON.parse(res),
+            order = 1,
+            buttons = ['取消', '去下载'];
+        if( window.platform == 'win' ) {
+            order = 0;
+            buttons = ['去下载', '取消'];
+        }
         // 提示更新
         if( data.version != appData.version ) {
             dialog.showMessageBox(null, {
-                buttons: ['取消', '去下载'],
+                buttons: buttons,
                 message: `检查到新版本v${data.version}，您正在使用的版本是v${appData.version}，是否打开下载页面？`
             }, (res, checkboxChecked) => {
-                if( res == 1 ) {
+                if( res == order ) {
                     shell.openExternal(`https://pan.baidu.com/s/1jIHnRk6#list/path=%2Fbilimini%2Fv${data.version}`);
                 }
             });
@@ -292,17 +309,6 @@ function checkUpdateOnInit() {
             });
         }
     });
-}
-
-// 给body加上platform flag
-function detectPlatform() {
-    if (process.platform.startsWith('win')) {
-        window.platform = 'win';
-        document.body.classList.add('win');
-    } else if (process.platform == 'darwin') {
-        window.platform = 'darwin';
-        document.body.classList.add('macos');
-    }
 }
 
 // 当用户拖拽窗口时保存窗口尺寸
@@ -424,9 +430,9 @@ function openExternalLink(url) {
 window.addEventListener('DOMContentLoaded', function() {
     wrapper = document.getElementById('wrapper');
     wv = document.getElementById('wv');
+    detectPlatform();
     checkUpdateOnInit();
     loadUserConfig();
-    detectPlatform();
     resizeWindowOnNavigation();
     saveWindowSizeOnResize();
     checkGoBackAndForwardStateOnNavigation();
