@@ -61,6 +61,9 @@ function openInteractiveWindowOnMessage() {
 function initExchangeMessageForRenderers() {
   // 转发分p数据，真的只能用这么蠢的方法实现么。。。
   ipc.on('update-part', (ev, args) => {
+    if( !args && iw && iw.isVisible() ) {
+      iw.hide();
+    }
     iw && iw.webContents.send('update-part', args);
   });
   // 转发番剧分p消息，这俩的格式是不一样的，分局的分p里头带了playurl
