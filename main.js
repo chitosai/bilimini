@@ -16,30 +16,33 @@ function openMainWindow() {
   mw.setAlwaysOnTop(true, 'torn-off-menu');
   mw.on('closed', () => {
     mw = null;
+    iw.close();
+    iw = null;
   });
+  // 带起来自己的interactiveWindow
+  initInteractiveWindow();
   // mw.webContents.openDevTools();
 }
 
-// 交互窗口，用于设置、选分p等
+// 初始化交互窗口，用于设置、选分p等
 let iw = null;
-function openInteractiveWindow() {
-  var pos = [500, 500];
-  if( mw ) {
-    let p = mw.getPosition(), s = mw.getSize();
-    pos = [p[0] + s[0] + 10, p[1]];
-  }
-  if( iw ) {
-    iw.setPosition(pos[0], pos[1]);
-    iw.show();
-  } else {
-    iw = new electron.BrowserWindow({
-      width: 200, height: 300, 
-      x: pos[0], y: pos[1],
-      parent: mw, frame: false
-    });
-    iw.loadURL('file://' + __dirname + '/interactive.html');
-  }
+function initInteractiveWindow() {
+  iw = new electron.BrowserWindow({
+    width: 200, height: 300, 
+    parent: mw, frame: false, show: false
+  });
+  iw.loadURL('file://' + __dirname + '/interactive.html');
   // iw.openDevTools();
+}
+
+function openInteractiveWindow() {
+  if( !mw || !iw ) {
+    return;
+  }
+  var p = mw.getPosition(), s = mw.getSize(),
+      pos = [p[0] + s[0] + 10, p[1]];
+  iw.setPosition(pos[0], pos[1]);
+  iw.show();
 }
 
 function openInteractiveWindowOnMessage() {
@@ -78,6 +81,7 @@ function init() {
   openMainWindow();
   bindGloablShortcut();
   initMenu();
+  initInteractiveWindow();
   initExchangeMessageForRenderers();
   openInteractiveWindowOnMessage();
   reposInteractiveWindowOnMainWindowResize();
