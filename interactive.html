@@ -64,6 +64,7 @@
 		});
 		// 更新分p列表
 		ipc.on('update-part', (ev, partList) => {
+			v.currentPart = 1;
 			v.partList = partList;
 		});
 	</script>

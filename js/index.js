@@ -78,7 +78,11 @@ var _history = {
     goPart: function(pid) {
         let av = /av(\d+)/.exec(wv.getURL());
         if( av ) {
-            _history.go(`${videoUrlPrefix}${av[1]}/index_${pid}.html`);
+            let url = `${videoUrlPrefix}${av[1]}/index_${pid}.html`;
+            wv.loadURL(url, {
+                userAgent: userAgent.desktop
+            });
+            _history.add(url);
         }
     },
     add: function(url) {
@@ -124,9 +128,13 @@ var ajax = {
 
 function getPartOfVideo(av) {
     ajax.get(`http://m.bilibili.com/video/av${av}.html`, (res) => {
-        var m = /"pageTitle":(\{.+?\})/g.exec(res);
+        var m = /"pageTitle":(\{.*?\})/g.exec(res);
         if( m ) {
-            ipc.send('update-part', JSON.parse(m[1]));
+            try {
+                ipc.send('update-part', JSON.parse(m[1]));
+            } catch(e) {
+                ipc.send('update-part', null);
+            }
         } else {
             ipc.send('update-part', null);
         }
