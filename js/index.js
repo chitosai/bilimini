@@ -311,6 +311,9 @@ function resizeWindowOnNavigation() {
             }, true);
 
             currentWindowType = targetWindowType;
+
+            // 通知设置窗口改变位置
+            ipc.send('main-window-resized', targetPosition, targetSize);
         }
         // 关闭loading遮罩
         wrapper.classList.remove('loading');

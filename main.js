@@ -63,12 +63,21 @@ function initExchangeMessageForRenderers() {
   });
 }
 
+  
+// mainWindow在default/mini尺寸间切换时同时移动interactiveWindow
+function reposInteractiveWindowOnMainWindowResize() {
+  ipc.on('main-window-resized', (ev, pos, size) => {
+    iw && iw.setPosition((pos[0] + size[0] + 10), pos[1], true);
+  });
+}
+
 function init() {
   openMainWindow();
   bindGloablShortcut();
   initMenu();
   initExchangeMessageForRenderers();
   openInteractiveWindowOnMessage();
+  reposInteractiveWindowOnMainWindowResize();
 }
 
 // This method will be called when Electron has finished
