@@ -416,6 +416,11 @@ function redirectOnSelectPart() {
     });
 }
 
+// 外链
+function openExternalLink(url) {
+    shell.openExternal(url);
+}
+
 window.addEventListener('DOMContentLoaded', function() {
     wrapper = document.getElementById('wrapper');
     wv = document.getElementById('wv');
