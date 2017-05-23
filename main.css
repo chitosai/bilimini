@@ -76,7 +76,7 @@ body.macos #wrapper:hover,
 	top: -9999px;
 	left: 0;
 	transition: transform .2s ease;
-	z-index: 12450000;
+	z-index: 8;
 	transform: scale3d(2, 2, 2);
 }
 #wrapper.loading #loading{
