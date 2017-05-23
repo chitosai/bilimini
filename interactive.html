@@ -64,7 +64,8 @@
 		</div> -->
 		<div id="select-part" class="list">
 			<p class="list-title">视频分Part</p>
-			<div class="item part" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span v-show="index == currentPart">● </span>{{ title }}</div>
+			<div class="item part" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span v-show="index == currentPart">● </span>{{ index}}、{{ title }}</div>
+			<div class="item part" v-for="part in bangumiPartList" :title="part.title" @click="selectBangumiPart(part.index, part.url)"><span v-show="part.index == currentPart">● </span>{{ part.index }}、{{ part.title }}</div>
 		</div>
 	</div>
 
@@ -76,12 +77,17 @@
 			el: '#wrapper',
 			data: {
 				partList: null,
+				bangumiPartList: null,
 				currentPart: 1
 			},
 			methods: {
 				selectPart(index) {
 					this.currentPart = index;
 					ipc.send('select-part', index);
+				},
+				selectBangumiPart(index, url) {
+					this.currentPart = index;
+					ipc.send('select-bangumi-part', url);
 				},
 				closeWindow() {
 				  remote.getCurrentWindow().hide();
@@ -93,6 +99,13 @@
 		ipc.on('update-part', (ev, partList) => {
 			v.currentPart = 1;
 			v.partList = partList;
+			v.bangumiPartList = null;
+		});
+		// 番剧分p
+		ipc.on('update-bangumi-part', (ev, partList) => {
+			v.currentPart = 1;
+			v.partList = null;
+			v.bangumiPartList = partList;
 		});
 	</script>
 </body>

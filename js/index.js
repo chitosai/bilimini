@@ -71,6 +71,12 @@ var _history = {
             _history.add(url);
             // 抓分p
             getPartOfBangumi(m[1]);
+        } else if (/bangumi\.bilibili\.com\/anime\/\d+\/play#\d+/.test(target)) {
+            // 另一种番剧地址，这个可以直接用pc端打开播放，不用做任何处理
+            wv.loadURL(target, {
+                userAgent: userAgent.desktop
+            });
+            _history.add(target);
         } else {
             // 其他链接不做操作直接打开
             wv.loadURL(target, {
@@ -82,9 +88,9 @@ var _history = {
                 _history.replace(target);
             } else {
                 !noNewHistory && _history.add(target);
+                // 清除分p
+                ipc.send('update-part', null);
             }
-            // 清除分p
-            ipc.send('update-part', null);
         }
     },
     goPart: function(pid) {
@@ -159,6 +165,30 @@ function getPartOfVideo(av) {
             ipc.send('update-part', null);
         }
     }, 'mobile');
+}
+
+function getPartOfBangumi(aid) {
+    ajax.get(`http://bangumi.bilibili.com/jsonp/seasoninfo/${aid}.ver?callback=seasonListCallback`, (res) => {
+        var json = res.replace(/^seasonListCallback\(/, '').replace(/\);$/, '');
+        try {
+            var data = JSON.parse(json),
+                partList = data.result.episodes.map((p) => {
+                    return {
+                        index: p.index,
+                        title: p.index_title,
+                        url: p.webplay_url
+                    }
+                }).reverse();
+            ipc.send('update-bangumi-part', partList);
+            if( partList[2] ) {
+                ipc.send('show-interactive-window');
+            }
+        } catch(e) {
+            console.error('解析番剧分集失败', e);
+            console.error(`JSON: ${json}`);
+            ipc.send('update-part', null);
+        }
+    });
 }
 
 // UI逻辑
@@ -380,6 +410,9 @@ function redirectWhenOpenUrlInNewTab() {
 function redirectOnSelectPart() {
     ipc.on('select-part', (ev, pid) => {
         _history.goPart(pid);
+    });
+    ipc.on('select-bangumi-part', (ev, url) => {
+        _history.go(url);
     });
 }
 

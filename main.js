@@ -63,9 +63,17 @@ function initExchangeMessageForRenderers() {
   ipc.on('update-part', (ev, args) => {
     iw && iw.webContents.send('update-part', args);
   });
+  // 转发番剧分p消息，这俩的格式是不一样的，分局的分p里头带了playurl
+  ipc.on('update-bangumi-part', (ev, args) => {
+    iw && iw.webContents.send('update-bangumi-part', args);
+  });
   // 转发选p消息
   ipc.on('select-part', (ev, args) => {
     mw && mw.webContents.send('select-part', args);
+  });
+  // 番剧选P
+  ipc.on('select-bangumi-part', (ev, args) => {
+    mw && mw.webContents.send('select-bangumi-part', args);
   });
 }
 
