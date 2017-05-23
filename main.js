@@ -42,6 +42,16 @@ function openInteractiveWindow() {
   // iw.openDevTools();
 }
 
+function openInteractiveWindowOnMessage() {
+  ipc.on('call-interactive-window', () => {
+    if( iw && iw.isVisible() ) {
+      iw.hide();
+    } else {
+      openInteractiveWindow();
+    }
+  });
+}
+
 function initExchangeMessageForRenderers() {
   // 转发分p数据，真的只能用这么蠢的方法实现么。。。
   ipc.on('update-part', (ev, args) => {
@@ -58,7 +68,7 @@ function init() {
   bindGloablShortcut();
   initMenu();
   initExchangeMessageForRenderers();
-  // openInteractiveWindow();
+  openInteractiveWindowOnMessage();
 }
 
 // This method will be called when Electron has finished

@@ -63,8 +63,12 @@ var _history = {
             wv.loadURL(url, {
                 userAgent: userAgent.desktop
             });
-            // 因为番剧页最终目标是/blackboard/html5player.html，这里获取到的url只是中间步骤，
-            // 所以就不加到history里了
+            // 因为番剧页最终目标是/blackboard/html5player.html，这里获取到的url只是中间步骤，所以就不加到history里了
+            // modefied：因为存在从av号以普通视频的形式进入番剧播放页的情况，此时先以正常av号的形式add了一条历史记录，
+            // inject.js用location.href触发跳转后又增加了一条/html5player.html的记录，会造成goBack失效
+            // 所以放弃最初的方法，改为从anime/:bid入口进入时也临时增加一条历史记录，但在inject.js生效进行二次跳转
+            // 的时候用replace删除最后一条历史记录
+            _history.add(url);
             // 抓分p
             getPartOfBangumi(m[1]);
         } else {
@@ -72,7 +76,13 @@ var _history = {
             wv.loadURL(target, {
                 userAgent: userAgent.mobile
             });
-            !noNewHistory && _history.add(target);
+            // 我们假设html5player的页面都是通过inject.js转跳进入的，所以删除上一条历史记录来保证goBack操作的正确
+            // 如果用户自己输入一个html5player的播放地址，那就管不了了
+            if( target.indexOf('html5player.html') > -1 ) {
+                _history.replace(target);
+            } else {
+                !noNewHistory && _history.add(target);
+            }
             // 清除分p
             ipc.send('update-part', null);
         }
@@ -92,6 +102,9 @@ var _history = {
         _history.stack.length = _history.pos + 1;
         _history.stack.push(url);
         _history.pos++;
+    },
+    replace: function(url) {
+        _history.stack[_history.stack.length - 1] = url;
     },
     goBack: function() {
         if( !_history.canGoBack() ) {
@@ -195,6 +208,10 @@ const v = new Vue({
         hideAbout: function() {
             this.showAboutOverlay = false;
             wrapper.classList.remove('showAbout');
+        },
+        // 召唤设置页面
+        callConfigWindow: function() {
+            ipc.send('call-interactive-window');
         },
         // 关鸡
         turnOff: function() {
