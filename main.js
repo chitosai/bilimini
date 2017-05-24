@@ -16,8 +16,10 @@ function openMainWindow() {
   mw.setAlwaysOnTop(true, 'torn-off-menu');
   mw.on('closed', () => {
     mw = null;
-    iw.close();
-    iw = null;
+    if( iw ) {
+      iw.close();
+      iw = null;
+    }
   });
   // 带起来自己的interactiveWindow
   initInteractiveWindow();
@@ -31,7 +33,11 @@ function initInteractiveWindow() {
     width: 200, height: 300, 
     parent: mw, frame: false, show: false
   });
+  iw.hide();
   iw.loadURL('file://' + __dirname + '/interactive.html');
+  iw.on('closed', () => {
+    iw = null;
+  });
   // iw.openDevTools();
 }
 
@@ -92,7 +98,6 @@ function init() {
   openMainWindow();
   bindGloablShortcut();
   initMenu();
-  initInteractiveWindow();
   initExchangeMessageForRenderers();
   openInteractiveWindowOnMessage();
   reposInteractiveWindowOnMainWindowResize();
