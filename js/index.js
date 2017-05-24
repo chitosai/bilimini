@@ -280,7 +280,7 @@ function detectPlatform() {
 
 // 检查更新
 function checkUpdateOnInit() {
-    ajax.get('http://rakuen.thec.me/bilimini/beacon', (res) => {
+    ajax.get('http://rakuen.thec.me/bilimini/beacon?_t=' + new Date().getTime(), (res) => {
         var data = JSON.parse(res),
             order = 1,
             buttons = ['取消', '去下载'];
