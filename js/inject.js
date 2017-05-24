@@ -28,6 +28,44 @@ window.addEventListener('DOMContentLoaded', function() {
 		}, 50), checkCount = 0;
 	}
 
+	// 直播使用了hls，原生pc-chrome不支持，我们需要手动让它支持
+	if( /\/\/live\.bilibili\.com\/h5\/\d+/.exec(window.location.href) ) {
+		var Hls = require('hls.js');
+		if( !Hls.isSupported() ) {
+			console.error(`内核不支持hls.js？！ ${navigator.userAgent}`);
+			return false;
+		}
+    var video, checkCount = 0;
+    var videoCheck = setInterval(() => {
+    	if( video = document.querySelector('.live-player') ) {
+    		video.addEventListener('loadstart', () => {
+    			// 获取直播的推流地址
+    			var src = video.querySelector('source').src,
+    					hls = new Hls(),
+				  		player = document.createElement('video'),
+				  		stage = document.querySelector('.canvas-ctnr'),
+				  		danmaku = document.querySelector('#danmu-canvas');
+		  		// 为弹幕层加一些样式，让它能够显示在我们添加的<video>上面
+				  danmaku.style.zIndex = 12450;
+				  danmaku.style.position = 'relative';
+				  stage.style.display = 'block';
+					// 页面中自带的<video>经常被操作，我们只能自己创建一个新的<video>覆盖在他上面
+				  player.style.cssText = 'position: absolute; top: 0; left: 0; z-index: 3; width: 100%;';
+				  stage.appendChild(player);
+				  // 播放@
+				  hls.loadSource(src);
+				  hls.attachMedia(player);
+				  hls.on(Hls.Events.MANIFEST_PARSED,function() {
+					  player.play();
+					});
+    		});
+    		clearInterval(videoCheck);
+    	} else if( ++checkCount > 200 ) {
+    		clearInterval(videoCheck);
+    	}
+    }, 50);
+	}
+
 	// 移除app广告
 	let appAdCheck, appAdNode;
 	appAdCheck = setInterval(function() {

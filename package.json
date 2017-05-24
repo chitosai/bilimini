@@ -18,5 +18,8 @@
     "mac": {
       "category": "Network"
     }
+  },
+  "dependencies": {
+    "hls.js": "^0.7.8"
   }
 }
