@@ -289,7 +289,11 @@ function checkUpdateOnInit() {
             buttons = ['去下载', '取消'];
         }
         // 提示更新
-        if( data.version != appData.version ) {
+        var lastVersionArr = data.version.split('.'),
+            lastVersion = lastVersionArr[0] * 10000 + lastVersionArr[1] * 100 + lastVersionArr[2],
+            currentVersionArr = appData.version.split('.'),
+            currentVersion = currentVersionArr[0] * 10000 + currentVersionArr[1] * 100 + currentVersionArr[2];
+        if( lastVersion > currentVersion ) {
             dialog.showMessageBox(null, {
                 buttons: buttons,
                 message: `检查到新版本v${data.version}，您正在使用的版本是v${appData.version}，是否打开下载页面？`
