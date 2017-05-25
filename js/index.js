@@ -5,7 +5,7 @@ const shell = require('electron').shell;
 const appData = require('./package.json');
 const userAgent = {
     desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
-    mobile: 'bilimini Mobile like (iPhone or Android) whatever'
+    mobile: 'Mozilla/5.0 (iPhone; CPU iPhone OS 5_0 like Mac OS X) AppleWebKit/534.46 (KHTML, like Gecko) Version/5.1 Mobile/9A334 Safari/7534.48.3'
 };
 const videoUrlPrefix = 'http://bilibili.com/video/av';
 const videoUrlPattern = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/;
