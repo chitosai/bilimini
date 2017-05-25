@@ -11,7 +11,8 @@
 	<div id="wrapper">
 
 		<!-- webview -->
-	    <webview id="wv" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./js/inject.js"></webview>
+		<!-- 直播有几率会跨域请求 acgvideo.com 的视频资源，为了看直播只好 disablewebsecurity 了，不知道会不会有安全问题？ -->
+	    <webview id="wv" src="http://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever" preload="./js/inject.js" disablewebsecurity></webview>
 
 		<!-- loading -->
 		<div id="loading"></div>
