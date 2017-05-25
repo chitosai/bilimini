@@ -382,11 +382,7 @@ function switchDesktopOnNavigationToVideoPage() {
 
 // windows下frameless window没法正确检测到mouseout事件，只能根据光标位置做个dirtyCheck了
 function initMouseStateDirtyCheck() {
-    // 从 https://github.com/chitosai/bilimini/issues/10 的反馈来看linux下也无法用css触发hover，
-    // 所以目前除了mac其他系统都开启dirtycheck
-    if (platform == 'darwin') {
-        return false;
-    }
+    // 统一改为由js判断，一旦鼠标进入主窗口的上200px区域就显示topbar
     var getMousePosition = remote.screen.getCursorScreenPoint,
         mw = remote.getCurrentWindow();
     setInterval(function() {
@@ -394,12 +390,12 @@ function initMouseStateDirtyCheck() {
             windowPos = mw.getPosition(),
             windowSize = mw.getSize();
         if ((mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
-            (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + windowSize[1])) {
+            (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + 200)) {
             wrapper.classList.add('showTopBar');
         } else {
             wrapper.classList.remove('showTopBar');
         }
-    }, 300);
+    }, 200);
 }
 
 // 点击菜单「webview console」时打开webview

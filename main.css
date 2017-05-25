@@ -12,7 +12,6 @@ html, body{
 	position: relative;
 	top: 0;
 }
-body.macos #wrapper:hover,
 #wrapper.showTopBar{
 	/* transform: translate3d(0, 36px, 0); */
 	/* 不能用transform来做这个动画效果..貌似translate3d不会触发reflow，造成topBar的里的dragzone的
