@@ -62,7 +62,7 @@ window.addEventListener('DOMContentLoaded', function() {
         // 帮用户按下「播放」按钮
         setTimeout(function() {
           document.querySelector('.tv-play-button').click();
-        }, 200)
+        }, 200);
         clearInterval(videoCheck);
       } else if( ++checkCount > 200 ) {
         clearInterval(videoCheck);
