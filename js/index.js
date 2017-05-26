@@ -335,7 +335,8 @@ var currentWindowType = 'default';
 function resizeWindowOnNavigation() {
     wv.addEventListener('did-finish-load', function() {
         let targetWindowType, url = wv.getURL();
-        if (url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1) {
+        if (url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1 || 
+            /\/\/live\.bilibili\.com\/h5\/\d+/.test(url)) {
             targetWindowType = 'windowSizeMini';
         } else {
             targetWindowType = 'windowSizeDefault';
