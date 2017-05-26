@@ -180,7 +180,7 @@ function initMenu() {
 
 // 老板键
 function bindGloablShortcut() {
-  let shortcut = platform == 'win' ? 'ctrl+e' : 'alt+w';
+  let shortcut = platform == 'darwin' ? 'alt+w' : 'ctrl+e';
   let bindRes = globalShortcut.register(shortcut, () => {
     if( mw ) {
       if( mw.isVisible() ) {
