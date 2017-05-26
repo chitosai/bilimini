@@ -8,89 +8,88 @@ const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mw = null;
-
+let mainWindow = null;
 function openMainWindow() {
-  mw = new electron.BrowserWindow({width: 375, height: 500, frame: false});
-  mw.loadURL('file://' + __dirname + '/index.html');
-  mw.setAlwaysOnTop(true, 'torn-off-menu');
-  mw.on('closed', () => {
-    mw = null;
-    if( iw ) {
-      iw.close();
-      iw = null;
+  mainWindow = new electron.BrowserWindow({width: 375, height: 500, frame: false});
+  mainWindow.loadURL('file://' + __dirname + '/index.html');
+  mainWindow.setAlwaysOnTop(true, 'torn-off-menu');
+  mainWindow.on('closed', () => {
+    mainWindow = null;
+    if( selectPartWindow ) {
+      selectPartWindow.close();
+      selectPartWindow = null;
     }
   });
-  // 带起来自己的interactiveWindow
-  initInteractiveWindow();
-  // mw.webContents.openDevTools();
+  // 带起来自己的分p选择页
+  initSelectPartWindow();
+  // mainWindow.webContents.openDevTools();
 }
 
 // 初始化交互窗口，用于设置、选分p等
-let iw = null;
-function initInteractiveWindow() {
-  iw = new electron.BrowserWindow({
+let selectPartWindow = null;
+function initSelectPartWindow() {
+  selectPartWindow = new electron.BrowserWindow({
     width: 200, height: 300, 
-    parent: mw, frame: false, show: false
+    parent: mainWindow, frame: false, show: false
   });
-  iw.hide();
-  iw.loadURL('file://' + __dirname + '/interactive.html');
-  iw.on('closed', () => {
-    iw = null;
+  selectPartWindow.hide();
+  selectPartWindow.loadURL('file://' + __dirname + '/selectP.html');
+  selectPartWindow.on('closed', () => {
+    selectPartWindow = null;
   });
-  // iw.openDevTools();
+  // selectPartWindow.openDevTools();
 }
 
-function openInteractiveWindow() {
-  if( !mw || !iw ) {
+function openSelectPartWindow() {
+  if( !mainWindow || !selectPartWindow ) {
     return;
   }
-  var p = mw.getPosition(), s = mw.getSize(),
+  var p = mainWindow.getPosition(), s = mainWindow.getSize(),
       pos = [p[0] + s[0] + 10, p[1]];
-  iw.setPosition(pos[0], pos[1]);
-  iw.show();
+  selectPartWindow.setPosition(pos[0], pos[1]);
+  selectPartWindow.show();
 }
 
-function openInteractiveWindowOnMessage() {
+function openSelectPartWindowOnMessage() {
   // 切换、可开可关
-  ipc.on('toggle-interactive-window', () => {
-    if( iw && iw.isVisible() ) {
-      iw.hide();
+  ipc.on('toggle-select-part-window', () => {
+    if( selectPartWindow && selectPartWindow.isVisible() ) {
+      selectPartWindow.hide();
     } else {
-      openInteractiveWindow();
+      openSelectPartWindow();
     }
   });
   // 仅开启
-  ipc.on('show-interactive-window', openInteractiveWindow);
+  ipc.on('show-select-part-window', openSelectPartWindow);
 }
 
 function initExchangeMessageForRenderers() {
   // 转发分p数据，真的只能用这么蠢的方法实现么。。。
   ipc.on('update-part', (ev, args) => {
-    if( !args && iw && iw.isVisible() ) {
-      iw.hide();
+    if( !args && selectPartWindow && selectPartWindow.isVisible() ) {
+      selectPartWindow.hide();
     }
-    iw && iw.webContents.send('update-part', args);
+    selectPartWindow && selectPartWindow.webContents.send('update-part', args);
   });
   // 转发番剧分p消息，这俩的格式是不一样的，分局的分p里头带了playurl
   ipc.on('update-bangumi-part', (ev, args) => {
-    iw && iw.webContents.send('update-bangumi-part', args);
+    selectPartWindow && selectPartWindow.webContents.send('update-bangumi-part', args);
   });
   // 转发选p消息
   ipc.on('select-part', (ev, args) => {
-    mw && mw.webContents.send('select-part', args);
+    mainWindow && mainWindow.webContents.send('select-part', args);
   });
   // 番剧选P
   ipc.on('select-bangumi-part', (ev, args) => {
-    mw && mw.webContents.send('select-bangumi-part', args);
+    mainWindow && mainWindow.webContents.send('select-bangumi-part', args);
   });
 }
 
   
-// mainWindow在default/mini尺寸间切换时同时移动interactiveWindow
-function reposInteractiveWindowOnMainWindowResize() {
+// mainWindow在default/mini尺寸间切换时同时移动selectPartWindow
+function reposSelectPartWindowOnMainWindowResize() {
   ipc.on('main-window-resized', (ev, pos, size) => {
-    iw && iw.setPosition((pos[0] + size[0] + 10), pos[1], true);
+    selectPartWindow && selectPartWindow.setPosition((pos[0] + size[0] + 10), pos[1], true);
   });
 }
 
@@ -99,8 +98,8 @@ function init() {
   bindGloablShortcut();
   initMenu();
   initExchangeMessageForRenderers();
-  openInteractiveWindowOnMessage();
-  reposInteractiveWindowOnMainWindowResize();
+  openSelectPartWindowOnMessage();
+  reposSelectPartWindowOnMainWindowResize();
 }
 
 // This method will be called when Electron has finished
@@ -120,10 +119,10 @@ app.on('window-all-closed', () => {
 app.on('activate', () => {
   // On OS X it's common to re-create a window in the app when the
   // dock icon is clicked and there are no other windows open.
-  if( mw === null ) {
+  if( mainWindow === null ) {
     openMainWindow();
   } else {
-    mw.show();
+    mainWindow.show();
   }
 });
 
@@ -155,15 +154,15 @@ function initMenu() {
       submenu: [
         {
           label: 'Open Main Window Console',
-          click() { mw.webContents.openDevTools(); }
+          click() { mainWindow.webContents.openDevTools(); }
         },
         {
           label: 'Open Config Window Console',
-          click() { iw.webContents.openDevTools(); }
+          click() { selectPartWindow.webContents.openDevTools(); }
         },
         {
           label: 'Open Webview Console',
-          click() { mw.webContents.send('openWebviewDevTools'); }
+          click() { mainWindow.webContents.send('openWebviewDevTools'); }
         }
       ]
     }, {
@@ -182,12 +181,12 @@ function initMenu() {
 function bindGloablShortcut() {
   let shortcut = platform == 'darwin' ? 'alt+w' : 'ctrl+e';
   let bindRes = globalShortcut.register(shortcut, () => {
-    if( mw ) {
-      if( mw.isVisible() ) {
-        mw.hide();
-        iw && iw.isVisible() && iw.hide();
+    if( mainWindow ) {
+      if( mainWindow.isVisible() ) {
+        mainWindow.hide();
+        selectPartWindow && selectPartWindow.isVisible() && selectPartWindow.hide();
       } else {
-        mw.showInactive();
+        mainWindow.showInactive();
       }
     }
   });

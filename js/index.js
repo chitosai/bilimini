@@ -156,7 +156,7 @@ function getPartOfVideo(av) {
                 ipc.send('update-part', data);
                 // 有超过1p时自动开启分p窗口
                 if( data[2] ) {
-                    ipc.send('show-interactive-window');
+                    ipc.send('show-select-part-window');
                 }
             } catch(e) {
                 ipc.send('update-part', null);
@@ -181,7 +181,7 @@ function getPartOfBangumi(aid) {
                 }).reverse();
             ipc.send('update-bangumi-part', partList);
             if( partList[2] ) {
-                ipc.send('show-interactive-window');
+                ipc.send('show-select-part-window');
             }
         } catch(e) {
             console.error('解析番剧分集失败', e);
@@ -244,9 +244,9 @@ const v = new Vue({
             this.showAboutOverlay = false;
             wrapper.classList.remove('showAbout');
         },
-        // 召唤设置页面
-        toggleConfigWindow: function() {
-            ipc.send('toggle-interactive-window');
+        // 召唤选p窗口
+        toggleSelectPartWindow: function() {
+            ipc.send('toggle-select-part-window');
         },
         // 关鸡
         turnOff: function() {
