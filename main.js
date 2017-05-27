@@ -20,12 +20,13 @@ function openMainWindow() {
       selectPartWindow = null;
     }
   });
-  // 带起来自己的分p选择页
+  // 带起来自己的子窗口
   initSelectPartWindow();
+  initConfigWindow();
   // mainWindow.webContents.openDevTools();
 }
 
-// 初始化交互窗口，用于设置、选分p等
+// 初始化选分p窗口
 let selectPartWindow = null;
 function initSelectPartWindow() {
   selectPartWindow = new electron.BrowserWindow({
@@ -61,6 +62,44 @@ function openSelectPartWindowOnMessage() {
   });
   // 仅开启
   ipc.on('show-select-part-window', openSelectPartWindow);
+}
+
+// 初始化设置窗口
+let configWindow = null;
+function initConfigWindow() {
+  configWindow = new electron.BrowserWindow({
+    width: 200, height: 200,
+    parent: mainWindow, frame: false, show: false
+  });
+  configWindow.hide();
+  configWindow.loadURL('file://' + __dirname + '/config.html');
+  configWindow.on('closed', () => {
+    configWindow = null;
+  });
+  // configWindow.openDevTools();
+}
+
+function openConfigWindow() {
+  if( !mainWindow || !configWindow ) {
+    return;
+  }
+  var p = mainWindow.getPosition(), s = configWindow.getSize(),
+      pos = [p[0] - s[0] - 10, p[1]];
+  configWindow.setPosition(pos[0], pos[1]);
+  configWindow.show();
+}
+
+function openConfigWindowOnMessage() {
+  // 切换、可开可关
+  ipc.on('toggle-config-window', () => {
+    if( configWindow && configWindow.isVisible() ) {
+      configWindow.hide();
+    } else {
+      openConfigWindow();
+    }
+  });
+  // 仅开启
+  ipc.on('show-config-window', openConfigWindow);
 }
 
 function initExchangeMessageForRenderers() {
@@ -99,6 +138,7 @@ function init() {
   initMenu();
   initExchangeMessageForRenderers();
   openSelectPartWindowOnMessage();
+  openConfigWindowOnMessage();
   reposSelectPartWindowOnMainWindowResize();
 }
 
@@ -153,15 +193,19 @@ function initMenu() {
       label: 'Debug',
       submenu: [
         {
-          label: 'Open Main Window Console',
+          label: 'Inspect Main Window',
           click() { mainWindow.webContents.openDevTools(); }
         },
         {
-          label: 'Open Config Window Console',
+          label: 'Inspect Select Part Window',
           click() { selectPartWindow.webContents.openDevTools(); }
         },
         {
-          label: 'Open Webview Console',
+          label: 'Inspect Config Window',
+          click() { configWindow.webContents.openDevTools(); }
+        },
+        {
+          label: 'Inspect Webview',
           click() { mainWindow.webContents.send('openWebviewDevTools'); }
         }
       ]

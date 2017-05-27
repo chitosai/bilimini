@@ -248,6 +248,10 @@ const v = new Vue({
         toggleSelectPartWindow: function() {
             ipc.send('toggle-select-part-window');
         },
+        // 设置窗口
+        toggleConfig: function() {
+            ipc.send('toggle-config-window');
+        },
         // 关鸡
         turnOff: function() {
             remote.getCurrentWindow().close();

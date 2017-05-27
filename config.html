@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="cn">
+<head>
+	<meta charset="UTF-8">
+	<title>Bilibili v.mini 设置中心</title>
+	<link rel="stylesheet" href="css/child-window.css">
+</head>
+<body>
+	<div id="wrapper">
+		<span id="close" @click="closeWindow">x</span>
+		<div id="config-list" class="list">
+			<p class="list-title">窗口不透明度</p>
+			<div class="item">12333</div>
+			<p class="list-title">老板键</p>
+			<div class="item">223333</div>
+		</div>
+	</div>
+
+	<script src="js/vue.min.js"></script>
+	<script>
+		const ipc = require('electron').ipcRenderer;
+		const remote = require('electron').remote;
+		const v = new Vue({
+			el: '#wrapper',
+			data: {
+			},
+			methods: {
+				closeWindow() {
+				  remote.getCurrentWindow().hide();
+				}
+			}
+		});
+		</script>
+</body>
+</html>

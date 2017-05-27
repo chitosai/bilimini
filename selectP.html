@@ -8,10 +8,6 @@
 <body>
 	<div id="wrapper">
 		<span id="close" @click="closeWindow">x</span>
-		<!-- <div id="setting-panel">
-			<div class="setting">1</div>
-			<div class="setting">1</div>
-		</div> -->
 		<div id="select-part" class="list">
 			<p class="list-title">视频分Part</p>
 			<div class="item part" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span v-show="index == currentPart">● </span>{{ index}}、{{ title }}</div>
