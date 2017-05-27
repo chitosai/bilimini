@@ -10,7 +10,7 @@
 		<span id="close" @click="closeWindow">x</span>
 		<div id="config-list" class="list">
 			<p class="list-title">窗口不透明度</p>
-			<div class="item"><input type="range" class="range" v-model="opacity"></div>
+			<div class="item"><input type="range" class="range" v-model="opacity" min="0" max="1" step="0.01"></div>
 			<p class="list-title">老板键</p>
 			<div class="item">223333</div>
 		</div>
@@ -25,6 +25,11 @@
 			el: '#wrapper',
 			data: {
 				opacity: 1
+			},
+			watch: {
+				opacity(val) {
+					Config.set('opacity', val);
+				}
 			},
 			methods: {
 				closeWindow() {

@@ -10,14 +10,35 @@ var Config = {
     set: function(key, value) {
         if( typeof key == 'object' ) {
             for( let _k of key ) {
+                Config[_k] = key[_k];
                 window.localStorage.setItem(_k, JSON.stringify(key[_k]));
+                Config.applyCallback(key, key[_k]);
             }
         } else if( typeof key == 'string' && value ) {
+            Config[key] = value;
             window.localStorage.setItem(key, JSON.stringify(value));
+            Config.applyCallback(key, value);
         }
     },
-    'windowSizeMini': [300, 187],
-    'windowSizeDefault': [375, 500]
+    applyCallback: function(key, value) {
+        var arr = Config.callbacks[key];
+        if( arr && arr.length ) {
+            arr.forEach((fn) => {
+                fn(value);
+            });
+        }
+    },
+    onSet: function(key, callback) {
+        var arr = Config.callbacks[key];
+        if( !arr ) {
+            arr = Config.callbacks[key] = [];
+        }
+        arr.push(callback);
+    },
+    callbacks: {},
+    windowSizeMini: [300, 187],
+    windowSizeDefault: [375, 500],
+    opacity: 1
 };
 
 // 初始化时读取用户设置
