@@ -17,12 +17,14 @@
 	</div>
 
 	<script src="js/vue.min.js"></script>
+	<script src="js/utils.js"></script>
 	<script>
 		const ipc = require('electron').ipcRenderer;
 		const remote = require('electron').remote;
 		const v = new Vue({
 			el: '#wrapper',
 			data: {
+				opacity: 1
 			},
 			methods: {
 				closeWindow() {
