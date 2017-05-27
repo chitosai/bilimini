@@ -51,3 +51,30 @@ body{
     color: #fff;
   }
 }
+
+.range{
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  display: block;
+  outline: 0;
+  width: 100%;
+  height: 2.4em;
+
+  &::-webkit-slider-runnable-track{
+    background: #ef93a8;
+    border-radius: 2px;
+    height: 4px;
+    outline: 0;
+  }
+  &::-webkit-slider-thumb{
+    appearance: none;
+    -webkit-appearance: none;
+    background: #ef93a8;
+    border-radius: 5px;
+    box-shadow: 0 0 5px #f25d8e;
+    width: 15px;
+    height: 15px;
+    margin-top: -5px;
+  }
+}
