@@ -1,0 +1,217 @@
+/* global */
+html,
+body {
+  font-size: 12px;
+  font-family: 'PingFangSC-Regular', 'Microsoft Yahei';
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+}
+#wrapper {
+  transition: all .2s ease;
+  height: 100%;
+  position: relative;
+  top: 0;
+}
+#wrapper.showTopBar {
+  /* transform: translate3d(0, 36px, 0); */
+  /* 不能用transform来做这个动画效果..貌似translate3d不会触发reflow，造成topBar的里的dragzone的
+      -webkit-app-region: drag; 没有生效 */
+  top: 36px;
+}
+#wrapper.showAbout {
+  top: 211px !important;
+}
+.globalOverlay {
+  background: rgba(0, 0, 0, 0.7);
+  position: fixed;
+  top: 0;
+  left: -99999px;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  transition: opacity .2s ease;
+  z-index: 10;
+}
+.globalOverlay.active {
+  left: 0;
+  opacity: 1;
+}
+/* about */
+#about {
+  background: #f25d8e;
+  box-sizing: border-box;
+  text-align: center;
+  padding: 10px;
+  position: absolute;
+  top: -211px;
+  width: 100%;
+  z-index: 9;
+}
+#about p {
+  color: #fb93ab;
+  line-height: 1.7em;
+  margin: 0;
+}
+#about a {
+  color: #ffacbf;
+}
+#about-title {
+  color: #ffacbf;
+  font-size: 1.3em;
+  font-weight: bold;
+  line-height: 2em;
+}
+#about-overlay {
+  z-index: 2;
+}
+/* loading */
+#loading {
+  background: url('../images/loading.gif') center no-repeat rgba(255, 255, 255, 0.75);
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  top: -9999px;
+  left: 0;
+  transition: transform .2s ease;
+  z-index: 8;
+  transform: scale3d(2, 2, 2);
+}
+#wrapper.loading #loading {
+  top: 0;
+  transform: scale3d(1, 1, 1);
+}
+/* topbar*/
+#topbar {
+  background: #f25d8e;
+  box-sizing: border-box;
+  line-height: 36px;
+  padding: 0 1em;
+  position: absolute;
+  top: -36px;
+  left: 0;
+  width: 100%;
+  z-index: 9;
+}
+body.win .showAbout #topbar {
+  top: -37px;
+}
+#icon-bar-left {
+  position: absolute;
+  top: -1px;
+  left: 10px;
+}
+#icon-bar-right {
+  position: absolute;
+  top: -1px;
+  right: 10px;
+}
+.top-btn {
+  background: #fb93ab;
+  color: #f25d8e;
+  cursor: pointer;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 2px;
+  transition: all .2s ease;
+}
+.top-btn:hover {
+  background: #fff;
+}
+.top-btn[disabled] {
+  opacity: .5;
+}
+.top-btn[disabled]:hover {
+  background: #fb93ab;
+}
+.icon-btn {
+  border-radius: 14px;
+  font-size: 7px;
+  width: 14px;
+  height: 14px;
+  text-align: center;
+}
+#navi-back {
+  line-height: 15px;
+  text-indent: -1px;
+}
+#navi-forward {
+  line-height: 15px;
+  text-indent: -1px;
+  transform: rotate(180deg);
+}
+#navi-goto {
+  border-radius: 3px;
+  font-size: 14px;
+  line-height: 15px;
+  padding: 0 5px;
+}
+#app-danmaku,
+#app-part,
+#app-about {
+  font-size: 10px;
+  line-height: 14px;
+}
+#app-close {
+  font-size: 11px;
+  line-height: 13px;
+}
+#dragzone {
+  -webkit-user-select: none;
+  -webkit-app-region: drag;
+  border-radius: 3px;
+  color: #ffacbf;
+  cursor: move;
+  text-align: center;
+  line-height: 22px;
+  width: 50%;
+  margin: 7px auto;
+}
+/* webview */
+#wv {
+  width: 100%;
+  height: 100%;
+}
+#wrapper.loading #wv {
+  filter: blur(2px);
+}
+/* input */
+#av-input-layer {
+  background: #f25d8e;
+  border-radius: 4px;
+  width: 191px;
+  height: 25px;
+  padding: 10px;
+  margin: auto;
+  position: absolute;
+  top: -20px;
+  left: -999999px;
+  bottom: 0;
+  right: 0;
+  transition: top .2s ease;
+  z-index: 10;
+}
+#av-input-layer.active {
+  top: 0;
+  left: 0;
+}
+#av-input {
+  border: 0;
+  border-radius: 4px;
+  line-height: 24px;
+  outline: 0;
+  padding: 0 10px;
+}
+body.win #av-input {
+  width: 126px;
+}
+#av-input-finish {
+  color: #fb93ab;
+  cursor: pointer;
+  display: inline-block;
+  padding: 0 10px;
+  line-height: 24px;
+}
+#av-input-finish:hover {
+  color: #fff;
+}
