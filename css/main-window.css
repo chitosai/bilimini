@@ -1,6 +1,7 @@
 /* global */
 html,
 body {
+  background: transparent;
   font-size: 12px;
   font-family: 'PingFangSC-Regular', 'Microsoft Yahei';
   margin: 0;

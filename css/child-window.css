@@ -47,6 +47,9 @@ body {
   background: #ea8aa1;
   color: #fff;
 }
+.item-range:hover {
+  background: #f25d8e;
+}
 .range {
   appearance: none;
   -webkit-appearance: none;
@@ -55,6 +58,9 @@ body {
   outline: 0;
   width: 100%;
   height: 2.4em;
+}
+.range:hover::-webkit-slider-thumb {
+  background: #fdc1cf;
 }
 .range::-webkit-slider-runnable-track {
   background: #ef93a8;
@@ -71,4 +77,5 @@ body {
   width: 15px;
   height: 15px;
   margin-top: -5px;
+  transition: background .2s ease;
 }

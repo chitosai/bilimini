@@ -1,5 +1,8 @@
 // 保存用户设置
 var Config = {
+    get: function(key) {
+        return JSON.parse(localStorage.getItem(key));
+    },
     load: function(key) {
         var value = JSON.parse(localStorage.getItem(key));
         if( value != null ) {
