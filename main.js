@@ -157,6 +157,11 @@ app.on('activate', () => {
   }
 });
 
+app.on('window-all-closed', () => {
+  // 试了下，似乎electron的默认行为是在所有窗口都关闭后就执行app.quit()
+  // 所以我们希望所有窗口关闭后不退出程序就必须手动监听这个事件
+});
+
 // 菜单
 function initMenu() {
   // 本来我们是不需要菜单的，但是因为mac上app必须有菜单，所以只在mac上做一下
@@ -227,6 +232,8 @@ function bindGloablShortcut() {
       } else {
         mainWindow.showInactive();
       }
+    } else {
+      openMainWindow();
     }
   });
   if( !bindRes ) {

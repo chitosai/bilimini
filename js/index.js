@@ -209,9 +209,13 @@ const v = new Vue({
         toggleConfig: function() {
             ipc.send('toggle-config-window');
         },
-        // 关鸡
+        // 关鸡 - 在osx下仅关闭当前窗口，在windows下直接退出整个程序
         turnOff: function() {
-            remote.getCurrentWindow().close();
+            if( platform == 'darwin' ) {
+                remote.getCurrentWindow().close();
+            } else {
+                remote.app.quit();
+            }
         },
         // 显示、隐藏弹幕快捷键
         // pull request #1. Thanks to bumaociyuan
