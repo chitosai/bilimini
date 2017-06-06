@@ -194,18 +194,22 @@ function initMenu() {
       submenu: [
         {
           label: 'Inspect Main Window',
+          accelerator: 'CmdOrCtrl+1',
           click() { mainWindow.webContents.openDevTools(); }
         },
         {
           label: 'Inspect Select Part Window',
+          accelerator: 'CmdOrCtrl+2',
           click() { selectPartWindow.webContents.openDevTools(); }
         },
         {
           label: 'Inspect Config Window',
+          accelerator: 'CmdOrCtrl+3',
           click() { configWindow.webContents.openDevTools(); }
         },
         {
           label: 'Inspect Webview',
+          accelerator: 'CmdOrCtrl+4',
           click() { mainWindow.webContents.send('openWebviewDevTools'); }
         }
       ]
