@@ -331,6 +331,16 @@ function resizeWindowOnNavigation() {
     });
 }
 
+// 根据设置调整页面的透明度
+function initSetBodyOpacity() {
+    function update() {
+        var opacity = utils.config.get('opacity');
+        document.body.style.opacity = opacity;
+    }
+    ipc.on('set-opacity', update);
+    update();
+}
+
 // 判断是否能前进/后退
 function checkGoBackAndForwardStateOnNavigation() {
     wv.addEventListener('did-finish-load', function() {
@@ -406,4 +416,5 @@ window.addEventListener('DOMContentLoaded', function() {
     openWebviewConsoleOnMenuClick();
     redirectWhenOpenUrlInNewTab();
     redirectOnSelectPart();
+    initSetBodyOpacity();
 });

@@ -21,6 +21,10 @@
 		const ipc = require('electron').ipcRenderer;
 		const remote = require('electron').remote;
 		const config = require('./js/utils.js').config;
+		const timer = {};
+
+		var lastOpacity = 1;
+
 		const v = new Vue({
 			el: '#wrapper',
 			data: {
@@ -28,7 +32,17 @@
 			},
 			watch: {
 				opacity(val) {
-					config.set('opacity', val);
+					clearTimeout(timer.opacity);
+					setTimeout(() => {
+						// 在不透明和透明间切换的瞬间，需要重新创建主窗口并切换模式
+						if( lastOpacity == 1 && val < 1 || lastOpacity < 1 && val == 1 ) {
+							ipc.send('recreate-main-window');
+						} else {
+							ipc.send('set-opacity');
+						}
+						lastOpacity = val;
+						config.set('opacity', val);
+					}, 300);
 				}
 			},
 			methods: {
@@ -37,7 +51,7 @@
 				}
 			},
 			mounted() {
-				this.opacity = config.get('opacity');
+				lastOpacity = this.opacity = config.get('opacity');
 			}
 		});
 		</script>

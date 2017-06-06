@@ -35,6 +35,14 @@ function openMainWindow() {
   // mainWindow.webContents.openDevTools();
 }
 
+function initMainWindow() {
+  ipc.on('recreate-main-window', () => {
+    mainWindow && mainWindow.close();
+    openMainWindow();
+  });
+  openMainWindow();
+}
+
 // 初始化选分p窗口
 let selectPartWindow = null;
 function initSelectPartWindow() {
@@ -131,6 +139,10 @@ function initExchangeMessageForRenderers() {
   ipc.on('select-bangumi-part', (ev, args) => {
     mainWindow && mainWindow.webContents.send('select-bangumi-part', args);
   });
+  // 修改透明度
+  ipc.on('set-opacity', () => {
+    mainWindow && mainWindow.webContents.send('set-opacity');
+  });
 }
 
   
@@ -142,7 +154,7 @@ function reposSelectPartWindowOnMainWindowResize() {
 }
 
 function init() {
-  openMainWindow();
+  initMainWindow();
   bindGloablShortcut();
   initMenu();
   initExchangeMessageForRenderers();
