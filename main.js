@@ -1,6 +1,7 @@
 const electron = require('electron');
 const app = electron.app;
 const ipc = electron.ipcMain;
+const dialog = electron.dialog;
 const globalShortcut = electron.globalShortcut;
 const Menu = electron.Menu;
 const utils = require('./js/utils.js');
@@ -150,11 +151,11 @@ function reposSelectPartWindowOnMainWindowResize() {
 }
 
 function init() {
-  initMainWindow();
+  initGloablShortcut();
   initMenu();
+  initMainWindow();
   initExchangeMessageForRenderers();
   reposSelectPartWindowOnMainWindowResize();
-  bindGloablShortcut();
 }
 
 // This method will be called when Electron has finished
@@ -237,7 +238,7 @@ function initMenu() {
 }
 
 // 老板键
-function bindGloablShortcut() {
+function initGloablShortcut() {
   let shortcut = platform == 'darwin' ? 'alt+w' : 'ctrl+e';
   let bindRes = globalShortcut.register(shortcut, () => {
     if( mainWindow ) {
@@ -252,6 +253,6 @@ function bindGloablShortcut() {
     }
   });
   if( !bindRes ) {
-    mainWindow && mainWindow.webContents.alert('Fail to bind globalShortcut');
+    dialog.showErrorBox(`注册老板键失败，「${shortcut}」可能不能用作全局快捷键或已被其他程序占用`, '');
   }
 }
