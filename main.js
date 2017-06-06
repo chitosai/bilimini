@@ -9,7 +9,7 @@ const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
-let mainWindow = null;
+var mainWindow = null;
 function openMainWindow() {
   // 根据透明度设置决定是否要创建transparent窗口
   // 不论在windows还是在mac下，正常窗口都会比transparent窗口多一个好看的阴影
@@ -26,7 +26,9 @@ function openMainWindow() {
     mainWindow = null;
     if( selectPartWindow ) {
       selectPartWindow.close();
-      selectPartWindow = null;
+    }
+    if( configWindow ) {
+      configWindow.close();
     }
   });
   // 带起来自己的子窗口
@@ -44,17 +46,27 @@ function initMainWindow() {
 }
 
 // 初始化选分p窗口
-let selectPartWindow = null;
+var selectPartWindow = null;
 function initSelectPartWindow() {
   selectPartWindow = new electron.BrowserWindow({
     width: 200, height: 300, 
     parent: mainWindow, frame: false, show: false
   });
-  selectPartWindow.hide();
+  selectPartWindow.hide(); // 上面show: false对childWindow好像无效，必须手动调用一次hide
   selectPartWindow.loadURL('file://' + __dirname + '/selectP.html');
   selectPartWindow.on('closed', () => {
     selectPartWindow = null;
   });
+  // 切换、可开可关
+  ipc.on('toggle-select-part-window', () => {
+    if( selectPartWindow && selectPartWindow.isVisible() ) {
+      selectPartWindow.hide();
+    } else {
+      openSelectPartWindow();
+    }
+  });
+  // 仅开启
+  ipc.on('show-select-part-window', openSelectPartWindow);
   // selectPartWindow.openDevTools();
 }
 
@@ -68,21 +80,8 @@ function openSelectPartWindow() {
   selectPartWindow.show();
 }
 
-function openSelectPartWindowOnMessage() {
-  // 切换、可开可关
-  ipc.on('toggle-select-part-window', () => {
-    if( selectPartWindow && selectPartWindow.isVisible() ) {
-      selectPartWindow.hide();
-    } else {
-      openSelectPartWindow();
-    }
-  });
-  // 仅开启
-  ipc.on('show-select-part-window', openSelectPartWindow);
-}
-
 // 初始化设置窗口
-let configWindow = null;
+var configWindow = null;
 function initConfigWindow() {
   configWindow = new electron.BrowserWindow({
     width: 200, height: 200,
@@ -93,6 +92,16 @@ function initConfigWindow() {
   configWindow.on('closed', () => {
     configWindow = null;
   });
+  // 切换、可开可关
+  ipc.on('toggle-config-window', () => {
+    if( configWindow && configWindow.isVisible() ) {
+      configWindow.hide();
+    } else {
+      openConfigWindow();
+    }
+  });
+  // 仅开启
+  ipc.on('show-config-window', openConfigWindow);
   // configWindow.openDevTools();
 }
 
@@ -106,28 +115,16 @@ function openConfigWindow() {
   configWindow.show();
 }
 
-function openConfigWindowOnMessage() {
-  // 切换、可开可关
-  ipc.on('toggle-config-window', () => {
-    if( configWindow && configWindow.isVisible() ) {
-      configWindow.hide();
-    } else {
-      openConfigWindow();
-    }
-  });
-  // 仅开启
-  ipc.on('show-config-window', openConfigWindow);
-}
-
 function initExchangeMessageForRenderers() {
   // 转发分p数据，真的只能用这么蠢的方法实现么。。。
   ipc.on('update-part', (ev, args) => {
     if( !args && selectPartWindow && selectPartWindow.isVisible() ) {
       selectPartWindow.hide();
+    } else {
+      selectPartWindow && selectPartWindow.webContents.send('update-part', args);
     }
-    selectPartWindow && selectPartWindow.webContents.send('update-part', args);
   });
-  // 转发番剧分p消息，这俩的格式是不一样的，分局的分p里头带了playurl
+  // 转发番剧分p消息，这俩的格式是不一样的，番剧的分p里带了playurl
   ipc.on('update-bangumi-part', (ev, args) => {
     selectPartWindow && selectPartWindow.webContents.send('update-bangumi-part', args);
   });
@@ -139,13 +136,12 @@ function initExchangeMessageForRenderers() {
   ipc.on('select-bangumi-part', (ev, args) => {
     mainWindow && mainWindow.webContents.send('select-bangumi-part', args);
   });
-  // 修改透明度
+  // 设置主窗口透明度
   ipc.on('set-opacity', () => {
     mainWindow && mainWindow.webContents.send('set-opacity');
   });
 }
 
-  
 // mainWindow在default/mini尺寸间切换时同时移动selectPartWindow
 function reposSelectPartWindowOnMainWindowResize() {
   ipc.on('main-window-resized', (ev, pos, size) => {
@@ -155,12 +151,10 @@ function reposSelectPartWindowOnMainWindowResize() {
 
 function init() {
   initMainWindow();
-  bindGloablShortcut();
   initMenu();
   initExchangeMessageForRenderers();
-  openSelectPartWindowOnMessage();
-  openConfigWindowOnMessage();
   reposSelectPartWindowOnMainWindowResize();
+  bindGloablShortcut();
 }
 
 // This method will be called when Electron has finished
@@ -258,6 +252,6 @@ function bindGloablShortcut() {
     }
   });
   if( !bindRes ) {
-    console.log('Fail to bind globalShortcut');
+    mainWindow && mainWindow.webContents.alert('Fail to bind globalShortcut');
   }
 }
