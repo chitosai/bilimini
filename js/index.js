@@ -3,6 +3,7 @@ const remote = require('electron').remote;
 const dialog = remote.dialog;
 const shell = require('electron').shell;
 const appData = require('./package.json');
+const utils = require('./js/utils.js');
 const userAgent = {
     desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
     mobile: 'bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233'
@@ -105,7 +106,7 @@ var _history = {
 };
 
 function getPartOfVideo(av) {
-    ajax.get(`http://m.bilibili.com/video/av${av}.html`, (res) => {
+    utils.ajax.get(`http://m.bilibili.com/video/av${av}.html`, (res) => {
         var m = /"pageTitle":(\{.*?\})/g.exec(res);
         if( m ) {
             try {
@@ -125,7 +126,7 @@ function getPartOfVideo(av) {
 }
 
 function getPartOfBangumi(aid) {
-    ajax.get(`http://bangumi.bilibili.com/jsonp/seasoninfo/${aid}.ver?callback=seasonListCallback`, (res) => {
+    utils.ajax.get(`http://bangumi.bilibili.com/jsonp/seasoninfo/${aid}.ver?callback=seasonListCallback`, (res) => {
         var json = res.replace(/^seasonListCallback\(/, '').replace(/\);$/, '');
         try {
             var data = JSON.parse(json),
@@ -245,7 +246,7 @@ function detectPlatform() {
 
 // 检查更新
 function checkUpdateOnInit() {
-    ajax.get('http://rakuen.thec.me/bilimini/beacon?_t=' + new Date().getTime(), (res) => {
+    utils.ajax.get('http://rakuen.thec.me/bilimini/beacon?_t=' + new Date().getTime(), (res) => {
         var data = JSON.parse(res),
             order = 1,
             buttons = ['取消', '去下载'];
@@ -288,8 +289,7 @@ function saveWindowSizeOnResize() {
         saveWindowSizeTimer = setTimeout(function() {
             // 暂时只保存视频播放页的尺寸
             if( currentWindowType == 'windowSizeMini' ) {
-                Config[currentWindowType] = [window.innerWidth, window.innerHeight];
-                Config.set(currentWindowType, [window.innerWidth, window.innerHeight]);
+                utils.config.set(currentWindowType, [window.innerWidth, window.innerHeight]);
             }
         }, 600);
     });
@@ -311,7 +311,7 @@ function resizeWindowOnNavigation() {
                 currentSize = mw.getSize(),
                 leftTopPosition = mw.getPosition(),
                 rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
-                targetSize = (targetWindowType in Config) ? Config[targetWindowType] : Config.windowSizeDefault,
+                targetSize = utils.config.get(targetWindowType),
                 targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
 
             mw.setBounds({
@@ -398,7 +398,6 @@ window.addEventListener('DOMContentLoaded', function() {
     wv = document.getElementById('wv');
     detectPlatform();
     checkUpdateOnInit();
-    loadUserConfig();
     resizeWindowOnNavigation();
     saveWindowSizeOnResize();
     checkGoBackAndForwardStateOnNavigation();

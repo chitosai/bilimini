@@ -17,10 +17,10 @@
 	</div>
 
 	<script src="js/vue.min.js"></script>
-	<script src="js/utils.js"></script>
 	<script>
 		const ipc = require('electron').ipcRenderer;
 		const remote = require('electron').remote;
+		const config = require('./js/utils.js').config;
 		const v = new Vue({
 			el: '#wrapper',
 			data: {
@@ -28,7 +28,7 @@
 			},
 			watch: {
 				opacity(val) {
-					Config.set('opacity', val);
+					config.set('opacity', val);
 				}
 			},
 			methods: {
@@ -37,7 +37,7 @@
 				}
 			},
 			mounted() {
-				this.opacity = Config.get('opacity');
+				this.opacity = config.get('opacity');
 			}
 		});
 		</script>

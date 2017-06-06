@@ -3,6 +3,7 @@ const app = electron.app;
 const ipc = electron.ipcMain;
 const globalShortcut = electron.globalShortcut;
 const Menu = electron.Menu;
+const utils = require('./js/utils.js');
 
 const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 
@@ -10,7 +11,15 @@ const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow = null;
 function openMainWindow() {
-  mainWindow = new electron.BrowserWindow({width: 375, height: 500, frame: false});
+  // 根据透明度设置决定是否要创建transparent窗口
+  // 不论在windows还是在mac下，正常窗口都会比transparent窗口多一个好看的阴影
+  // 所以我们不希望为了方便始终使用transparent
+  var opacity = utils.config.get('opacity'),
+      windowParams = {width: 375, height: 500, frame: false};
+  if( opacity < 1 ) {
+    windowParams.transparent = true;
+  }
+  mainWindow = new electron.BrowserWindow(windowParams);
   mainWindow.loadURL('file://' + __dirname + '/index.html');
   mainWindow.setAlwaysOnTop(true, 'torn-off-menu');
   mainWindow.on('closed', () => {
