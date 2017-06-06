@@ -10,7 +10,7 @@
 		<span id="close" @click="closeWindow">x</span>
 		<div id="config-list" class="list">
 			<p class="list-title">窗口不透明度</p>
-			<div class="item item-range"><input type="range" class="range" v-model="opacity" min="0" max="1" step="0.01"></div>
+			<div class="item item-range"><input type="range" class="range" v-model="opacity" min="0.1" max="1" step="0.01"></div>
 			<!-- <p class="list-title">老板键</p>
 			<div class="item">223333</div> -->
 		</div>
@@ -21,7 +21,6 @@
 		const ipc = require('electron').ipcRenderer;
 		const remote = require('electron').remote;
 		const config = require('./js/utils.js').config;
-		const timer = {};
 
 		var lastOpacity = 1;
 
@@ -32,17 +31,16 @@
 			},
 			watch: {
 				opacity(val) {
-					clearTimeout(timer.opacity);
-					setTimeout(() => {
-						// 在不透明和透明间切换的瞬间，需要重新创建主窗口并切换模式
-						if( lastOpacity == 1 && val < 1 || lastOpacity < 1 && val == 1 ) {
-							ipc.send('recreate-main-window');
-						} else {
-							ipc.send('set-opacity');
-						}
-						lastOpacity = val;
-						config.set('opacity', val);
-					}, 300);
+					// 在不透明和透明间切换的瞬间，需要重新创建主窗口并切换模式
+					if( lastOpacity == 1 && val < 1 && confirm('主窗口从不透明变为透明时需要重启，点击确定后程序将重新启动') ) {
+						ipc.send('recreate-main-window');
+					} else if( lastOpacity < 1 && val == 1 && confirm('主窗口从透明变为不透明时需要重启，点击确定后程序将重新启动') ) {
+						ipc.send('recreate-main-window');
+					} else {
+						ipc.send('set-opacity');
+					}
+					lastOpacity = val;
+					config.set('opacity', val);
 				}
 			},
 			methods: {
