@@ -30,6 +30,7 @@ var _history = {
             !noNewHistory && _history.add(videoUrlPrefix + m[1]);
             // 抓分p
             getPartOfVideo(m[1]);
+            v.disableDanmakuButton = false;
         } else if(m = bangumiUrlPattern.exec(target)) {
             // case 2 番剧，转跳对应pc页
             let url = bangumiUrl(m[1]);
@@ -44,12 +45,14 @@ var _history = {
             _history.add(url);
             // 抓分p
             getPartOfBangumi(m[1]);
+            v.disableDanmakuButton = false;
         } else if (/bangumi\.bilibili\.com\/anime\/\d+\/play#\d+/.test(target)) {
             // 另一种番剧地址，这个可以直接用pc端打开播放，不用做任何处理
             wv.loadURL(target, {
                 userAgent: userAgent.desktop
             });
             _history.replace(target);
+            v.disableDanmakuButton = false;
         } else {
             // 其他链接不做操作直接打开
             wv.loadURL(target, {
@@ -64,6 +67,7 @@ var _history = {
                 // 清除分p
                 ipc.send('update-part', null);
             }
+            v.disableDanmakuButton = true;
         }
     },
     goPart: function(pid) {
@@ -115,12 +119,15 @@ function getPartOfVideo(av) {
                 // 有超过1p时自动开启分p窗口
                 if( data[2] ) {
                     ipc.send('show-select-part-window');
+                    v.disablePartButton = false;
                 }
             } catch(e) {
                 ipc.send('update-part', null);
+                v.disablePartButton = true;
             }
         } else {
             ipc.send('update-part', null);
+            v.disablePartButton = true;
         }
     }, 'mobile');
 }
@@ -140,11 +147,13 @@ function getPartOfBangumi(aid) {
             ipc.send('update-bangumi-part', partList);
             if( partList[2] ) {
                 ipc.send('show-select-part-window');
+                v.disablePartButton = false;
             }
         } catch(e) {
             console.error('解析番剧分集失败', e);
             console.error(`JSON: ${json}`);
             ipc.send('update-part', null);
+            v.disablePartButton = true;
         }
     });
 }
@@ -158,7 +167,9 @@ const v = new Vue({
         naviCanGoBack: false,
         naviCanGoForward: false,
         showNaviGotoOverlay: false,
-        showAboutOverlay: false
+        showAboutOverlay: false,
+        disableDanmakuButton: true,
+        disablePartButton: true
     },
     methods: {
         // 后退
@@ -204,6 +215,9 @@ const v = new Vue({
         },
         // 召唤选p窗口
         toggleSelectPartWindow: function() {
+            if( this.disablePartButton ) {
+              return false;
+            }
             ipc.send('toggle-select-part-window');
         },
         // 设置窗口
@@ -217,6 +231,9 @@ const v = new Vue({
         // 显示、隐藏弹幕快捷键
         // pull request #1. Thanks to bumaociyuan
         toggleDanmaku: function() {
+            if( this.disableDanmakuButton ) {
+              return false;
+            }
             wv.executeJavaScript(`document.getElementsByName('ctlbar_danmuku_on').length`, function(result) {
                 let isDanmakuOn = result == 1;
                 if (isDanmakuOn) {
