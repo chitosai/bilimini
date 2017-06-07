@@ -212,11 +212,7 @@ const v = new Vue({
         },
         // 关鸡 - 在osx下仅关闭当前窗口，在windows下直接退出整个程序
         turnOff: function() {
-            if( platform == 'darwin' ) {
-                ipc.send('close-main-window');
-            } else {
-                remote.app.quit();
-            }
+            ipc.send('close-main-window');
         },
         // 显示、隐藏弹幕快捷键
         // pull request #1. Thanks to bumaociyuan

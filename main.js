@@ -35,9 +35,13 @@ function openMainWindow() {
 function initMainWindow() {
   ipc.on('recreate-main-window', openMainWindow);
   ipc.on('close-main-window', () => {
-    mainWindow.close();
-    selectPartWindow.hide();
-    configWindow.hide();
+    if( platform == 'darwin' ) {
+      mainWindow.close();
+      selectPartWindow.hide();
+      configWindow.hide();
+    } else {
+      app.quit();
+    }
   });
   openMainWindow();
 }
