@@ -209,7 +209,6 @@ app.on('window-all-closed', () => {
 // 菜单
 function initMenu() {
   // 本来我们是不需要菜单的，但是因为mac上app必须有菜单，所以只在mac上做一下
-  if( platform != 'darwin' ) return;
   var template = [{
       label: app.getName(),
       submenu: [
