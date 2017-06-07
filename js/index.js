@@ -401,6 +401,13 @@ function redirectWhenOpenUrlInNewTab() {
     });
 }
 
+// 无法正常打开页面时显示错误页面
+function displayErrorPageWhenLoadFail() {
+    wv.addEventListener('did-fail-load', () => {
+        wv.loadURL('file://' + __dirname + '/error.html');
+    });
+}
+
 // 收到选p消息时跳p
 function redirectOnSelectPart() {
     ipc.on('select-part', (ev, pid) => {
@@ -430,4 +437,5 @@ window.addEventListener('DOMContentLoaded', function() {
     redirectWhenOpenUrlInNewTab();
     redirectOnSelectPart();
     initSetBodyOpacity();
+    displayErrorPageWhenLoadFail();
 });
