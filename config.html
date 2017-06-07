@@ -9,12 +9,20 @@
 	<div id="wrapper">
 		<span id="close" @click="closeWindow">x</span>
 		<div id="config-list" class="list">
+			<!-- 不透明度 -->
 			<p class="list-title">窗口不透明度</p>
 			<div class="item item-range"><input type="range" class="range" v-model="opacity" min="0.1" max="1" step="0.01"></div>
+			<!-- 老板键 -->
 			<p class="list-title">老板键</p>
 			<div class="item">
 				<input type="text" class="input" v-model="hideShortcut">
-				<span class="btn" style="padding: 3px 5px 3px 10px;" @click="saveHideShortcut">确定</span>
+				<span class="btn btn-submit" @click="saveHideShortcut">确定</span>
+			</div>
+			<!-- 代理 -->
+			<p class="list-title">代理设置</p>
+			<div class="item">
+				<input type="text" class="input" v-model="proxy" placeholder="scheme://host:port">
+				<span class="btn btn-submit" @click="saveProxy">确定</span>
 			</div>
 		</div>
 	</div>
@@ -32,7 +40,8 @@
 			el: '#wrapper',
 			data: {
 				opacity: 1,
-				hideShortcut: ''
+				hideShortcut: '',
+				proxy: ''
 			},
 			watch: {
 				opacity(val) {
@@ -64,11 +73,16 @@
 						this.hideShortcut = lastShortcut;
 						alert('你输入的快捷键不合法！\n合法的快捷键组合应当类似于「ctrl+shift+e」。\n合法的修饰键包括Ctrl、Alt、Shift、Cmd（仅Mac）、Option（仅Mac，等同于Alt）。')
 					}
+				},
+				saveProxy() {
+					config.set('proxy', this.proxy);
+					ipc.send('set-proxy');
 				}
 			},
 			mounted() {
-				lastOpacity = this.opacity = config.get('opacity');
+				this.opacity = lastOpacity = config.get('opacity');
 				this.hideShortcut = config.get('hideShortcut');
+				this.proxy = config.get('proxy');
 			}
 		});
 		</script>

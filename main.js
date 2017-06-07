@@ -83,7 +83,7 @@ function showSelectPartWindow() {
 var configWindow = null;
 function initConfigWindow() {
   configWindow = new electron.BrowserWindow({
-    width: 200, height: 140, frame: false, show: false
+    width: 200, height: 200, frame: false, show: false
   });
   configWindow.loadURL('file://' + __dirname + '/config.html');
   configWindow.on('closed', () => {
@@ -139,8 +139,9 @@ function initExchangeMessageForRenderers() {
   });
 }
 
-// mainWindow在default/mini尺寸间切换时同时移动selectPartWindow
-function reposChildWindowOnMainWindowResize() {
+// 当主窗口收到各种消息时的反应
+function initActionOnMessage() {
+  // mainWindow在default/mini尺寸间切换时同时移动selectPartWindow
   ipc.on('main-window-resized', (ev, pos, size) => {
     if( selectPartWindow.isVisible() ) {
       showSelectPartWindow();
@@ -149,6 +150,28 @@ function reposChildWindowOnMainWindowResize() {
       showConfigWindow();
     }
   });
+  // 用户设置proxy时更新session代理
+  ipc.on('set-proxy', setProxy)
+}
+
+// 更新webview代理设置
+function setProxy(isUpdate) {
+  var proxy = utils.config.get('proxy');
+  // 如果是用户手动设置代理，那么要允许用户通过设置空白代理来删除代理，反之当初始化时忽略空白代理
+  if( proxy == '' && !isUpdate ) {
+    return false;
+  }
+  if( mainWindow ) {
+    mainWindow.webContents.session.setProxy({
+      proxyRules: proxy
+    }, () => {
+      if( isUpdate ) {
+        dialog.showMessageBox({
+          message: '设置代理成功'
+        });
+      }
+    });
+  }
 }
 
 function init() {
@@ -157,7 +180,8 @@ function init() {
   initMainWindow();
   initSelectPartWindow();
   initConfigWindow();
-  reposChildWindowOnMainWindowResize();
+  initActionOnMessage();
+  setProxy();
   initExchangeMessageForRenderers();
 }
 

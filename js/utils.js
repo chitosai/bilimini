@@ -22,7 +22,8 @@ var config = {
     windowSizeMini: [300, 187],
     windowSizeDefault: [375, 500],
     opacity: 1,
-    hideShortcut: process.platform == 'darwin' ? 'Alt + W' : 'Ctrl + E'
+    hideShortcut: process.platform == 'darwin' ? 'Alt + W' : 'Ctrl + E',
+    proxy: ''
 }
 
 // ajax

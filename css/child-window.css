@@ -50,6 +50,9 @@ body {
 .item-range:hover {
   background: #f25d8e;
 }
+.btn-submit {
+  padding: 3px 5px 3px 10px;
+}
 .range {
   appearance: none;
   -webkit-appearance: none;
@@ -80,8 +83,15 @@ body {
   transition: background .2s ease;
 }
 .input {
+  background: #fb93ab;
   border: none;
   border-radius: 3px;
   outline: 0;
   padding: 3px 5px;
+}
+.input:focus {
+  background: #fff;
+}
+.input::-webkit-input-placeholder {
+  color: #999;
 }
