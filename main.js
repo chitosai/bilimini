@@ -61,15 +61,15 @@ function initSelectPartWindow() {
     if( selectPartWindow && selectPartWindow.isVisible() ) {
       selectPartWindow.hide();
     } else {
-      openSelectPartWindow();
+      showSelectPartWindow();
     }
   });
   // 仅开启
-  ipc.on('show-select-part-window', openSelectPartWindow);
+  ipc.on('show-select-part-window', showSelectPartWindow);
   // selectPartWindow.openDevTools();
 }
 
-function openSelectPartWindow() {
+function showSelectPartWindow() {
   if( !mainWindow || !selectPartWindow ) {
     return;
   }
@@ -94,15 +94,15 @@ function initConfigWindow() {
     if( configWindow && configWindow.isVisible() ) {
       configWindow.hide();
     } else {
-      openConfigWindow();
+      showConfigWindow();
     }
   });
   // 仅开启
-  ipc.on('show-config-window', openConfigWindow);
+  ipc.on('show-config-window', showConfigWindow);
   // configWindow.openDevTools();
 }
 
-function openConfigWindow() {
+function showConfigWindow() {
   if( !mainWindow || !configWindow ) {
     return;
   }
@@ -143,10 +143,10 @@ function initExchangeMessageForRenderers() {
 function reposChildWindowOnMainWindowResize() {
   ipc.on('main-window-resized', (ev, pos, size) => {
     if( selectPartWindow.isVisible() ) {
-      openSelectPartWindow();
+      showSelectPartWindow();
     }
     if( configWindow.isVisible() ) {
-      openConfigWindow();
+      showConfigWindow();
     }
   });
 }
