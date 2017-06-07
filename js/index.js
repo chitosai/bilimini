@@ -195,8 +195,8 @@ const v = new Vue({
         },
         // 关于
         showAbout: function() {
-            this.showAboutOverlay = true;
-            wrapper.classList.add('showAbout');
+            this.showAboutOverlay = !this.showAboutOverlay;
+            wrapper.classList.toggle('showAbout');
         },
         hideAbout: function() {
             this.showAboutOverlay = false;
