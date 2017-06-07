@@ -53,6 +53,7 @@ function initSelectPartWindow() {
     width: 200, height: 300, frame: false, show: false
   });
   selectPartWindow.loadURL('file://' + __dirname + '/selectP.html');
+  selectPartWindow.setAlwaysOnTop(true, 'modal-panel');
   selectPartWindow.on('closed', () => {
     selectPartWindow = null;
   });
@@ -86,6 +87,7 @@ function initConfigWindow() {
     width: 200, height: 200, frame: false, show: false
   });
   configWindow.loadURL('file://' + __dirname + '/config.html');
+  configWindow.setAlwaysOnTop(true, 'modal-panel');
   configWindow.on('closed', () => {
     configWindow = null;
   });
