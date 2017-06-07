@@ -1,4 +1,5 @@
-const store = require('electron-settings');
+const Store = require('electron-store');
+const store = new Store();
 
 // 设置，比永久储存库多一个默认值，诶嘿 (<ゝω·)☆
 var config = {
