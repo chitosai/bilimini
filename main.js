@@ -249,6 +249,7 @@ function initGloablShortcut() {
       if( mainWindow.isVisible() ) {
         mainWindow.hide();
         selectPartWindow && selectPartWindow.isVisible() && selectPartWindow.hide();
+        configWindow && configWindow.isVisible() && configWindow.hide();
       } else {
         mainWindow.showInactive();
       }
