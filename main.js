@@ -79,7 +79,7 @@ function openSelectPartWindow() {
 var configWindow = null;
 function initConfigWindow() {
   configWindow = new electron.BrowserWindow({
-    width: 200, height: 200, frame: false, show: false
+    width: 200, height: 80, frame: false, show: false
   });
   configWindow.loadURL('file://' + __dirname + '/config.html');
   configWindow.on('closed', () => {
@@ -173,8 +173,9 @@ app.on('activate', () => {
 });
 
 app.on('window-all-closed', () => {
-  // 试了下，似乎electron的默认行为是在所有窗口都关闭后就执行app.quit()
-  // 所以我们希望所有窗口关闭后不退出程序就必须手动监听这个事件
+  if( platform != 'darwin' ) {
+    app.quit();
+  }
 });
 
 // 菜单
