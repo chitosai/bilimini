@@ -16,9 +16,13 @@ var config = {
             store.set(key, value);
         }
     },
+    delete(key) {
+        store.delete(key);
+    },
     windowSizeMini: [300, 187],
     windowSizeDefault: [375, 500],
-    opacity: 1
+    opacity: 1,
+    hideShortcut: process.platform == 'darwin' ? 'Alt + W' : 'Ctrl + E'
 }
 
 // ajax

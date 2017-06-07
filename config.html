@@ -11,8 +11,11 @@
 		<div id="config-list" class="list">
 			<p class="list-title">窗口不透明度</p>
 			<div class="item item-range"><input type="range" class="range" v-model="opacity" min="0.1" max="1" step="0.01"></div>
-			<!-- <p class="list-title">老板键</p>
-			<div class="item">223333</div> -->
+			<p class="list-title">老板键</p>
+			<div class="item">
+				<input type="text" class="input" v-model="hideShortcut">
+				<span class="btn" style="padding: 3px 5px 3px 10px;" @click="saveHideShortcut">确定</span>
+			</div>
 		</div>
 	</div>
 
@@ -20,6 +23,7 @@
 	<script>
 		const ipc = require('electron').ipcRenderer;
 		const remote = require('electron').remote;
+		const isAccelerator = require('electron-is-accelerator');
 		const config = require('./js/utils.js').config;
 
 		var lastOpacity = 1;
@@ -27,7 +31,8 @@
 		const v = new Vue({
 			el: '#wrapper',
 			data: {
-				opacity: 1
+				opacity: 1,
+				hideShortcut: ''
 			},
 			watch: {
 				opacity(val) {
@@ -44,10 +49,26 @@
 			methods: {
 				closeWindow() {
 				  remote.getCurrentWindow().hide();
+				},
+				saveHideShortcut() {
+					var lastShortcut = config.get('hideShortcut'),
+							curShortcut = this.hideShortcut;
+					// 手动检查快捷键格式：
+					// 似乎随便瞎写一个字符串丢进globalShortcut.register会报错，而且这个错误还catch不到，必定会中断程序执行
+					// 所以只能在这里人工检查了
+					if( isAccelerator(curShortcut) ) {
+						this.hideShortcut = curShortcut;
+						config.set('hideShortcut', curShortcut);
+						ipc.send('update-hide-shortcut', lastShortcut);
+					} else {
+						this.hideShortcut = lastShortcut;
+						alert('你输入的快捷键不合法！\n合法的快捷键组合应当类似于「ctrl+shift+e」。\n合法的修饰键包括Ctrl、Alt、Shift、Cmd（仅Mac）、Option（仅Mac，等同于Alt）。')
+					}
 				}
 			},
 			mounted() {
 				lastOpacity = this.opacity = config.get('opacity');
+				this.hideShortcut = config.get('hideShortcut');
 			}
 		});
 		</script>

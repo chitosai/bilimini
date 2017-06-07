@@ -83,7 +83,7 @@ function showSelectPartWindow() {
 var configWindow = null;
 function initConfigWindow() {
   configWindow = new electron.BrowserWindow({
-    width: 200, height: 80, frame: false, show: false
+    width: 200, height: 140, frame: false, show: false
   });
   configWindow.loadURL('file://' + __dirname + '/config.html');
   configWindow.on('closed', () => {
@@ -152,7 +152,7 @@ function reposChildWindowOnMainWindowResize() {
 }
 
 function init() {
-  initGloablShortcut();
+  initGlobalShortcut();
   initMenu();
   initMainWindow();
   initSelectPartWindow();
@@ -242,8 +242,8 @@ function initMenu() {
 }
 
 // 老板键
-function initGloablShortcut() {
-  let shortcut = platform == 'darwin' ? 'alt+w' : 'ctrl+e';
+function bindGlobalShortcut(isUpdate) {
+  var shortcut = utils.config.get('hideShortcut');
   let bindRes = globalShortcut.register(shortcut, () => {
     if( mainWindow ) {
       if( mainWindow.isVisible() ) {
@@ -258,6 +258,20 @@ function initGloablShortcut() {
     }
   });
   if( !bindRes ) {
-    dialog.showErrorBox(`注册老板键失败，「${shortcut}」可能不能用作全局快捷键或已被其他程序占用`, '');
+    dialog.showErrorBox(`修改老板键失败，「${shortcut}」可能不能用作全局快捷键或已被其他程序占用`, '');
+  } else if( isUpdate ) {
+    // 通过设置页面修改快捷键成功时弹个窗提示修改成功
+    dialog.showMessageBox({
+      type: 'info',
+      message: `修改成功，老板键已替换为「${shortcut}」`
+    });
   }
+}
+
+function initGlobalShortcut() {
+  ipc.on('update-hide-shortcut', (ev, args) => {
+    globalShortcut.unregister(args);
+    bindGlobalShortcut(true);
+  });
+  bindGlobalShortcut();
 }

@@ -20,6 +20,7 @@
     }
   },
   "dependencies": {
+    "electron-is-accelerator": "^0.1.2",
     "electron-store": "^1.1.0",
     "hls.js": "^0.7.8"
   }
