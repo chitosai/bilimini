@@ -213,7 +213,7 @@ const v = new Vue({
         // 关鸡 - 在osx下仅关闭当前窗口，在windows下直接退出整个程序
         turnOff: function() {
             if( platform == 'darwin' ) {
-                remote.getCurrentWindow().close();
+                ipc.send('close-main-window');
             } else {
                 remote.app.quit();
             }

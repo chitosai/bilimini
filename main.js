@@ -12,6 +12,9 @@ const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 // be closed automatically when the JavaScript object is garbage collected.
 var mainWindow = null;
 function openMainWindow() {
+  if( mainWindow ) {
+    mainWindow.close();
+  }
   // 根据透明度设置决定是否要创建transparent窗口
   // 不论在windows还是在mac下，正常窗口都会比transparent窗口多一个好看的阴影
   // 所以我们不希望为了方便始终使用transparent
@@ -25,23 +28,16 @@ function openMainWindow() {
   mainWindow.setAlwaysOnTop(true, 'torn-off-menu');
   mainWindow.on('closed', () => {
     mainWindow = null;
-    if( selectPartWindow ) {
-      selectPartWindow.close();
-    }
-    if( configWindow ) {
-      configWindow.close();
-    }
   });
-  // 带起来自己的子窗口
-  initSelectPartWindow();
-  initConfigWindow();
   // mainWindow.webContents.openDevTools();
 }
 
 function initMainWindow() {
-  ipc.on('recreate-main-window', () => {
-    mainWindow && mainWindow.close();
-    openMainWindow();
+  ipc.on('recreate-main-window', openMainWindow);
+  ipc.on('close-main-window', () => {
+    mainWindow.close();
+    selectPartWindow.hide();
+    configWindow.hide();
   });
   openMainWindow();
 }
@@ -50,10 +46,8 @@ function initMainWindow() {
 var selectPartWindow = null;
 function initSelectPartWindow() {
   selectPartWindow = new electron.BrowserWindow({
-    width: 200, height: 300, 
-    parent: mainWindow, frame: false, show: false
+    width: 200, height: 300, frame: false, show: false
   });
-  selectPartWindow.hide(); // 上面show: false对childWindow好像无效，必须手动调用一次hide
   selectPartWindow.loadURL('file://' + __dirname + '/selectP.html');
   selectPartWindow.on('closed', () => {
     selectPartWindow = null;
@@ -85,10 +79,8 @@ function openSelectPartWindow() {
 var configWindow = null;
 function initConfigWindow() {
   configWindow = new electron.BrowserWindow({
-    width: 200, height: 200,
-    parent: mainWindow, frame: false, show: false
+    width: 200, height: 200, frame: false, show: false
   });
-  configWindow.hide();
   configWindow.loadURL('file://' + __dirname + '/config.html');
   configWindow.on('closed', () => {
     configWindow = null;
@@ -144,9 +136,14 @@ function initExchangeMessageForRenderers() {
 }
 
 // mainWindow在default/mini尺寸间切换时同时移动selectPartWindow
-function reposSelectPartWindowOnMainWindowResize() {
+function reposChildWindowOnMainWindowResize() {
   ipc.on('main-window-resized', (ev, pos, size) => {
-    selectPartWindow && selectPartWindow.setPosition((pos[0] + size[0] + 10), pos[1], true);
+    if( selectPartWindow.isVisible() ) {
+      openSelectPartWindow();
+    }
+    if( configWindow.isVisible() ) {
+      openConfigWindow();
+    }
   });
 }
 
@@ -154,8 +151,10 @@ function init() {
   initGloablShortcut();
   initMenu();
   initMainWindow();
+  initSelectPartWindow();
+  initConfigWindow();
+  reposChildWindowOnMainWindowResize();
   initExchangeMessageForRenderers();
-  reposSelectPartWindowOnMainWindowResize();
 }
 
 // This method will be called when Electron has finished

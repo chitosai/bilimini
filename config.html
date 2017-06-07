@@ -32,9 +32,7 @@
 			watch: {
 				opacity(val) {
 					// 在不透明和透明间切换的瞬间，需要重新创建主窗口并切换模式
-					if( lastOpacity == 1 && val < 1 && confirm('主窗口从不透明变为透明时需要重启，点击确定后程序将重新启动') ) {
-						ipc.send('recreate-main-window');
-					} else if( lastOpacity < 1 && val == 1 && confirm('主窗口从透明变为不透明时需要重启，点击确定后程序将重新启动') ) {
+					if( lastOpacity == 1 && val < 1 || lastOpacity < 1 && val == 1 ) {
 						ipc.send('recreate-main-window');
 					} else {
 						ipc.send('set-opacity');
