@@ -62,16 +62,20 @@
         },
         saveHideShortcut() {
           var lastShortcut = config.get('hideShortcut'),
-              curShortcut = this.hideShortcut.replace(/\s/g, '');
+              curShortcut = this.hideShortcut.split('+').map((c) => {
+                let _c = c.trim().toLowerCase().split('');
+                _c[0] = _c[0].toUpperCase();
+                return _c.join('');
+              }).join('+');
           // 手动检查快捷键格式：
           // 似乎随便瞎写一个字符串丢进globalShortcut.register会报错，而且这个错误还catch不到，必定会中断程序执行
           // 所以只能在这里人工检查了
           if( isAccelerator(curShortcut) ) {
-            this.hideShortcut = curShortcut.replace(/+/g, ' + ');
+            this.hideShortcut = curShortcut.replace(/\+/g, ' + ');
             config.set('hideShortcut', curShortcut);
             ipc.send('update-hide-shortcut', lastShortcut);
           } else {
-            this.hideShortcut = lastShortcut;
+            this.hideShortcut = lastShortcut.replace(/\+/g, ' + ');
             utils.error(`快捷键被检测为不合法 ${curShortcut}`);
             alert('你输入的快捷键不合法！\n合法的快捷键组合应当类似于「ctrl+shift+e」。\n合法的修饰键包括Ctrl、Alt、Shift、Cmd（仅Mac）、Option（仅Mac，等同于Alt）。')
           }
