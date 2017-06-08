@@ -310,38 +310,34 @@ function saveWindowSizeOnResize() {
 
 // 根据用户访问的url决定app窗口尺寸
 var currentWindowType = 'default';
-function resizeWindowOnNavigation() {
-    wv.addEventListener('did-finish-load', function() {
-        let targetWindowType, url = wv.getURL();
-        if (url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1 || 
-            /\/\/live\.bilibili\.com\/h5\/\d+/.test(url)) {
-            targetWindowType = 'windowSizeMini';
-        } else {
-            targetWindowType = 'windowSizeDefault';
-        }
-        if (targetWindowType != currentWindowType) {
-            let mw = remote.getCurrentWindow(),
-                currentSize = mw.getSize(),
-                leftTopPosition = mw.getPosition(),
-                rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
-                targetSize = utils.config.get(targetWindowType),
-                targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
+function resizeMainWindow() {
+    let targetWindowType, url = wv.getURL();
+    if (url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1 || 
+        /\/\/live\.bilibili\.com\/h5\/\d+/.test(url)) {
+        targetWindowType = 'windowSizeMini';
+    } else {
+        targetWindowType = 'windowSizeDefault';
+    }
+    if (targetWindowType != currentWindowType) {
+        let mw = remote.getCurrentWindow(),
+            currentSize = mw.getSize(),
+            leftTopPosition = mw.getPosition(),
+            rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
+            targetSize = utils.config.get(targetWindowType),
+            targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
 
-            mw.setBounds({
-                x: targetPosition[0],
-                y: targetPosition[1],
-                width: targetSize[0],
-                height: targetSize[1]
-            }, true);
+        mw.setBounds({
+            x: targetPosition[0],
+            y: targetPosition[1],
+            width: targetSize[0],
+            height: targetSize[1]
+        }, true);
 
-            currentWindowType = targetWindowType;
+        currentWindowType = targetWindowType;
 
-            // 通知设置窗口改变位置
-            ipc.send('main-window-resized', targetPosition, targetSize);
-        }
-        // 关闭loading遮罩
-        wrapper.classList.remove('loading');
-    });
+        // 通知设置窗口改变位置
+        ipc.send('main-window-resized', targetPosition, targetSize);
+    }
 }
 
 // 根据设置调整页面的透明度
@@ -354,18 +350,48 @@ function initSetBodyOpacity() {
     update();
 }
 
-// 判断是否能前进/后退
-function checkGoBackAndForwardStateOnNavigation() {
+// webview跳转相关
+function initActionOnWebviewNavigate() {
+    // 判断是否能前进/后退
     wv.addEventListener('did-finish-load', function() {
         v.naviCanGoBack = _history.canGoBack();
         v.naviCanGoForward = _history.canGoForward();
+        // 改变窗口尺寸
+        resizeMainWindow();
+        // 关闭loading遮罩
+        wrapper.classList.remove('loading');
+    });
+    // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
+    wv.addEventListener('will-navigate', function(e) {
+       _history.go(e.url);
+    });
+    // webview中点击target="_blank"的链接时在当前webview打开
+    wv.addEventListener('new-window', function(ev) {
+        _history.go(ev.url);
     });
 }
 
-// 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
-function switchDesktopOnNavigationToVideoPage() {
-    wv.addEventListener('will-navigate', function(e) {
-       _history.go(e.url);
+// 无法正常打开页面时显示错误页面
+// function displayErrorPageWhenLoadFail() {
+//     wv.addEventListener('did-fail-load', () => {
+//         wv.loadURL('file://' + __dirname + '/error.html');
+//     });
+// }
+
+// 点击菜单「webview console」时打开webview
+function openWebviewConsoleOnMenuClick() {
+    ipc.on('openWebviewDevTools', () => {
+        wv.openDevTools();
+    });
+}
+
+// 收到选p消息时跳p
+function redirectOnSelectPart() {
+    ipc.on('select-part', (ev, pid) => {
+        _history.goPart(pid);
+    });
+    ipc.on('select-bangumi-part', (ev, url) => {
+        _history.go(url);
     });
 }
 
@@ -387,37 +413,6 @@ function initMouseStateDirtyCheck() {
     }, 200);
 }
 
-// 点击菜单「webview console」时打开webview
-function openWebviewConsoleOnMenuClick() {
-    ipc.on('openWebviewDevTools', () => {
-        wv.openDevTools();
-    });
-}
-
-// webview中点击target="_blank"的链接时在当前webview打开
-function redirectWhenOpenUrlInNewTab() {
-    wv.addEventListener('new-window', function(ev) {
-        _history.go(ev.url);
-    });
-}
-
-// 无法正常打开页面时显示错误页面
-function displayErrorPageWhenLoadFail() {
-    wv.addEventListener('did-fail-load', () => {
-        wv.loadURL('file://' + __dirname + '/error.html');
-    });
-}
-
-// 收到选p消息时跳p
-function redirectOnSelectPart() {
-    ipc.on('select-part', (ev, pid) => {
-        _history.goPart(pid);
-    });
-    ipc.on('select-bangumi-part', (ev, url) => {
-        _history.go(url);
-    });
-}
-
 // 外链
 function openExternalLink(url) {
     shell.openExternal(url);
@@ -428,14 +423,10 @@ window.addEventListener('DOMContentLoaded', function() {
     wv = document.getElementById('wv');
     detectPlatform();
     checkUpdateOnInit();
-    resizeWindowOnNavigation();
+    initActionOnWebviewNavigate();
     saveWindowSizeOnResize();
-    checkGoBackAndForwardStateOnNavigation();
-    switchDesktopOnNavigationToVideoPage();
     initMouseStateDirtyCheck();
     openWebviewConsoleOnMenuClick();
-    redirectWhenOpenUrlInNewTab();
     redirectOnSelectPart();
     initSetBodyOpacity();
-    displayErrorPageWhenLoadFail();
 });
