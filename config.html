@@ -32,7 +32,8 @@
     const ipc = require('electron').ipcRenderer;
     const remote = require('electron').remote;
     const isAccelerator = require('electron-is-accelerator');
-    const config = require('./js/utils.js').config;
+    const utils = require('./js/utils.js');
+    const config = utils.config;
 
     var lastOpacity = 1;
 
@@ -71,6 +72,7 @@
             ipc.send('update-hide-shortcut', lastShortcut);
           } else {
             this.hideShortcut = lastShortcut;
+            utils.error(`快捷键被检测为不合法 ${curShortcut}`);
             alert('你输入的快捷键不合法！\n合法的快捷键组合应当类似于「ctrl+shift+e」。\n合法的修饰键包括Ctrl、Alt、Shift、Cmd（仅Mac）、Option（仅Mac，等同于Alt）。')
           }
         },
@@ -86,8 +88,9 @@
       }
     });
 
-    window.onerror = function(err) {
-        utils.error(`config窗口报错 : ${err}`);
+    window.onerror = function(err, f, line) {
+      var id = f.split('/');
+      utils.error(`${id[id.length-1]} : Line ${line}\n> ${err}`);
     }
   </script>
 </body>

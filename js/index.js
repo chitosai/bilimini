@@ -456,6 +456,7 @@ window.addEventListener('DOMContentLoaded', function() {
     logWebviewError();
 });
 
-window.onerror = function(err) {
-    utils.error(`index窗口报错 : ${err}`)
+window.onerror = function(err, f, line) {
+  var id = f.split('/');
+  utils.error(`${id[id.length-1]} : Line ${line}\n> ${err}`);
 }

@@ -54,9 +54,10 @@
 			v.bangumiPartList = partList;
 		});
 
-		window.onerror = function(err) {
-		    utils.error(`selectP窗口报错 : ${err}`);
-		}
+		window.onerror = function(err, f, line) {
+      var id = f.split('/');
+      utils.error(`${id[id.length-1]} : Line ${line}\n> ${err}`);
+    }
 	</script>
 </body>
 </html>
