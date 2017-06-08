@@ -13,13 +13,13 @@ var config = {
             for( let k in key ) {
                 store.set(k, key[k]);
                 log.write({
-                    message: `更新用户设置：SET ${k} = ${key[k]}`
+                    message: `更新用户设置：SET ${k} = ${JSON.stringify(key[k])}`
                 });
             }
         } else {
             store.set(key, value);
             log.write({
-                message: `更新用户设置：SET ${key} = ${value}`
+                message: `更新用户设置：SET ${key} = ${JSON.stringify(value)}`
             });
         }
     },
@@ -58,17 +58,17 @@ var log = {
     write(obj) {
         var logFileName = __dirname.replace(/js$/, '') + '/bilimini.log',
             now = new Date();
-            _msg = '';
-        if( obj.type ) {
-            _msg += '--\r\n';
-        }
-        _msg += `${now.toLocaleDateString()} ${now.toTimeString()} ${obj.message}`;
+            _msg = '',
+            LF = '\r\n' + ' '.repeat(33);
+        // 让每个换行前都空出33个字符的距离，这样能让message对齐
+        var message = obj.message.replace(/\n/g, LF);
         if( obj.data ) {
-            _msg += ` ${JSON.stringify(obj.data)}`;
+            message += `${LF}${JSON.stringify(obj.data)}`;
         }
-        _msg += '\r\n';
         if( obj.type ) {
-            _msg += '--\r\n';
+            _msg = `* ${now.toLocaleDateString()} ${now.toTimeString()} ${obj.type} > ${message}\r\n`;
+        } else {
+            _msg = `${now.toLocaleDateString()} ${now.toTimeString()} ${message}\r\n`;
         }
         if( obj.override ) {
             fs.writeFile(logFileName, _msg);

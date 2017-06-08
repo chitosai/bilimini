@@ -31,7 +31,7 @@ var _history = {
             // 抓分p
             getPartOfVideo(m[1]);
             v.disableDanmakuButton = false;
-            utils.log(`路由：视频详情页；原地址：${target}，转跳地址：${videoUrlPrefix+m[1]}`);
+            utils.log(`路由：类型① 视频详情页\n原地址：${target}\n转跳地址：${videoUrlPrefix+m[1]}`);
         } else if(m = bangumiUrlPattern.exec(target)) {
             // case 2 番剧，转跳对应pc页
             let url = bangumiUrl(m[1]);
@@ -47,7 +47,7 @@ var _history = {
             // 抓分p
             getPartOfBangumi(m[1]);
             v.disableDanmakuButton = false;
-            utils.log(`路由：番剧详情页；原地址：${target}，转跳地址：${url}`);
+            utils.log(`路由：类型② 番剧详情页\n原地址：${target}\n转跳地址：${url}`);
         } else if (/bangumi\.bilibili\.com\/anime\/\d+\/play#\d+/.test(target)) {
             // 另一种番剧地址，这个可以直接用pc端打开播放，不用做任何处理
             wv.loadURL(target, {
@@ -55,7 +55,7 @@ var _history = {
             });
             _history.replace(target);
             v.disableDanmakuButton = false;
-            utils.log(`路由：番剧详情页 类型2；原地址：${target}，转跳地址：${target}`);
+            utils.log(`路由：类型③ 番剧详情页2\n原地址：${target}\n转跳地址：${target}`);
         } else {
             // 其他链接不做操作直接打开
             wv.loadURL(target, {
@@ -71,7 +71,7 @@ var _history = {
                 ipc.send('update-part', null);
             }
             v.disableDanmakuButton = true;
-            utils.log(`路由：普通页面；原地址：${target}，转跳地址：${target}`);
+            utils.log(`路由：类型④ 未归类\n原地址：${target}\n转跳地址：${target}`);
         }
     },
     goPart: function(pid) {
@@ -159,7 +159,7 @@ function getPartOfBangumi(aid) {
                 v.disablePartButton = false;
             }
         } catch(e) {
-            utils.error(`分析 ${aid} 的分P数据失败 ${e}`, json);
+            utils.error(`分析 ${aid} 的分P数据失败\n${e}`, json);
             ipc.send('update-part', null);
             v.disablePartButton = true;
         }
@@ -437,7 +437,7 @@ function logWebviewError() {
     wv.addEventListener('console-message', (err) => {
         // 我看console.error的level是2，那>1的就都log下来吧
         if( err.level > 1 ) {
-            utils.error(`Webview报错 : [Line ${err.line}] ${err.message}`)
+            utils.error(`Webview报错\nLine ${err.line}: ${err.message}\nwebview当前url: ${wv.getURL()}`)
         }
     });
 }

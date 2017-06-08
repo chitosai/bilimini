@@ -171,7 +171,9 @@ function initActionOnMessage() {
     }
   });
   // 用户设置proxy时更新session代理
-  ipc.on('set-proxy', setProxy)
+  ipc.on('set-proxy', () => {
+    setProxy(true);
+  });
 }
 
 // 更新webview代理设置
@@ -181,7 +183,7 @@ function setProxy(isUpdate) {
   if( proxy == '' && !isUpdate ) {
     return false;
   }
-  utils.log(`代理：开始设置代理 ${proxy}, 是否更新：${isUpdate}`);
+  utils.log(`代理：设置代理 ${proxy}, isUpdate：${!!isUpdate}`);
   if( mainWindow ) {
     mainWindow.webContents.session.setProxy({
       proxyRules: proxy
@@ -197,7 +199,7 @@ function setProxy(isUpdate) {
 }
 
 function init() {
-  utils.log(`主线程：初始化 on ${process.platform}`, null, true);
+  utils.log(`主线程：初始化；Platform：${process.platform}`, null, true);
   initGlobalShortcut();
   initMenu();
   initMainWindow();
@@ -294,7 +296,7 @@ function initMenu() {
 
 // 老板键
 function bindGlobalShortcut(isUpdate) {
-  utils.log(`老板键：开始注册，isUpdate: ${isUpdate}`);
+  utils.log(`老板键：开始注册，isUpdate: ${!!isUpdate}`);
   var shortcut = utils.config.get('hideShortcut');
   let bindRes = globalShortcut.register(shortcut, () => {
     if( mainWindow ) {
