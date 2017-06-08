@@ -1,94 +1,94 @@
 <!DOCTYPE html>
 <html lang="cn">
 <head>
-	<meta charset="UTF-8">
-	<title>Bilibili v.mini 设置中心</title>
-	<link rel="stylesheet" href="css/child-window.css">
+  <meta charset="UTF-8">
+  <title>Bilibili v.mini 设置中心</title>
+  <link rel="stylesheet" href="css/child-window.css">
 </head>
 <body>
-	<div id="wrapper">
-		<span id="close" @click="closeWindow">x</span>
-		<div id="config-list" class="list">
-			<!-- 不透明度 -->
-			<p class="list-title">窗口不透明度</p>
-			<div class="item item-range"><input type="range" class="range" v-model="opacity" min="0.1" max="1" step="0.01"></div>
-			<!-- 老板键 -->
-			<p class="list-title">老板键</p>
-			<div class="item">
-				<input type="text" class="input" v-model="hideShortcut">
-				<span class="btn btn-submit" @click="saveHideShortcut">确定</span>
-			</div>
-			<!-- 代理 -->
-			<p class="list-title">代理设置</p>
-			<div class="item">
-				<input type="text" class="input" v-model="proxy" placeholder="scheme://host:port">
-				<span class="btn btn-submit" @click="saveProxy">确定</span>
-			</div>
-		</div>
-	</div>
+  <div id="wrapper">
+    <span id="close" @click="closeWindow">x</span>
+    <div id="config-list" class="list">
+      <!-- 不透明度 -->
+      <p class="list-title">窗口不透明度</p>
+      <div class="item item-range"><input type="range" class="range" v-model="opacity" min="0.1" max="1" step="0.01"></div>
+      <!-- 老板键 -->
+      <p class="list-title">老板键</p>
+      <div class="item">
+        <input type="text" class="input" v-model="hideShortcut">
+        <span class="btn btn-submit" @click="saveHideShortcut">确定</span>
+      </div>
+      <!-- 代理 -->
+      <p class="list-title">代理设置</p>
+      <div class="item">
+        <input type="text" class="input" v-model="proxy" placeholder="scheme://host:port">
+        <span class="btn btn-submit" @click="saveProxy">确定</span>
+      </div>
+    </div>
+  </div>
 
-	<script src="js/vue.min.js"></script>
-	<script>
-		const ipc = require('electron').ipcRenderer;
-		const remote = require('electron').remote;
-		const isAccelerator = require('electron-is-accelerator');
-		const config = require('./js/utils.js').config;
+  <script src="js/vue.min.js"></script>
+  <script>
+    const ipc = require('electron').ipcRenderer;
+    const remote = require('electron').remote;
+    const isAccelerator = require('electron-is-accelerator');
+    const config = require('./js/utils.js').config;
 
-		var lastOpacity = 1;
+    var lastOpacity = 1;
 
-		const v = new Vue({
-			el: '#wrapper',
-			data: {
-				opacity: 1,
-				hideShortcut: '',
-				proxy: ''
-			},
-			watch: {
-				opacity(val) {
-					// 在不透明和透明间切换的瞬间，需要重新创建主窗口并切换模式
-					if( lastOpacity == 1 && val < 1 || lastOpacity < 1 && val == 1 ) {
-						ipc.send('recreate-main-window');
-					} else {
-						ipc.send('set-opacity');
-					}
-					lastOpacity = val;
-					config.set('opacity', val);
-				}
-			},
-			methods: {
-				closeWindow() {
-				  remote.getCurrentWindow().hide();
-				},
-				saveHideShortcut() {
-					var lastShortcut = config.get('hideShortcut'),
-							curShortcut = this.hideShortcut.replace(/\s/g, '');
-					// 手动检查快捷键格式：
-					// 似乎随便瞎写一个字符串丢进globalShortcut.register会报错，而且这个错误还catch不到，必定会中断程序执行
-					// 所以只能在这里人工检查了
-					if( isAccelerator(curShortcut) ) {
-						this.hideShortcut = curShortcut.replace(/+/g, ' + ');
-						config.set('hideShortcut', curShortcut);
-						ipc.send('update-hide-shortcut', lastShortcut);
-					} else {
-						this.hideShortcut = lastShortcut;
-						alert('你输入的快捷键不合法！\n合法的快捷键组合应当类似于「ctrl+shift+e」。\n合法的修饰键包括Ctrl、Alt、Shift、Cmd（仅Mac）、Option（仅Mac，等同于Alt）。')
-					}
-				},
-				saveProxy() {
-					config.set('proxy', this.proxy);
-					ipc.send('set-proxy');
-				}
-			},
-			mounted() {
-				this.opacity = lastOpacity = config.get('opacity');
-				this.hideShortcut = config.get('hideShortcut');
-				this.proxy = config.get('proxy');
-			}
-		});
+    const v = new Vue({
+      el: '#wrapper',
+      data: {
+        opacity: 1,
+        hideShortcut: '',
+        proxy: ''
+      },
+      watch: {
+        opacity(val) {
+          // 在不透明和透明间切换的瞬间，需要重新创建主窗口并切换模式
+          if( lastOpacity == 1 && val < 1 || lastOpacity < 1 && val == 1 ) {
+            ipc.send('recreate-main-window');
+          } else {
+            ipc.send('set-opacity');
+          }
+          lastOpacity = val;
+          config.set('opacity', val);
+        }
+      },
+      methods: {
+        closeWindow() {
+          remote.getCurrentWindow().hide();
+        },
+        saveHideShortcut() {
+          var lastShortcut = config.get('hideShortcut'),
+              curShortcut = this.hideShortcut.replace(/\s/g, '');
+          // 手动检查快捷键格式：
+          // 似乎随便瞎写一个字符串丢进globalShortcut.register会报错，而且这个错误还catch不到，必定会中断程序执行
+          // 所以只能在这里人工检查了
+          if( isAccelerator(curShortcut) ) {
+            this.hideShortcut = curShortcut.replace(/+/g, ' + ');
+            config.set('hideShortcut', curShortcut);
+            ipc.send('update-hide-shortcut', lastShortcut);
+          } else {
+            this.hideShortcut = lastShortcut;
+            alert('你输入的快捷键不合法！\n合法的快捷键组合应当类似于「ctrl+shift+e」。\n合法的修饰键包括Ctrl、Alt、Shift、Cmd（仅Mac）、Option（仅Mac，等同于Alt）。')
+          }
+        },
+        saveProxy() {
+          config.set('proxy', this.proxy);
+          ipc.send('set-proxy');
+        }
+      },
+      mounted() {
+        this.opacity = lastOpacity = config.get('opacity');
+        this.hideShortcut = config.get('hideShortcut');
+        this.proxy = config.get('proxy');
+      }
+    });
 
-		window.onerror = function(err) {
-		    utils.error(`config窗口报错 : ${err}`);
-		}
-	</script>
+    window.onerror = function(err) {
+        utils.error(`config窗口报错 : ${err}`);
+    }
+  </script>
 </body>
 </html>
