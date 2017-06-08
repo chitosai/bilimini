@@ -10,7 +10,10 @@ const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 
 // handle uncaught exception
 process.on('uncaughtException', (err) => {
-  utils.error('意外报错', err);
+  console.error('主线程意外报错', err);
+  utils.error(`主线程意外报错\n${err}`);
+  dialog.showErrorBox('肥肠抱歉', 
+    '好像似乎也许可能出现了意料之外的错误，我建议您现在关闭程序并到bilimini的根目录下找到一个名为bilimini.log的文件，并把这个文件通过电子邮件发送给我：i@thec.me。\n这份文件会帮助我了解您的程序在进行什么操作时出现了问题，因此它会包含您最近一次运行bilimini的浏览记录，如果您介意也可以选择不发送。_(:з」∠)_');
 });
 
 // Keep a global reference of the window object, if you don't, the window will
