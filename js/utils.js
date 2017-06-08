@@ -54,9 +54,18 @@ var ajax = {
 //    message: '' // 日志内容,
 //    override: boolean, // 为true时清空之前的log，重新开始写入
 // }
+function getAppPath() {
+    const slash = require('path').sep;
+    var logFilePath = __dirname.split(slash);
+    logFilePath.length = logFilePath.lastIndexOf('bilimini') + 1;
+    logFilePath.push('');
+    return logFilePath.join(slash);
+}
+const appPath = getAppPath();
+
 var log = {
     write(obj) {
-        var logFileName = __dirname.replace(/js$/, '') + '/bilimini.log',
+        var logFileName = appPath + 'bilimini.log',
             now = new Date();
             _msg = '',
             LF = '\r\n' + ' '.repeat(33);
