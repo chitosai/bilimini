@@ -1,5 +1,6 @@
 const Store = require('electron-store');
 const store = new Store();
+const fs = require('graceful-fs');
 
 // 设置，比永久储存库多一个默认值，诶嘿 (<ゝω·)☆
 var config = {
@@ -42,7 +43,49 @@ var ajax = {
     }
 }
 
+// log
+// obj {
+//    message: '' // 日志内容,
+//    override: boolean, // 为true时清空之前的log，重新开始写入
+// }
+var log = {
+    write(obj) {
+        var logFileName = __dirname.replace(/js$/, '') + '/bilimini.log',
+            now = new Date();
+            _msg = '';
+        if( obj.type ) {
+            _msg += '--\r\n';
+        }
+        _msg += `${now.toLocaleDateString()} ${now.toTimeString()} ${obj.message}`;
+        if( obj.data ) {
+            _msg += ` ${JSON.stringify(obj.data)}`;
+        }
+        _msg += '\r\n';
+        if( obj.type ) {
+            _msg += '--\r\n';
+        }
+        if( obj.override ) {
+            fs.writeFile(logFileName, _msg);
+        } else {
+            fs.appendFile(logFileName, _msg);
+        }
+    }
+}
+    
+
 module.exports = {
     config,
-    ajax
+    ajax,
+    log(message, data, override) {
+        log.write({
+            message,
+            data,
+            override
+        });
+    },
+    error(message, data, override) {
+        log.write({
+            message, data, override, type: 'ERROR'
+        });
+    }
 }
