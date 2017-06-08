@@ -85,6 +85,10 @@
 				this.proxy = config.get('proxy');
 			}
 		});
-		</script>
+
+		window.onerror = function(err) {
+		    utils.error(`config窗口报错 : ${err}`);
+		}
+	</script>
 </body>
 </html>

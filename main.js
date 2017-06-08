@@ -8,12 +8,20 @@ const utils = require('./js/utils.js');
 
 const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 
+// handle uncaught exception
+process.on('uncaughtException', (err) => {
+  utils.error('意外报错', err);
+});
+
 // Keep a global reference of the window object, if you don't, the window will
-// be closed automatically when the JavaScript object is garbage collected.
+// be closed automatically hen the JavaScript object is garbage collected.
 var mainWindow = null;
 function openMainWindow() {
+  utils.log('主窗口：开始创建');
   if( mainWindow ) {
+    utils.log('主窗口：检测到主窗口已存在，正在关闭她');
     mainWindow.close();
+    utils.log('主窗口：原主窗口已关闭');
   }
   // 根据透明度设置决定是否要创建transparent窗口
   // 不论在windows还是在mac下，正常窗口都会比transparent窗口多一个好看的阴影
@@ -28,7 +36,9 @@ function openMainWindow() {
   mainWindow.setAlwaysOnTop(true, 'torn-off-menu');
   mainWindow.on('closed', () => {
     mainWindow = null;
+    utils.log('主窗口：已关闭');
   });
+  utils.log('主窗口：已创建');
   // mainWindow.webContents.openDevTools();
 }
 
@@ -49,6 +59,7 @@ function initMainWindow() {
 // 初始化选分p窗口
 var selectPartWindow = null;
 function initSelectPartWindow() {
+  utils.log('选p窗口：开始创建');
   selectPartWindow = new electron.BrowserWindow({
     width: 200, height: 300, frame: false, show: false
   });
@@ -56,7 +67,9 @@ function initSelectPartWindow() {
   selectPartWindow.setAlwaysOnTop(true, 'modal-panel');
   selectPartWindow.on('closed', () => {
     selectPartWindow = null;
+    utils.log('选p窗口：已关闭');
   });
+  utils.log('选p窗口：已创建');
   // 切换、可开可关
   ipc.on('toggle-select-part-window', () => {
     if( selectPartWindow && selectPartWindow.isVisible() ) {
@@ -71,6 +84,7 @@ function initSelectPartWindow() {
 }
 
 function showSelectPartWindow() {
+  utils.log('选p窗口：打开');
   if( !mainWindow || !selectPartWindow ) {
     return;
   }
@@ -83,6 +97,7 @@ function showSelectPartWindow() {
 // 初始化设置窗口
 var configWindow = null;
 function initConfigWindow() {
+  utils.log('设置窗口：开始创建');
   configWindow = new electron.BrowserWindow({
     width: 200, height: 200, frame: false, show: false
   });
@@ -90,7 +105,9 @@ function initConfigWindow() {
   configWindow.setAlwaysOnTop(true, 'modal-panel');
   configWindow.on('closed', () => {
     configWindow = null;
+    utils.log('设置窗口：已关闭');
   });
+  utils.log('设置窗口：已创建');
   // 切换、可开可关
   ipc.on('toggle-config-window', () => {
     if( configWindow && configWindow.isVisible() ) {
@@ -105,6 +122,7 @@ function initConfigWindow() {
 }
 
 function showConfigWindow() {
+  utils.log('设置窗口：打开');
   if( !mainWindow || !configWindow ) {
     return;
   }
@@ -163,6 +181,7 @@ function setProxy(isUpdate) {
   if( proxy == '' && !isUpdate ) {
     return false;
   }
+  utils.log(`代理：开始设置代理 ${proxy}, 是否更新：${isUpdate}`);
   if( mainWindow ) {
     mainWindow.webContents.session.setProxy({
       proxyRules: proxy
@@ -172,11 +191,13 @@ function setProxy(isUpdate) {
           message: '设置代理成功'
         });
       }
+      utils.log('代理：设置成功');
     });
   }
 }
 
 function init() {
+  utils.log(`主线程：初始化 on ${process.platform}`, null, true);
   initGlobalShortcut();
   initMenu();
   initMainWindow();
@@ -185,6 +206,7 @@ function init() {
   initActionOnMessage();
   setProxy();
   initExchangeMessageForRenderers();
+  utils.log('主线程：初始化流程结束');
 }
 
 // This method will be called when Electron has finished
@@ -203,13 +225,16 @@ app.on('activate', () => {
 });
 
 app.on('window-all-closed', () => {
+  utils.log('主线程：所有窗口关闭');
   if( platform != 'darwin' ) {
+    utils.log('主线程：非OSX平台，程序即将退出');
     app.quit();
   }
 });
 
 // 菜单
 function initMenu() {
+  utils.log('菜单：初始化');
   // 本来我们是不需要菜单的，但是因为mac上app必须有菜单，所以只在mac上做一下
   var template = [{
       label: app.getName(),
@@ -264,10 +289,12 @@ function initMenu() {
   ];
   var menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
+  utils.log('菜单：初始化结束');
 }
 
 // 老板键
 function bindGlobalShortcut(isUpdate) {
+  utils.log(`老板键：开始注册，isUpdate: ${isUpdate}`);
   var shortcut = utils.config.get('hideShortcut');
   let bindRes = globalShortcut.register(shortcut, () => {
     if( mainWindow ) {
@@ -283,7 +310,9 @@ function bindGlobalShortcut(isUpdate) {
     }
   });
   if( !bindRes ) {
+    utils.log('老板键：注册失败');
     dialog.showErrorBox(`修改老板键失败，「${shortcut}」可能不能用作全局快捷键或已被其他程序占用`, '');
+    return false;
   } else if( isUpdate ) {
     // 通过设置页面修改快捷键成功时弹个窗提示修改成功
     dialog.showMessageBox({
@@ -291,6 +320,7 @@ function bindGlobalShortcut(isUpdate) {
       message: `修改成功，老板键已替换为「${shortcut}」`
     });
   }
+  utils.log('老板键：注册成功');
 }
 
 function initGlobalShortcut() {

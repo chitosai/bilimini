@@ -12,9 +12,15 @@ var config = {
         if( typeof key == 'object' ) {
             for( let k in key ) {
                 store.set(k, key[k]);
+                log.write({
+                    message: `更新用户设置：SET ${k} = ${key[k]}`
+                });
             }
         } else {
             store.set(key, value);
+            log.write({
+                message: `更新用户设置：SET ${key} = ${value}`
+            });
         }
     },
     delete(key) {
@@ -71,7 +77,6 @@ var log = {
         }
     }
 }
-    
 
 module.exports = {
     config,

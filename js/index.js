@@ -31,6 +31,7 @@ var _history = {
             // 抓分p
             getPartOfVideo(m[1]);
             v.disableDanmakuButton = false;
+            utils.log(`路由：视频详情页；原地址：${target}，转跳地址：${videoUrlPrefix+m[1]}`);
         } else if(m = bangumiUrlPattern.exec(target)) {
             // case 2 番剧，转跳对应pc页
             let url = bangumiUrl(m[1]);
@@ -46,6 +47,7 @@ var _history = {
             // 抓分p
             getPartOfBangumi(m[1]);
             v.disableDanmakuButton = false;
+            utils.log(`路由：番剧详情页；原地址：${target}，转跳地址：${url}`);
         } else if (/bangumi\.bilibili\.com\/anime\/\d+\/play#\d+/.test(target)) {
             // 另一种番剧地址，这个可以直接用pc端打开播放，不用做任何处理
             wv.loadURL(target, {
@@ -53,6 +55,7 @@ var _history = {
             });
             _history.replace(target);
             v.disableDanmakuButton = false;
+            utils.log(`路由：番剧详情页 类型2；原地址：${target}，转跳地址：${target}`);
         } else {
             // 其他链接不做操作直接打开
             wv.loadURL(target, {
@@ -68,6 +71,7 @@ var _history = {
                 ipc.send('update-part', null);
             }
             v.disableDanmakuButton = true;
+            utils.log(`路由：普通页面；原地址：${target}，转跳地址：${target}`);
         }
     },
     goPart: function(pid) {
@@ -78,6 +82,7 @@ var _history = {
                 userAgent: userAgent.desktop
             });
             _history.replace(url);
+            utils.log(`路由：选择分p，选中第${pid}，转跳地址：${url}`);
         }
     },
     add: function(url) {
@@ -93,12 +98,14 @@ var _history = {
         if( !_history.canGoBack() ) {
             return false;
         }
+        utils.log('路由：后退');
         _history.go(_history.stack[--_history.pos], true);
     },
     goForward: function() {
         if( !_history.canGoForward() ) {
             return false;
         }
+        utils.log('路由：前进');
         _history.go(_history.stack[++_history.pos], true);
     },
     canGoBack: function() {
@@ -112,6 +119,7 @@ var _history = {
 function getPartOfVideo(av) {
     utils.ajax.get(`http://m.bilibili.com/video/av${av}.html`, (res) => {
         var m = /"pageTitle":(\{.*?\})/g.exec(res);
+        utils.log(`获取 av${av} 的分P数据`, m);
         if( m ) {
             try {
                 var data = JSON.parse(m[1]);
@@ -144,14 +152,14 @@ function getPartOfBangumi(aid) {
                         url: p.webplay_url
                     }
                 }).reverse();
+            utils.log(`获取番剧 ${aid} 分P数据`, partList);
             ipc.send('update-bangumi-part', partList);
             if( partList[2] ) {
                 ipc.send('show-select-part-window');
                 v.disablePartButton = false;
             }
         } catch(e) {
-            console.error('解析番剧分集失败', e);
-            console.error(`JSON: ${json}`);
+            utils.error(`分析 ${aid} 的分P数据失败 ${e}`, json);
             ipc.send('update-part', null);
             v.disablePartButton = true;
         }
@@ -192,6 +200,7 @@ const v = new Vue({
         },
         naviGoto: function() {
             var target = this.naviGotoTarget;
+            utils.log(`路由：手动输入地址 ${target}`);
             // 包含bilibili.com的字符串和纯数字是合法的跳转目标
             if (target.startsWith('http') && target.indexOf('bilibili.com') > -1) {
                 _history.go(target);
@@ -206,6 +215,7 @@ const v = new Vue({
         },
         // 关于
         showAbout: function() {
+            utils.log('主窗口：点击关于');
             this.showAboutOverlay = !this.showAboutOverlay;
             wrapper.classList.toggle('showAbout');
         },
@@ -218,14 +228,17 @@ const v = new Vue({
             if( this.disablePartButton ) {
               return false;
             }
+            utils.log('主窗口：点击P');
             ipc.send('toggle-select-part-window');
         },
         // 设置窗口
         toggleConfig: function() {
+            utils.log('主窗口：点击设置');
             ipc.send('toggle-config-window');
         },
         // 关鸡 - 在osx下仅关闭当前窗口，在windows下直接退出整个程序
         turnOff: function() {
+            utils.log('主窗口：点击退出');
             ipc.send('close-main-window');
         },
         // 显示、隐藏弹幕快捷键
@@ -234,6 +247,7 @@ const v = new Vue({
             if( this.disableDanmakuButton ) {
               return false;
             }
+            utils.log('主窗口：点击弹幕开关');
             wv.executeJavaScript(`document.getElementsByName('ctlbar_danmuku_on').length`, function(result) {
                 let isDanmakuOn = result == 1;
                 if (isDanmakuOn) {
@@ -418,6 +432,16 @@ function openExternalLink(url) {
     shell.openExternal(url);
 }
 
+// 把webview里的报错信息log下来
+function logWebviewError() {
+    wv.addEventListener('console-message', (err) => {
+        // 我看console.error的level是2，那>1的就都log下来吧
+        if( err.level > 1 ) {
+            utils.error(`Webview报错 : [Line ${err.line}] ${err.message}`)
+        }
+    });
+}
+
 window.addEventListener('DOMContentLoaded', function() {
     wrapper = document.getElementById('wrapper');
     wv = document.getElementById('wv');
@@ -429,4 +453,9 @@ window.addEventListener('DOMContentLoaded', function() {
     openWebviewConsoleOnMenuClick();
     redirectOnSelectPart();
     initSetBodyOpacity();
+    logWebviewError();
 });
+
+window.onerror = function(err) {
+    utils.error(`index窗口报错 : ${err}`)
+}

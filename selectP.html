@@ -53,6 +53,10 @@
 			v.partList = null;
 			v.bangumiPartList = partList;
 		});
+
+		window.onerror = function(err) {
+		    utils.error(`selectP窗口报错 : ${err}`);
+		}
 	</script>
 </body>
 </html>
