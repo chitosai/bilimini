@@ -8,7 +8,7 @@ const userAgent = {
   desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
   mobile: 'bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233'
 };
-const videoUrlPrefix = 'http://bilibili.com/video/av';
+const videoUrlPrefix = 'http://www.bilibili.com/video/av';
 const videoUrlPattern = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/;
 const bangumiUrl = (aid, pid) => `http://bangumi.bilibili.com/anime/${aid}/play#${pid}`;
 const bangumiUrlPattern = /bangumi\/i\/(\d+)/;
@@ -16,7 +16,7 @@ let wv, wrapper;
 
 // 保存用户浏览记录
 var _history = {
-  stack: ['http://m.bilibili.com/index.html'],
+  stack: ['https://m.bilibili.com/index.html'],
   pos: 0,
   go: function(target, noNewHistory) {
     // 显示loading mask
@@ -369,6 +369,7 @@ function initSetBodyOpacity() {
 function initActionOnWebviewNavigate() {
   // 判断是否能前进/后退
   wv.addEventListener('did-finish-load', function() {
+    utils.log(`触发did-finish-load事件，当前url是${wv.getURL()}`);
     v.naviCanGoBack = _history.canGoBack();
     v.naviCanGoForward = _history.canGoForward();
     // 改变窗口尺寸
@@ -378,11 +379,13 @@ function initActionOnWebviewNavigate() {
   });
   // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
   wv.addEventListener('will-navigate', function(e) {
+    utils.log(`触发will-navigate事件，目标${e.url}`);
     _history.go(e.url);
   });
   // webview中点击target="_blank"的链接时在当前webview打开
-  wv.addEventListener('new-window', function(ev) {
-    _history.go(ev.url);
+  wv.addEventListener('new-window', function(e) {
+    utils.log(`触发new-window事件，目标${e.url}`);
+    _history.go(e.url);
   });
 }
 
