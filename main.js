@@ -18,7 +18,7 @@ process.on('uncaughtException', (err) => {
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically hen the JavaScript object is garbage collected.
-var mainWindow = null;
+var mainWindow = null, mainWindowIsClosed = null;
 function openMainWindow() {
   utils.log('主窗口：开始创建');
   if( mainWindow ) {
@@ -40,7 +40,13 @@ function openMainWindow() {
   mainWindow.on('closed', () => {
     mainWindow = null;
     utils.log('主窗口：已关闭');
+    // 主窗口关闭后如果3s都没有重新创建，就认为程序是被不正常退出了（例如windows下直接alt+f4），关闭整个程序
+    mainWindowIsClosed = setTimeout(() => {
+      utils.log('主窗口：关闭超过 3s 未重新创建，程序自动退出');
+      app.quit();
+    }, 3000);
   });
+  clearTimeout(mainWindowIsClosed);
   utils.log('主窗口：已创建');
   // mainWindow.webContents.openDevTools();
 }
