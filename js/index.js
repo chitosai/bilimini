@@ -170,6 +170,7 @@ function getPartOfBangumi(aid) {
 const v = new Vue({
   el: '#wrapper',
   data: {
+    version: remote.app.getVersion(),
     naviGotoTarget: '',
     naviGotoInputShow: false,
     naviCanGoBack: false,
