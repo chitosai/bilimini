@@ -274,7 +274,7 @@ function detectPlatform() {
 
 // 检查更新
 function checkUpdateOnInit() {
-  utils.ajax.get('https://raw.githubusercontent.com/chitosai/bilimini/master/package.json?_t=' + new Date().getTime(), (res) => {
+  utils.ajax.get('http://rakuen.thec.me/bilimini/beacon?_t=' + new Date().getTime(), (res) => {
     var data = JSON.parse(res),
       order = 1,
       buttons = ['取消', '去下载'];
