@@ -436,8 +436,12 @@ function initMouseStateDirtyCheck() {
     let mousePos = getMousePosition(),
       windowPos = mw.getPosition(),
       windowSize = mw.getSize();
+    function getTriggerAreaHeight() {
+      let h = 0.1*windowSize[1];
+      return h > 36 ? h : 36;
+    }
     if((mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
-      (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + 0.1*windowSize[1])) {
+      (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + getTriggerAreaHeight())) {
       wrapper.classList.add('showTopBar');
     } else {
       wrapper.classList.remove('showTopBar');
