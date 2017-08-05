@@ -96,6 +96,12 @@
       var id = f.split('/');
       utils.error(`${id[id.length-1]} : Line ${line}\n> ${err}`);
     }
+
+    if( !process.platform.indexOf('win') ) {
+      document.querySelectorAll('input[type=text]').forEach((input) => {
+        input.style.width = '70%';
+      });
+    }
   </script>
 </body>
 </html>
