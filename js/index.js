@@ -57,15 +57,19 @@ var _history = {
       v.disableDanmakuButton = false;
       utils.log(`路由：类型③ 番剧详情页2\n原地址：${target}\n转跳地址：${target}`);
     } else {
-      // 其他链接不做操作直接打开
-      wv.loadURL(target, {
-        userAgent: userAgent.mobile
-      });
       // 我们假设html5player的页面都是通过inject.js转跳进入的，所以删除上一条历史记录来保证goBack操作的正确
       // 如果用户自己输入一个html5player的播放地址，那就管不了了
       if(target.indexOf('html5player.html') > -1) {
+        // html5player.html有防盗链验证，ua似乎必须是桌面浏览器
+        wv.loadURL(target, {
+          userAgent: userAgent.desktop
+        });
         _history.replace(target);
       } else {
+        // 其他链接不做操作直接打开
+        wv.loadURL(target, {
+          userAgent: userAgent.mobile
+        });
         !noNewHistory && _history.add(target);
         // 清除分p
         ipc.send('update-part', null);
