@@ -429,7 +429,7 @@ function redirectOnSelectPart() {
 
 // windows下frameless window没法正确检测到mouseout事件，只能根据光标位置做个dirtyCheck了
 function initMouseStateDirtyCheck() {
-  // 统一改为由js判断，一旦鼠标进入主窗口的上200px区域就显示topbar
+  // 统一改为由js判断，一旦鼠标进入主窗口的上较近才显示topbar
   var getMousePosition = remote.screen.getCursorScreenPoint,
     mw = remote.getCurrentWindow();
   setInterval(function() {
@@ -437,7 +437,7 @@ function initMouseStateDirtyCheck() {
       windowPos = mw.getPosition(),
       windowSize = mw.getSize();
     if((mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
-      (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + 200)) {
+      (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + 0.1*windowSize[1])) {
       wrapper.classList.add('showTopBar');
     } else {
       wrapper.classList.remove('showTopBar');
