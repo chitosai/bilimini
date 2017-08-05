@@ -392,6 +392,15 @@ function initActionOnWebviewNavigate() {
     utils.log(`触发new-window事件，目标${e.url}`);
     _history.go(e.url);
   });
+  // 服务端要求302转跳
+  wv.addEventListener('did-get-redirect-request', function(e) {
+    // 栗子：请求 http://www.bilibili.com/video/av12718065/ 时，会被302到 http://bangumi.bilibili.com/anime/6301/play#113085
+    // 此时并不会触发新的will-navigate，但是我们又需要触发anime/6301/play页面的getPartOfBangumi事件，所以需要在这里catch一下
+    let m;
+    if( /av\d+/.test(e.oldURL) && (m = /\/anime\/(\d+)\/play#/.exec(e.newURL)) ) {
+      getPartOfBangumi(m[1]);
+    }
+  });
 }
 
 // 无法正常打开页面时显示错误页面
