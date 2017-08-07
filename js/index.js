@@ -9,9 +9,7 @@ const userAgent = {
   mobile: 'bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233'
 };
 const videoUrlPrefix = 'http://www.bilibili.com/video/av';
-const videoUrlPattern = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/;
 const bangumiUrl = (aid, pid) => `http://bangumi.bilibili.com/anime/${aid}/play#${pid}`;
-const bangumiUrlPattern = /bangumi\/i\/(\d+)/;
 let wv, wrapper;
 
 // 保存用户浏览记录
@@ -22,7 +20,7 @@ var _history = {
     // 显示loading mask
     wrapper.classList.add('loading');
     let m;
-    if(m = videoUrlPattern.exec(target)) {
+    if(m = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/.exec(target)) {
       // case 1 普通视频播放页，转跳对应pc页
       wv.loadURL(videoUrlPrefix + m[1], {
         userAgent: userAgent.desktop
@@ -32,7 +30,7 @@ var _history = {
       getPartOfVideo(m[1]);
       v.disableDanmakuButton = false;
       utils.log(`路由：类型① 视频详情页\n原地址：${target}\n转跳地址：${videoUrlPrefix+m[1]}`);
-    } else if(m = bangumiUrlPattern.exec(target)) {
+    } else if(m = /bangumi\/i\/(\d+)/.exec(target)) {
       // case 2 番剧，转跳对应pc页
       let url = bangumiUrl(m[1]);
       wv.loadURL(url, {
