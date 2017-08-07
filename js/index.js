@@ -438,19 +438,26 @@ function redirectOnSelectPart() {
 function initMouseStateDirtyCheck() {
   // 统一改为由js判断，一旦鼠标进入主窗口的上较近才显示topbar
   var getMousePosition = remote.screen.getCursorScreenPoint,
-    mw = remote.getCurrentWindow();
+    mw = remote.getCurrentWindow(), 
+    lastStatus = 'OUT';
   setInterval(function() {
     let mousePos = getMousePosition(),
       windowPos = mw.getPosition(),
       windowSize = mw.getSize();
     function getTriggerAreaHeight() {
-      let h = 0.1*windowSize[1];
-      return h > 36 ? h : 36;
+      let h = 0.1 * windowSize[1],
+          // 如果topbar已经下来了，就主动把触发区域变高一点，防止鼠标稍微向下滑动就触发收起
+          minHeight = lastStatus == 'IN' ? 120 : 36; 
+      return h > minHeight ? h : minHeight;
     }
-    if((mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
-      (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + getTriggerAreaHeight())) {
-      wrapper.classList.add('showTopBar');
-    } else {
+    if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
+        (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + getTriggerAreaHeight()) ) {
+      if( lastStatus == 'OUT' ) {
+        wrapper.classList.add('showTopBar');
+        lastStatus = 'IN';
+      }
+    } else if( lastStatus == 'IN' ) {
+      lastStatus = 'OUT';
       wrapper.classList.remove('showTopBar');
     }
   }, 200);
