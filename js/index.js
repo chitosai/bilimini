@@ -46,14 +46,23 @@ var _history = {
       getPartOfBangumi(m[1]);
       v.disableDanmakuButton = false;
       utils.log(`路由：类型② 番剧详情页\n原地址：${target}\n转跳地址：${url}`);
-    } else if(/bangumi\.bilibili\.com\/anime\/\d+\/play#\d+/.test(target)) {
-      // 另一种番剧地址，这个可以直接用pc端打开播放，不用做任何处理
-      wv.loadURL(target, {
+    } else if(m = /bangumi\.bilibili\.com\/anime\/(\d+)/.exec(target)) {
+      // 这类地址需要二次确认：
+      // Type 1、地址类似 http://bangumi.bilibili.com/anime/6338/play#113342 ，包含后面play#的部分，这种地址
+      //         是可以直接丢进桌面webview打开的
+      // Type 2、地址只包含 http://bangumi.bilibili.com/anime/6338，不包含后面的play，这种地址直接扔进桌面端打开
+      //         是无法直接播放的，我们需要在结尾处手动加一个/play，来转换成第一种形式
+      if( target.indexOf('play') == -1 ) {
+        url = bangumiUrl(m[1]);
+      } else {
+        url = target;
+      }
+      wv.loadURL(url, {
         userAgent: userAgent.desktop
       });
-      _history.replace(target);
+      _history.replace(url);
       v.disableDanmakuButton = false;
-      utils.log(`路由：类型③ 番剧详情页2\n原地址：${target}\n转跳地址：${target}`);
+      utils.log(`路由：类型③ 番剧详情页2\n原地址：${target}\n转跳地址：${url}`);
     } else {
       // 我们假设html5player的页面都是通过inject.js转跳进入的，所以删除上一条历史记录来保证goBack操作的正确
       // 如果用户自己输入一个html5player的播放地址，那就管不了了
