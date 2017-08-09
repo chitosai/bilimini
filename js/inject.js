@@ -1,5 +1,15 @@
 window.addEventListener('DOMContentLoaded', function() {
 
+  // 首页、分区首页支持多列
+  if( /bilibili\.com\/index\.html$/.test(window.location.href) || /\/channel\/\d+\.html$/.test(window.location.href) ) {
+    let css = document.createElement('style');
+    css.type = 'text/css';
+    css.innerHTML = "@media (min-width: 840px) { .index__item__src-commonComponent-Item-{ width: 33%; } }" + 
+                    "@media (min-width: 1040px) { .index__item__src-commonComponent-Item-{ width: 25%; } }" +
+                    "@media (min-width: 1240px) { .index__item__src-commonComponent-Item-{ width: 20%; } }";
+    document.head.appendChild(css);
+  }
+
   // 普通视频页：自动最大化播放器
   if( window.location.href.indexOf('video/av') > -1 || window.location.href.indexOf('html5player.html') > -1 ) {
     let playerInitCheck = setInterval(() => {
