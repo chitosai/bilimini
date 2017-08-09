@@ -444,13 +444,18 @@ function initMouseStateDirtyCheck() {
     let mousePos = getMousePosition(),
       windowPos = mw.getPosition(),
       windowSize = mw.getSize();
+    // 在窗口最右边留出滚动条的宽度，用户操作滚动条时不会触发showTopbar；
+    // 但是如果showTopbar已经触发，即用户已经在操作工具栏了，那么就暂时屏蔽这个规则
+    function getTriggerAreaWidth() {
+      return lastStatus == 'IN' ? 0 : 16;
+    }
+    // 如果topbar已经下来了，就主动把触发区域变高一点，防止鼠标稍微向下滑动就触发收起
     function getTriggerAreaHeight() {
       let h = 0.1 * windowSize[1],
-          // 如果topbar已经下来了，就主动把触发区域变高一点，防止鼠标稍微向下滑动就触发收起
           minHeight = lastStatus == 'IN' ? 120 : 36; 
       return h > minHeight ? h : minHeight;
     }
-    if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0] - 20) &&
+    if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0] - getTriggerAreaWidth()) &&
         (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + getTriggerAreaHeight()) ) {
       if( lastStatus == 'OUT' ) {
         wrapper.classList.add('showTopBar');
