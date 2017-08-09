@@ -450,7 +450,7 @@ function initMouseStateDirtyCheck() {
           minHeight = lastStatus == 'IN' ? 120 : 36; 
       return h > minHeight ? h : minHeight;
     }
-    if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0]) &&
+    if( (mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0] - 20) &&
         (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + getTriggerAreaHeight()) ) {
       if( lastStatus == 'OUT' ) {
         wrapper.classList.add('showTopBar');
