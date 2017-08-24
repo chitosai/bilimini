@@ -434,6 +434,18 @@ function redirectOnSelectPart() {
   });
 }
 
+// 按下ESC键
+function initActionOnEsc() {
+  ipc.on('press-esc', (ev) => {
+    let url = wv.getURL();
+    // 如果在播放页按下esc就触发后退
+    if( /video\/av\d+/.test(url) || url.indexOf('html5player.html') > -1 ) {
+      utils.log('在播放器页面按下ESC，后退至上一页')
+      _history.goBack();
+    }
+  });
+}
+
 // windows下frameless window没法正确检测到mouseout事件，只能根据光标位置做个dirtyCheck了
 function initMouseStateDirtyCheck() {
   // 统一改为由js判断，一旦鼠标进入主窗口的上较近才显示topbar
@@ -489,6 +501,7 @@ window.addEventListener('DOMContentLoaded', function() {
   detectPlatform();
   checkUpdateOnInit();
   initActionOnWebviewNavigate();
+  initActionOnEsc();
   saveWindowSizeOnResize();
   initMouseStateDirtyCheck();
   openWebviewConsoleOnMenuClick();

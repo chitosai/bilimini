@@ -264,7 +264,12 @@ function initMenu() {
         { role: 'copy' },
         { role: 'paste' },
         { role: 'delete' },
-        { role: 'selectall' }
+        { role: 'selectall' },
+        {
+          label: 'Backward',
+          accelerator: 'Esc',
+          click() { mainWindow.webContents.send('press-esc'); }
+        }
       ]
     }, {
       label: 'Debug',
