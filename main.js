@@ -257,10 +257,8 @@ function initMenu() {
         { role: 'quit' }
       ]
     }, {
-      label: 'Edit',
+      label: 'Shortcuts',
       submenu: [
-        { role: 'undo' },
-        { role: 'cut' },
         { role: 'copy' },
         { role: 'paste' },
         { role: 'delete' },
@@ -269,6 +267,14 @@ function initMenu() {
           label: 'Backward',
           accelerator: 'Esc',
           click() { mainWindow.webContents.send('press-esc'); }
+        }, { 
+          label: 'Volume+',
+          accelerator: 'Up',
+          click() { mainWindow.webContents.send('change-volume', 'up'); }
+        }, {
+          label: 'Volume-',
+          accelerator: 'Down',
+          click() { mainWindow.webContents.send('change-volume', 'down'); }
         }
       ]
     }, {

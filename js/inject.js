@@ -1,3 +1,5 @@
+const ipc = require('electron').ipcRenderer;
+
 window.addEventListener('DOMContentLoaded', function() {
 
   // 首页、分区首页支持多列
@@ -18,6 +20,18 @@ window.addEventListener('DOMContentLoaded', function() {
         wideScreenButton.click();
         // 隐藏全屏播放器（在某些情况下会出现）的滚动条
         document.body.style.overflow = 'hidden';
+        // 从app层面把 上、下 按键传进来，方便播放器控制音量
+        ipc.on('change-volume', (ev, arg) => {
+          let event = new KeyboardEvent('keydown', {
+            bubbles: true
+          });
+          // 傻逼玩意儿which和keycode因为deprecated变成只读了，替代的属性又还没通用，搞条毛？
+          Object.defineProperties(event, {
+            keyCode: { writeable: true, value: arg == 'up' ? 38 : 40 }
+          });
+          let volume = document.querySelector('.bilibili-player-iconfont-volume-max');
+          volume.dispatchEvent(event);
+        });
         clearInterval(playerInitCheck);
       } else if( ++checkCount > 100 ) {
         clearInterval(playerInitCheck);

@@ -446,6 +446,13 @@ function initActionOnEsc() {
   });
 }
 
+// 用户按↑、↓键时，把事件传递到webview里去实现修改音量功能
+function initWebviewVolumeContrlShortcuts() {
+  ipc.on('change-volume', (ev, arg) => {
+    wv.send('change-volume', arg);
+  });
+}
+
 // windows下frameless window没法正确检测到mouseout事件，只能根据光标位置做个dirtyCheck了
 function initMouseStateDirtyCheck() {
   // 统一改为由js判断，一旦鼠标进入主窗口的上较近才显示topbar
@@ -502,6 +509,7 @@ window.addEventListener('DOMContentLoaded', function() {
   checkUpdateOnInit();
   initActionOnWebviewNavigate();
   initActionOnEsc();
+  initWebviewVolumeContrlShortcuts();
   saveWindowSizeOnResize();
   initMouseStateDirtyCheck();
   openWebviewConsoleOnMenuClick();
