@@ -440,7 +440,7 @@ function initActionOnEsc() {
     let url = wv.getURL();
     // 如果在播放页按下esc就触发后退
     if( /video\/av\d+/.test(url) || url.indexOf('html5player.html') > -1 ) {
-      utils.log('在播放器页面按下ESC，后退至上一页')
+      utils.log('在播放器页面按下ESC，后退至上一页');
       _history.goBack();
     }
   });

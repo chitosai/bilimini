@@ -41,10 +41,12 @@ function openMainWindow() {
     mainWindow = null;
     utils.log('主窗口：已关闭');
     // 主窗口关闭后如果3s都没有重新创建，就认为程序是被不正常退出了（例如windows下直接alt+f4），关闭整个程序
-    mainWindowIsClosed = setTimeout(() => {
-      utils.log('主窗口：关闭超过 3s 未重新创建，程序自动退出');
-      app.quit();
-    }, 3000);
+    if( platform != 'darwin' ) {
+      mainWindowIsClosed = setTimeout(() => {
+        utils.log('主窗口：关闭超过 3s 未重新创建，程序自动退出');
+        app.quit();
+      }, 3000);
+    }
   });
   clearTimeout(mainWindowIsClosed);
   utils.log('主窗口：已创建');
