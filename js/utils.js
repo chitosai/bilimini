@@ -63,21 +63,25 @@ function getAppPath() {
 }
 const appPath = getAppPath();
 
+Date.prototype.format = function() {
+    return `${this.toLocaleDateString()} ${this.toTimeString().split(' ')[0]} ` + 
+            ('000' + this.getMilliseconds()).slice(-3);
+}
 var log = {
     write(obj) {
         var logFileName = appPath + 'bilimini.log',
             now = new Date();
             _msg = '',
-            LF = '\r\n' + ' '.repeat(33);
+            LF = '\r\n' + ' '.repeat(23);
         // 让每个换行前都空出33个字符的距离，这样能让message对齐
         var message = obj.message.replace(/\n/g, LF);
         if( obj.data ) {
-            message += `${LF}${JSON.stringify(obj.data)}`;
+            message += `${LF} ${JSON.stringify(obj.data)}`;
         }
         if( obj.type ) {
-            _msg = `* ${now.toLocaleDateString()} ${now.toTimeString()} ${obj.type} > ${message}\r\n`;
+            _msg = `* ${now.format()} ${obj.type} > ${message}\r\n`;
         } else {
-            _msg = `${now.toLocaleDateString()} ${now.toTimeString()} ${message}\r\n`;
+            _msg = `${now.format()} ${message}\r\n`;
         }
         if( obj.override ) {
             fs.writeFile(logFileName, _msg);
