@@ -24,12 +24,12 @@
 			data: {
 				partList: null,
 				bangumiPartList: null,
-				currentPart: 1
+				currentPart: 0
 			},
 			methods: {
 				selectPart(index) {
 					this.currentPart = index;
-					ipc.send('select-part', index);
+					ipc.send('select-part', index + 1);
 				},
 				selectBangumiPart(index, url) {
 					this.currentPart = index;
@@ -43,13 +43,13 @@
 
 		// 更新分p列表
 		ipc.on('update-part', (ev, partList) => {
-			v.currentPart = 1;
+			v.currentPart = 0;
 			v.partList = partList;
 			v.bangumiPartList = null;
 		});
 		// 番剧分p
 		ipc.on('update-bangumi-part', (ev, partList) => {
-			v.currentPart = 1;
+			v.currentPart = 0;
 			v.partList = null;
 			v.bangumiPartList = partList;
 		});

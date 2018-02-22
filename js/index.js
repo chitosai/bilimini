@@ -129,14 +129,17 @@ var _history = {
 
 function getPartOfVideo(av) {
   utils.ajax.get(`http://m.bilibili.com/video/av${av}.html`, (res) => {
-    var m = /"pageTitle":(\{.*?\})/g.exec(res);
+    let re = /<option [^>]+>([^<]+)<\/option>/g,
+        _m = null, m = [];
+    while( _m = re.exec(res) ) {
+      m.push(_m[1]);
+    }
     utils.log(`获取 av${av} 的分P数据`, m);
-    if(m) {
+    if(m.length) {
       try {
-        var data = JSON.parse(m[1]);
-        ipc.send('update-part', data);
+        ipc.send('update-part', m);
         // 有超过1p时自动开启分p窗口
-        if(data[2]) {
+        if(m[2]) {
           ipc.send('show-select-part-window');
           v.disablePartButton = false;
         }
