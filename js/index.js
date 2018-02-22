@@ -26,8 +26,6 @@ var _history = {
         userAgent: userAgent.desktop
       });
       !noNewHistory && _history.add(videoUrlPrefix + m[1]);
-      // 抓分p
-      getPartOfVideo(m[1]);
       v.disableDanmakuButton = false;
       utils.log(`路由：类型① 视频详情页\n原地址：${target}\n转跳地址：${videoUrlPrefix+m[1]}`);
     } else {
@@ -123,9 +121,10 @@ function getPartOfVideo(av) {
   }, 'mobile');
 }
 
-function getPartOfBangumi(aid) {
-  utils.ajax.get(`http://bangumi.bilibili.com/jsonp/seasoninfo/${aid}.ver?callback=seasonListCallback`, (res) => {
-    var json = res.replace(/^seasonListCallback\(/, '').replace(/\);$/, '');
+function getPartOfBangumi(url) {
+  utils.ajax.get(url, (res) => {
+    let re = /li title="(.+?)" class="episode-item"/,
+        _m = null, m = [];
     try {
       var data = JSON.parse(json),
         partList = data.result.episodes.map((p) => {
@@ -353,13 +352,21 @@ function initSetBodyOpacity() {
 function initActionOnWebviewNavigate() {
   // 判断是否能前进/后退
   wv.addEventListener('did-finish-load', function() {
-    utils.log(`触发did-finish-load事件，当前url是: ${wv.getURL()}`);
+    let url = wv.getURL();
+    utils.log(`触发did-finish-load事件，当前url是: ${url}`);
     v.naviCanGoBack = _history.canGoBack();
     v.naviCanGoForward = _history.canGoForward();
     // 改变窗口尺寸
     resizeMainWindow();
     // 关闭loading遮罩
     wrapper.classList.remove('loading');
+    // 根据跳转完成后的真实url决定如何抓取分p
+    let m;
+    if( m = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/.exec(url) ) {
+      getPartOfVideo(m[1]);
+    } else if( url.indexOf('bangumi/play/') > -1 ) {
+      getPartOfBangumi(url);
+    }
   });
   // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
   wv.addEventListener('will-navigate', function(e) {
