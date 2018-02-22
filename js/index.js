@@ -30,39 +30,6 @@ var _history = {
       getPartOfVideo(m[1]);
       v.disableDanmakuButton = false;
       utils.log(`路由：类型① 视频详情页\n原地址：${target}\n转跳地址：${videoUrlPrefix+m[1]}`);
-    } else if(m = /bangumi\/i\/(\d+)/.exec(target)) {
-      // case 2 番剧，转跳对应pc页
-      let url = bangumiUrl(m[1]);
-      wv.loadURL(url, {
-        userAgent: userAgent.desktop
-      });
-      // 因为番剧页最终目标是/blackboard/html5player.html，这里获取到的url只是中间步骤，所以就不加到history里了
-      // modefied：因为存在从av号以普通视频的形式进入番剧播放页的情况，此时先以正常av号的形式add了一条历史记录，
-      // inject.js用location.href触发跳转后又增加了一条/html5player.html的记录，会造成goBack失效
-      // 所以放弃最初的方法，改为从anime/:bid入口进入时也临时增加一条历史记录，但在inject.js生效进行二次跳转
-      // 的时候用replace删除最后一条历史记录
-      _history.add(url);
-      // 抓分p
-      getPartOfBangumi(m[1]);
-      v.disableDanmakuButton = false;
-      utils.log(`路由：类型② 番剧详情页\n原地址：${target}\n转跳地址：${url}`);
-    } else if(m = /bangumi\.bilibili\.com\/anime\/(\d+)/.exec(target)) {
-      // 这类地址需要二次确认：
-      // Type 1、地址类似 http://bangumi.bilibili.com/anime/6338/play#113342 ，包含后面play#的部分，这种地址
-      //         是可以直接丢进桌面webview打开的
-      // Type 2、地址只包含 http://bangumi.bilibili.com/anime/6338，不包含后面的play，这种地址直接扔进桌面端打开
-      //         是无法直接播放的，我们需要在结尾处手动加一个/play，来转换成第一种形式
-      if( target.indexOf('play') == -1 ) {
-        url = bangumiUrl(m[1]);
-      } else {
-        url = target;
-      }
-      wv.loadURL(url, {
-        userAgent: userAgent.desktop
-      });
-      _history.replace(url);
-      v.disableDanmakuButton = false;
-      utils.log(`路由：类型③ 番剧详情页2\n原地址：${target}\n转跳地址：${url}`);
     } else {
       // 我们假设html5player的页面都是通过inject.js转跳进入的，所以删除上一条历史记录来保证goBack操作的正确
       // 如果用户自己输入一个html5player的播放地址，那就管不了了
