@@ -386,7 +386,7 @@ function initSetBodyOpacity() {
 function initActionOnWebviewNavigate() {
   // 判断是否能前进/后退
   wv.addEventListener('did-finish-load', function() {
-    utils.log(`触发did-finish-load事件，当前url是${wv.getURL()}`);
+    utils.log(`触发did-finish-load事件，当前url是: ${wv.getURL()}`);
     v.naviCanGoBack = _history.canGoBack();
     v.naviCanGoForward = _history.canGoForward();
     // 改变窗口尺寸
@@ -396,12 +396,12 @@ function initActionOnWebviewNavigate() {
   });
   // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
   wv.addEventListener('will-navigate', function(e) {
-    utils.log(`触发will-navigate事件，目标${e.url}`);
+    utils.log(`触发will-navigate事件，目标: ${e.url}`);
     _history.go(e.url);
   });
   // webview中点击target="_blank"的链接时在当前webview打开
   wv.addEventListener('new-window', function(e) {
-    utils.log(`触发new-window事件，目标${e.url}`);
+    utils.log(`触发new-window事件，目标: ${e.url}`);
     _history.go(e.url);
   });
   // 服务端要求302转跳
