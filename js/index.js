@@ -86,6 +86,8 @@ var _history = {
     }
   },
   goPart: function(pid) {
+    // 显示loading mask
+    wrapper.classList.add('loading');
     let av = /av(\d+)/.exec(wv.getURL());
     if(av) {
       let url = `${videoUrlPrefix}${av[1]}/index_${pid}.html`;
