@@ -11,6 +11,7 @@ const userAgent = {
 const videoUrlPrefix = 'http://www.bilibili.com/video/av';
 let wv, wrapper;
 let _isLastNavigatePartSelect = false;
+let _isLastestVersionChecked = false;
 
 // 保存用户浏览记录
 var _history = {
@@ -276,6 +277,11 @@ function detectPlatform() {
 
 // 检查更新
 function checkUpdateOnInit() {
+  if( _isLastestVersionChecked ) {
+    return;
+  } else {
+    _isLastestVersionChecked = true;
+  }
   utils.ajax.get('http://rakuen.thec.me/bilimini/beacon?_t=' + new Date().getTime(), (res) => {
     var data = JSON.parse(res),
       order = 1,
