@@ -10,6 +10,7 @@ const userAgent = {
 };
 const videoUrlPrefix = 'http://www.bilibili.com/video/av';
 let wv, wrapper;
+let _isLastNavigatePartSelect = false;
 
 // 保存用户浏览记录
 var _history = {
@@ -58,8 +59,8 @@ var _history = {
     }
   },
   goPart: function(pid) {
-    // 显示loading mask
     wrapper.classList.add('loading');
+    _isLastNavigatePartSelect = true;
     let av = /av(\d+)/.exec(wv.getURL());
     if(av) {
       let url = `${videoUrlPrefix}${av[1]}/index_${pid}.html`;
@@ -72,6 +73,7 @@ var _history = {
   },
   goBangumiPart(ep) {
     wrapper.classList.add('loading');
+    _isLastNavigatePartSelect = true;
     let url = 'https://www.bilibili.com/bangumi/play/ep' + ep;
     wv.loadURL(url, {
       userAgent: userAgent.desktop
@@ -379,11 +381,15 @@ function initActionOnWebviewNavigate() {
     // 关闭loading遮罩
     wrapper.classList.remove('loading');
     // 根据跳转完成后的真实url决定如何抓取分p
-    let m;
-    if( m = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/.exec(url) ) {
-      getPartOfVideo(m[1]);
-    } else if( url.indexOf('bangumi/play/') > -1 ) {
-      getPartOfBangumi(url);
+    if( !_isLastNavigatePartSelect ) {
+      let m;
+      if( m = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/.exec(url) ) {
+        getPartOfVideo(m[1]);
+      } else if( url.indexOf('bangumi/play/') > -1 ) {
+        getPartOfBangumi(url);
+      }
+    } else {
+      _isLastNavigatePartSelect = false;
     }
   });
   // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
