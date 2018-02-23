@@ -100,22 +100,22 @@ window.addEventListener('DOMContentLoaded', function() {
 
   // 移除app广告
   let appAdCheck, appAdNode;
-  appAdCheck = setInterval(function() {
+  function removeAppAd() {
     // 第一次check，如果上一次获取到的dom引用还在，我们就假设上一次设定的left: -99999px还有效，不做任何操作
     if( appAdNode ) {
       return;
     }
     // 如果上一次的引用已经丢失了，就再次去获取元素
     // 如果获取不到该元素，就假设当前页面没有广告
-    appAdNode = document.getElementById('b_app_link');
+    appAdNode = document.querySelector('.index__openBtn__M-commonComponent-openBtn-');
     if( !appAdNode ) {
       return;
     }
     // 如果获取成功，就重新设置一次left样式
-    if( window.getComputedStyle(appAdNode)['left'] == '0px' ) {
+    if( window.getComputedStyle(appAdNode)['left'] != '-999999px' ) {
       appAdNode.style.left = '-999999px';
     }
-    // 我觉得这样的dirty check开销是最小的
-  }, 500);
-  
+  }
+  appAdCheck = setInterval(removeAppAd, 500);
+  removeAppAd();
 });
