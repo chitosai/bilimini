@@ -123,25 +123,27 @@ function getPartOfVideo(av) {
 
 function getPartOfBangumi(url) {
   utils.ajax.get(url, (res) => {
-    let re = /li title="(.+?)" class="episode-item"/,
+    let re = /"ep_id":(\d+),"episode_status":\d+,"from":"bangumi","index":"(\d+)","index_title":"(.+?)"/g,
         _m = null, m = [];
-    try {
-      var data = JSON.parse(json),
-        partList = data.result.episodes.map((p) => {
-          return {
-            index: p.index,
-            title: p.index_title,
-            url: p.webplay_url
-          }
-        }).reverse();
-      utils.log(`获取番剧 ${aid} 分P数据`, partList);
-      ipc.send('update-bangumi-part', partList);
-      if(partList[2]) {
+    while( _m = re.exec(res) ) {
+      m.push({
+        ep: _m[1],
+        index: _m[2] - 1,
+        title: _m[3]
+      });
+    }
+    if( m.length ) {
+      m.sort((a, b) => {
+        return a.index > b.index;
+      });
+      utils.log(`获取番剧 ${url} 分P数据`, m);
+      ipc.send('update-bangumi-part', m);
+      if( m.length > 1 ) {
         ipc.send('show-select-part-window');
         v.disablePartButton = false;
       }
-    } catch(e) {
-      utils.error(`分析 ${aid} 的分P数据失败\n${e}`, json);
+    } else {
+      utils.error(`分析 ${url} 的分P数据失败`);
       ipc.send('update-part', null);
       v.disablePartButton = true;
     }
