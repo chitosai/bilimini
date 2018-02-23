@@ -9,7 +9,6 @@ const userAgent = {
   mobile: 'bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233'
 };
 const videoUrlPrefix = 'http://www.bilibili.com/video/av';
-const bangumiUrl = (aid, pid) => `http://bangumi.bilibili.com/anime/${aid}/play#${pid}`;
 let wv, wrapper;
 
 // 保存用户浏览记录
@@ -28,6 +27,14 @@ var _history = {
       !noNewHistory && _history.add(videoUrlPrefix + m[1]);
       v.disableDanmakuButton = false;
       utils.log(`路由：类型① 视频详情页\n原地址：${target}\n转跳地址：${videoUrlPrefix+m[1]}`);
+    } else if( target.indexOf('bangumi/play/') > -1 ) {
+      // case 2 番剧播放页
+      wv.loadURL(target, {
+        userAgent: userAgent.desktop
+      });
+      !noNewHistory && _history.add(target);
+      v.disableDanmakuButton = false;
+      utils.log(`路由：类型② 番剧播放页\n地址：${target}`);
     } else {
       // 我们假设html5player的页面都是通过inject.js转跳进入的，所以删除上一条历史记录来保证goBack操作的正确
       // 如果用户自己输入一个html5player的播放地址，那就管不了了
@@ -62,6 +69,15 @@ var _history = {
       _history.replace(url);
       utils.log(`路由：选择分p，选中第${pid}，转跳地址：${url}`);
     }
+  },
+  goBangumiPart(ep) {
+    wrapper.classList.add('loading');
+    let url = 'https://www.bilibili.com/bangumi/play/ep' + ep;
+    wv.loadURL(url, {
+      userAgent: userAgent.desktop
+    });
+    _history.replace(url);
+    utils.log(`路由：选择番剧分p，epid：${ep}，转跳地址：${url}`);
   },
   add: function(url) {
     // 丢掉当前位置往后的history
@@ -102,17 +118,12 @@ function getPartOfVideo(av) {
       m.push(_m[1]);
     }
     utils.log(`获取 av${av} 的分P数据`, m);
-    if(m.length) {
-      try {
-        ipc.send('update-part', m);
-        // 有超过1p时自动开启分p窗口
-        if(m[2]) {
-          ipc.send('show-select-part-window');
-          v.disablePartButton = false;
-        }
-      } catch(e) {
-        ipc.send('update-part', null);
-        v.disablePartButton = true;
+    if( m.length ) {
+      ipc.send('update-part', m);
+      // 有超过1p时自动开启分p窗口
+      if( m.length > 1 ) {
+        ipc.send('show-select-part-window');
+        v.disablePartButton = false;
       }
     } else {
       ipc.send('update-part', null);
@@ -126,11 +137,16 @@ function getPartOfBangumi(url) {
     let re = /"ep_id":(\d+),"episode_status":\d+,"from":"bangumi","index":"(\d+)","index_title":"(.+?)"/g,
         _m = null, m = [];
     while( _m = re.exec(res) ) {
-      m.push({
-        ep: _m[1],
-        index: _m[2] - 1,
-        title: _m[3]
-      });
+      // 正则抓取的时候会多抓到一条「当前ep」的数据，所以生成完整ep列表的时候要手动去个重
+      if( !m.find((p) => {
+        return p.ep == _m[1];
+      }) ) {
+        m.push({
+          ep: _m[1],
+          index: _m[2] - 1,
+          title: _m[3]
+        });
+      }
     }
     if( m.length ) {
       m.sort((a, b) => {
@@ -312,8 +328,8 @@ var currentWindowType = 'default';
 
 function resizeMainWindow() {
   let targetWindowType, url = wv.getURL();
-  if(url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1 ||
-    /\/\/live\.bilibili\.com\/h5\/\d+/.test(url)) {
+  if( url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1 ||
+    /\/\/live\.bilibili\.com\/h5\/\d+/.test(url) || url.indexOf('bangumi/play/') > -1 ) {
     targetWindowType = 'windowSizeMini';
   } else {
     targetWindowType = 'windowSizeDefault';
@@ -410,8 +426,8 @@ function redirectOnSelectPart() {
   ipc.on('select-part', (ev, pid) => {
     _history.goPart(pid);
   });
-  ipc.on('select-bangumi-part', (ev, url) => {
-    _history.go(url);
+  ipc.on('select-bangumi-part', (ev, ep) => {
+    _history.goBangumiPart(ep);
   });
 }
 
