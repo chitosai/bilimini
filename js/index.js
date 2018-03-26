@@ -115,10 +115,19 @@ var _history = {
 
 function getPartOfVideo(av) {
   utils.ajax.get(`http://m.bilibili.com/video/av${av}.html`, (res) => {
-    let re = /<option [^>]+>([^<]+)<\/option>/g,
-        _m = null, m = [];
-    while( _m = re.exec(res) ) {
-      m.push(_m[1]);
+    let re = /"pages":(\[.+?\])/g,
+        _m = re.exec(res), m = [];
+    if( _m ) {
+      _m = _m[1];
+    }
+    try{
+      _m = JSON.parse(_m);
+      m = _m.map((p) => {
+        return p.part;
+      });
+    } catch(e) {
+      utils.log(`解析分p失败：${e}`);
+      utils.log(_m);
     }
     utils.log(`获取 av${av} 的分P数据`, m);
     if( m.length ) {
