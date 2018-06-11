@@ -9,6 +9,7 @@ const userAgent = {
   mobile: 'bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233'
 };
 const videoUrlPrefix = 'http://www.bilibili.com/video/av';
+const liveUrlPrefix  = 'https://live.bilibili.com/';
 let wv, wrapper;
 let _isLastNavigatePartSelect = false;
 let _isLastestVersionChecked = false;
@@ -21,6 +22,7 @@ var _history = {
     // 显示loading mask
     wrapper.classList.add('loading');
     let m;
+    let live;
     if(m = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/.exec(target)) {
       // case 1 普通视频播放页，转跳对应pc页
       wv.loadURL(videoUrlPrefix + m[1], {
@@ -37,6 +39,13 @@ var _history = {
       !noNewHistory && _history.add(target);
       v.disableDanmakuButton = false;
       utils.log(`路由：类型② 番剧播放页\n地址：${target}`);
+    } else if ( live = /live\.bilibili\.com\/(h5\/)?(\d+).*/.exec(target) ) {
+      wv.loadURL(liveUrlPrefix + live[2], {
+        userAgent: userAgent.desktop
+      });
+      !noNewHistory && _history.add(liveUrlPrefix + live[2]);
+      v.disableDanmakuButton = false;
+      utils.log(`路由：类型③ 直播页面\n原地址：${target}\n转跳地址：${liveUrlPrefix+live[2]}`);
     } else {
       // 我们假设html5player的页面都是通过inject.js转跳进入的，所以删除上一条历史记录来保证goBack操作的正确
       // 如果用户自己输入一个html5player的播放地址，那就管不了了
@@ -213,10 +222,14 @@ const v = new Vue({
     },
     naviGoto: function() {
       var target = this.naviGotoTarget;
+      let lv;
       utils.log(`路由：手动输入地址 ${target}`);
       // 包含bilibili.com的字符串和纯数字是合法的跳转目标
       if(target.startsWith('http') && target.indexOf('bilibili.com') > -1) {
         _history.go(target);
+        this.naviGotoHide();
+      } else if (lv = /^lv(\d+)$/.exec(target)) {
+        _history.go(liveUrlPrefix + lv[1]);
         this.naviGotoHide();
       } else if(/^(\d+)$/.test(target)) {
         _history.go(videoUrlPrefix + target);
@@ -346,7 +359,7 @@ var currentWindowType = 'default';
 function resizeMainWindow() {
   let targetWindowType, url = wv.getURL();
   if( url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1 ||
-    /\/\/live\.bilibili\.com\/h5\/\d+/.test(url) || url.indexOf('bangumi/play/') > -1 ) {
+    /\/\/live\.bilibili\.com\/(h5\/)?\d+/.test(url) || url.indexOf('bangumi/play/') > -1 ) {
     targetWindowType = 'windowSizeMini';
   } else {
     targetWindowType = 'windowSizeDefault';
