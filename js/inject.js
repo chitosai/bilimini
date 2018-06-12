@@ -68,6 +68,9 @@ window.addEventListener('DOMContentLoaded', function() {
       } else if ( document.querySelector('.bilibili-live-player') ) {
         // 全屏播放器并隐藏聊天栏
         document.getElementsByTagName('body')[0].classList.add('player-full-win', 'hide-aside-area');
+        // 隐藏聊天栏显示按钮
+        let aside = document.getElementsByClassName('aside-area-toggle-btn')[0];
+        aside.style.display = 'none';
         // 隐藏 haruna
         let haruna = document.getElementsByClassName('haruna-ctnr')[0];
         haruna.style.display = 'none';
