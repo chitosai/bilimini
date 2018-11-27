@@ -8,7 +8,7 @@ const userAgent = {
   desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
   mobile: 'bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233'
 };
-const videoUrlPrefix = 'http://www.bilibili.com/video/av';
+const videoUrlPrefix = 'https://www.bilibili.com/video/av';
 const liveUrlPrefix  = 'https://live.bilibili.com/';
 let wv, wrapper;
 let _isLastNavigatePartSelect = false;
