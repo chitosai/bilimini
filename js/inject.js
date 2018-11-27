@@ -56,46 +56,31 @@ window.addEventListener('DOMContentLoaded', function() {
     }, 50), checkCount = 0;
   }
 
-  // 直播使用了hls，原生pc-chrome不支持，我们需要手动让它支持
-  if( /\/\/live\.bilibili\.com\/h5\/\d+/.exec(window.location.href) ) {
-    var Hls = require('hls.js');
-    if( !Hls.isSupported() ) {
-      console.error(`内核不支持hls.js？！ ${navigator.userAgent}`);
-      return false;
-    }
-    var video, checkCount = 0;
-    var videoCheck = setInterval(() => {
-      if( video = document.querySelector('.live-player') ) {
-        video.addEventListener('loadstart', () => {
-          // 获取直播的推流地址
-          var src = video.querySelector('source').src,
-              hls = new Hls(),
-              player = document.createElement('video'),
-              stage = document.querySelector('.canvas-ctnr'),
-              danmaku = document.querySelector('#danmu-canvas');
-          // 准备舞台
-          document.body.style.overflow = 'hidden';
-          stage.style.cssText = 'background: #000; display: block; position: fixed; top: 0; left: 0; z-index: 12450; width: 100%; height: 100%;';
-          danmaku.style.cssText = 'position: absolute; top: 0; left: 0; z-index: 33; width: 100%; height: 100%;';
-          // 页面中自带的<video>经常被操作，我们只能自己创建一个新的<video>覆盖在他上面
-          player.style.cssText = 'position: relative; z-index: 22; width: 100%; height: 100%;';
-          stage.appendChild(player);
-          // 播放@
-          hls.loadSource(src);
-          hls.attachMedia(player);
-          hls.on(Hls.Events.MANIFEST_PARSED,function() {
-            player.play();
-          });
-        });
-        // 帮用户按下「播放」按钮
-        setTimeout(function() {
-          document.querySelector('.tv-play-button').click();
-        }, 200);
-        clearInterval(videoCheck);
-      } else if( ++checkCount > 200 ) {
-        clearInterval(videoCheck);
+  // 使用桌面版 HTML5 直播播放器
+  if ( /\/\/live\.bilibili\.com\/\d+/.test(window.location.href) ) {
+    let playerInitCheck = setInterval(() => {
+      // 通过查询 HTML5 播放器 DIV 来判断页面加载
+      if ( document.querySelector('.bp-no-flash-tips') ) {
+        // 切换 HTML5 播放器
+        if ( /"type":"flash"/.test(localStorage.LIVE_PLAYER_STATUS) ) {
+          window.EmbedPlayer.loader();
+        }
+      } else if ( document.querySelector('.bilibili-live-player') ) {
+        // 全屏播放器并隐藏聊天栏
+        document.getElementsByTagName('body')[0].classList.add('player-full-win', 'hide-aside-area');
+        // 隐藏聊天栏显示按钮
+        let aside = document.getElementsByClassName('aside-area-toggle-btn')[0];
+        aside.style.display = 'none';
+        // 隐藏 haruna
+        let haruna = document.getElementsByClassName('haruna-ctnr')[0];
+        haruna.style.display = 'none';
+        // 隐藏全屏播放器（在某些情况下会出现）的滚动条
+        document.body.style.overflow = 'hidden';
+        clearInterval(playerInitCheck);
+      } else if ( ++checkCount > 400 ) {
+        clearInterval(playerInitCheck);
       }
-    }, 50);
+    }, 50), checkCount = 0;
   }
 
   // 移除app广告
