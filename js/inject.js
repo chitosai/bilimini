@@ -92,7 +92,7 @@ window.addEventListener('DOMContentLoaded', function() {
     }
     // 如果上一次的引用已经丢失了，就再次去获取元素
     // 如果获取不到该元素，就假设当前页面没有广告
-    appAdNode = document.querySelector('[class*=-openBtn-]');
+    appAdNode = document.querySelector('[class*="-bottomOpenApp-"]');
     if( !appAdNode ) {
       return;
     }
