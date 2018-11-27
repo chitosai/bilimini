@@ -62,9 +62,7 @@ window.addEventListener('DOMContentLoaded', function() {
       // 通过查询 HTML5 播放器 DIV 来判断页面加载
       if ( document.querySelector('.bp-no-flash-tips') ) {
         // 切换 HTML5 播放器
-        if ( /"type":"flash"/.test(localStorage.LIVE_PLAYER_STATUS) ) {
-          window.EmbedPlayer.loader();
-        }
+        window.EmbedPlayer.loader();
       } else if ( document.querySelector('.bilibili-live-player') ) {
         // 全屏播放器并隐藏聊天栏
         document.getElementsByTagName('body')[0].classList.add('player-full-win', 'hide-aside-area');
@@ -77,10 +75,10 @@ window.addEventListener('DOMContentLoaded', function() {
         // 隐藏全屏播放器（在某些情况下会出现）的滚动条
         document.body.style.overflow = 'hidden';
         clearInterval(playerInitCheck);
-      } else if ( ++checkCount > 400 ) {
+      } else if ( ++checkCount > 1000 ) {
         clearInterval(playerInitCheck);
       }
-    }, 50), checkCount = 0;
+    }, 100), checkCount = 0;
   }
 
   // 移除app广告
