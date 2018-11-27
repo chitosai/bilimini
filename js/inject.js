@@ -18,7 +18,7 @@ window.addEventListener('DOMContentLoaded', function() {
       window.location.href.indexOf('bangumi/play/') > -1 ) {
     let playerInitCheck = setInterval(() => {
       let wideScreenButton;
-      if( wideScreenButton = document.querySelector('.bilibili-player-iconfont-web-fullscreen') ) {
+      if( wideScreenButton = document.querySelector('[class*="bilibili-player-iconfont-web-fullscreen"]') ) {
         wideScreenButton.click();
         // 隐藏全屏播放器（在某些情况下会出现）的滚动条
         document.body.style.overflow = 'hidden';
