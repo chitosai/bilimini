@@ -345,10 +345,7 @@ function saveWindowSizeOnResize() {
   window.addEventListener('resize', function() {
     clearTimeout(saveWindowSizeTimer);
     saveWindowSizeTimer = setTimeout(function() {
-      // 暂时只保存视频播放页的尺寸
-      if(currentWindowType == 'windowSizeMini') {
-        utils.config.set(currentWindowType, [window.innerWidth, window.innerHeight]);
-      }
+      utils.config.set(currentWindowType, [window.innerWidth, window.innerHeight]);
     }, 600);
   });
 }
