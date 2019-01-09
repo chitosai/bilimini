@@ -1,6 +1,11 @@
 const ipc = require('electron').ipcRenderer;
 
 window.addEventListener('DOMContentLoaded', function() {
+  // 默认字体设置
+  let fontFamilyCss = document.createElement('style');
+  fontFamilyCss.type = 'text/css';
+  fontFamilyCss.innerHTML = "html{font-family:'Helvetica Neue', Helvetica, 'Hiragino Sans GB', 'Segoe UI', 'Microsoft Yahei', Tahoma, Arial, STHeiti, sans-serif}"
+  document.head.appendChild(fontFamilyCss);
 
   // 首页、分区首页支持多列
   if( /bilibili\.com\/index\.html$/.test(window.location.href) || /\/channel\/\d+\.html$/.test(window.location.href) ) {
