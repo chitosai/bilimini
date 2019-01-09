@@ -275,15 +275,7 @@ const v = new Vue({
       }
       utils.log('主窗口：点击弹幕开关');
       // 2018-12-05 适配最新B站弹幕开关
-      wv.executeJavaScript(`document.querySelector('.bilibili-player-video-danmaku-switch .bui-checkbox').click()`)
-      // wv.executeJavaScript(`document.getElementsByName('ctlbar_danmuku_on').length`, function(result) {
-      //   let isDanmakuOn = result == 1;
-      //   if(isDanmakuOn) {
-      //     wv.executeJavaScript(`document.querySelector('.bilibili-player-iconfont-danmaku-off').click()`)
-      //   } else {
-      //     wv.executeJavaScript(`document.querySelector('.bilibili-player-iconfont-danmaku').click()`)
-      //   }
-      // });
+      wv.executeJavaScript(`document.querySelector('.bilibili-player-video-danmaku-switch .bui-checkbox').click()`);
     }
   }
 });
