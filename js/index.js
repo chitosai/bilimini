@@ -73,7 +73,7 @@ var _history = {
     _isLastNavigatePartSelect = true;
     let av = /av(\d+)/.exec(wv.getURL());
     if(av) {
-      let url = `${videoUrlPrefix}${av[1]}/index_${pid}.html`;
+      let url = `${videoUrlPrefix}${av[1]}/?p=${pid}`;
       wv.loadURL(url, {
         userAgent: userAgent.desktop
       });
