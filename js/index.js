@@ -18,7 +18,7 @@ let _isLastestVersionChecked = false;
 var _history = {
   stack: ['https://m.bilibili.com/index.html'],
   pos: 0,
-  go: function(target, noNewHistory) {
+  go: function(target, noNewHistory, openType) {
     // 显示loading mask
     wrapper.classList.add('loading');
     let m;
@@ -49,7 +49,10 @@ var _history = {
     } else {
       // 我们假设html5player的页面都是通过inject.js转跳进入的，所以删除上一条历史记录来保证goBack操作的正确
       // 如果用户自己输入一个html5player的播放地址，那就管不了了
-      if(target.indexOf('html5player.html') > -1) {
+      // d:桌面网页(强制用桌面打开)
+      if(openType=="d"
+        || target.indexOf('html5player.html') > -1
+        || target.indexOf('authorize') > -1) {
         // html5player.html有防盗链验证，ua似乎必须是桌面浏览器
         wv.loadURL(target, {
           userAgent: userAgent.desktop
@@ -225,7 +228,11 @@ const v = new Vue({
       let lv;
       utils.log(`路由：手动输入地址 ${target}`);
       // 包含bilibili.com的字符串和纯数字是合法的跳转目标
-      if(target.startsWith('http') && target.indexOf('bilibili.com') > -1) {
+      if(target.startsWith('e')){
+        target = "https://majsoul.union-game.com/#/";
+        _history.go(target, null, "d");
+        this.naviGotoHide();
+      } else if (target.startsWith('http')) {
         _history.go(target);
         this.naviGotoHide();
       } else if (lv = /^lv(\d+)$/.exec(target)) {
