@@ -1,63 +1,68 @@
 <!DOCTYPE html>
 <html lang="cn">
+
 <head>
-	<meta charset="UTF-8">
-	<title>Bilibili v.mini</title>
-	<link rel="stylesheet" href="css/child-window.css">
+    <meta charset="UTF-8">
+    <title>Bilibili v.mini</title>
+    <link rel="stylesheet" href="css/child-window.css">
 </head>
+
 <body>
-	<div id="wrapper">
-		<span id="close" @click="closeWindow">x</span>
-		<div id="select-part" class="list">
-			<p class="list-title">视频分Part</p>
-			<div class="item part" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span v-show="index == currentPart">● </span>{{ index}}、{{ title }}</div>
-			<div class="item part" v-for="part in bangumiPartList" :title="part.title" @click="selectBangumiPart(part)"><span v-show="part.index == currentPart">● </span>{{ part.index + 1 }}、{{ part.title }}</div>
-		</div>
-	</div>
+    <div id="wrapper">
+        <span id="close" @click="closeWindow">x</span>
+        <div id="select-part" class="list">
+            <p class="list-title">视频分Part</p>
+            <div class="item part" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span
+                    v-show="index == currentPart">● </span>{{ index}}、{{ title }}</div>
+            <div class="item part" v-for="part in bangumiPartList" :title="part.title" @click="selectBangumiPart(part)"><span
+                    v-show="part.index == currentPart">● </span>{{ part.index + 1 }}、{{ part.title }}</div>
+        </div>
+    </div>
 
-	<script src="js/vue.min.js"></script>
-	<script>
-		const ipc = require('electron').ipcRenderer;
-		const remote = require('electron').remote;
-		const v = new Vue({
-			el: '#wrapper',
-			data: {
-				partList: null,
-				bangumiPartList: null,
-				currentPart: 0
-			},
-			methods: {
-				selectPart(index) {
-					this.currentPart = index;
-					ipc.send('select-part', index + 1);
-				},
-				selectBangumiPart(part) {
-					this.currentPart = part.index;
-					ipc.send('select-bangumi-part', part.ep);
-				},
-				closeWindow() {
-				  remote.getCurrentWindow().hide();
-				}
-			}
-		});
+    <script src="js/vue.min.js"></script>
+    <script>
+        const ipc = require('electron').ipcRenderer;
+        const remote = require('electron').remote;
+        const v = new Vue({
+            el: '#wrapper',
+            data: {
+                partList: null,
+                bangumiPartList: null,
+                currentPart: 0
+            },
+            methods: {
+                selectPart(index) {
+                    this.currentPart = index;
+                    ipc.send('select-part', index + 1);
+                },
+                selectBangumiPart(part) {
+                    this.currentPart = part.index;
+                    ipc.send('select-bangumi-part', part.ep);
+                },
+                closeWindow() {
+                    remote.getCurrentWindow().hide();
+                }
+            }
+        });
 
-		// 更新分p列表
-		ipc.on('update-part', (ev, partList) => {
-			v.currentPart = 0;
-			v.partList = partList;
-			v.bangumiPartList = null;
-		});
-		// 番剧分p
-		ipc.on('update-bangumi-part', (ev, partList) => {
-			v.currentPart = 0;
-			v.partList = null;
-			v.bangumiPartList = partList;
-		});
+        // 更新分p列表
+        ipc.on('update-part', (ev, partList) => {
+            v.currentPart = 0;
+            v.partList = partList;
+            v.bangumiPartList = null;
+        });
+        // 番剧分p
+        ipc.on('update-bangumi-part', (ev, partList) => {
+            v.currentPart = 0;
+            v.partList = null;
+            v.bangumiPartList = partList;
+        });
 
-		window.onerror = function(err, f, line) {
-      var id = f.split('/');
-      utils.error(`${id[id.length-1]} : Line ${line}\n> ${err}`);
-    }
-	</script>
+        window.onerror = function (err, f, line) {
+            var id = f.split('/');
+            utils.error(`${id[id.length-1]} : Line ${line}\n> ${err}`);
+        }
+    </script>
 </body>
+
 </html>

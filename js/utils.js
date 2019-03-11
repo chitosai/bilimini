@@ -3,7 +3,7 @@ const store = new Store();
 const fs = require('graceful-fs');
 
 var setWindownSize = {
-    set: function(targetWin, x, y, width, height){
+    set: function (targetWin, x, y, width, height) {
         targetWin.setBounds({
             x: x,
             y: y,
@@ -20,8 +20,8 @@ var config = {
         return val ? val : config[key];
     },
     set(key, value) {
-        if( typeof key == 'object' ) {
-            for( let k in key ) {
+        if (typeof key == 'object') {
+            for (let k in key) {
                 store.set(k, key[k]);
                 log.write({
                     message: `更新用户设置：SET ${k} = ${JSON.stringify(key[k])}`
@@ -49,10 +49,10 @@ var config = {
 
 // ajax
 var ajax = {
-    get: function(url, success, mode) {
+    get: function (url, success, mode) {
         var r = new XMLHttpRequest();
         r.open("GET", url, true);
-        if( mode in userAgent ) {
+        if (mode in userAgent) {
             r.setRequestHeader('userAgent', userAgent[mode]);
         }
         r.onreadystatechange = function () {
@@ -72,9 +72,9 @@ function getAppPath() {
 }
 const appPath = getAppPath();
 
-Date.prototype.format = function() {
-    return `${this.toLocaleDateString()} ${this.toTimeString().split(' ')[0]} ` + 
-            ('000' + this.getMilliseconds()).slice(-3);
+Date.prototype.format = function () {
+    return `${this.toLocaleDateString()} ${this.toTimeString().split(' ')[0]} ` +
+        ('000' + this.getMilliseconds()).slice(-3);
 }
 
 // log
@@ -86,20 +86,20 @@ var log = {
     write(obj) {
         var logFileName = appPath + 'bilimini.log',
             now = new Date();
-            _msg = '',
+        _msg = '',
             LF = '\r\n' + ' '.repeat(23);
         // 让每个换行前都空出33个字符的距离，这样能让message对齐
         var message = obj.message.replace(/\n/g, LF);
         console.log(message);
-        if( obj.data ) {
+        if (obj.data) {
             message += `${LF} ${JSON.stringify(obj.data)}`;
         }
-        if( obj.type ) {
+        if (obj.type) {
             _msg = `* ${now.format()} ${obj.type} > ${message}\r\n`;
         } else {
             _msg = `${now.format()} ${message}\r\n`;
         }
-        if( obj.override ) {
+        if (obj.override) {
             fs.writeFile(logFileName, _msg);
         } else {
             fs.appendFile(logFileName, _msg);
@@ -120,7 +120,10 @@ module.exports = {
     },
     error(message, data, override) {
         log.write({
-            message, data, override, type: 'ERROR'
+            message,
+            data,
+            override,
+            type: 'ERROR'
         });
     }
 }
