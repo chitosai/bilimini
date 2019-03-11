@@ -7,6 +7,12 @@ body {
   margin: 0;
   height: 100%;
   overflow: hidden;
+  -webkit-touch-callout: none; /* iOS Safari */
+  -webkit-user-select: none; /* Chrome/Safari/Opera */
+  -khtml-user-select: none; /* Konqueror */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Non-prefixed version, currently not supported by any browser */
 }
 #wrapper {
   transition: all .2s ease;
@@ -147,6 +153,8 @@ body.win .showAbout #topbar {
   line-height: 15px;
   padding: 0 5px;
 }
+#app-majsoul-mini,
+#app-majsoul-medium,
 #app-danmaku,
 #app-part,
 #app-about {
@@ -171,7 +179,7 @@ body.win .showAbout #topbar {
   cursor: move;
   text-align: center;
   line-height: 22px;
-  width: 50%;
+  width: 40%;
   margin: 7px auto;
 }
 /* webview */

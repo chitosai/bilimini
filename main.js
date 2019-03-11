@@ -5,6 +5,7 @@ const dialog = electron.dialog;
 const globalShortcut = electron.globalShortcut;
 const Menu = electron.Menu;
 const utils = require('./js/utils.js');
+const remote = require('electron').remote;
 
 const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 
@@ -129,7 +130,23 @@ function initConfigWindow() {
   });
   // 仅开启
   ipc.on('show-config-window', showConfigWindow);
+  ipc.on('set-window-size', setWindowSize);
   // configWindow.openDevTools();
+}
+
+function setWindowSize(event, args){
+  utils.log('设置窗口大小');
+  var mainWindowBounds = mainWindow.getBounds();
+  var config = utils.config;
+  var targetSize;
+  if(args=="mini"){
+    targetSize = config.get("defaultMajsoulMini");
+  } else if(args=="medium"){
+    targetSize = config.get("majsoulMedium");
+  } else {
+    targetSize = config.get("windowSizeDefault");
+  }
+    utils.setWindownSize.set(mainWindow, mainWindowBounds.x, mainWindowBounds.y, targetSize[0], targetSize[1]);
 }
 
 function showConfigWindow() {

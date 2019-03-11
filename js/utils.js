@@ -2,6 +2,17 @@ const Store = require('electron-store');
 const store = new Store();
 const fs = require('graceful-fs');
 
+var setWindownSize = {
+    set: function(targetWin, x, y, width, height){
+        targetWin.setBounds({
+            x: x,
+            y: y,
+            width: width,
+            height: height
+        }, true);
+    }
+}
+
 // 设置，比永久储存库多一个默认值，诶嘿 (<ゝω·)☆
 var config = {
     get(key) {
@@ -28,6 +39,9 @@ var config = {
     },
     windowSizeMini: [300, 187],
     windowSizeDefault: [375, 500],
+    defaultMajsoulMini: [446, 251],
+    majsoulMini: [446, 251],
+    majsoulMedium: [720, 480],
     opacity: 1,
     hideShortcut: process.platform == 'darwin' ? 'Alt + W' : 'Ctrl + E',
     proxy: ''
@@ -49,11 +63,6 @@ var ajax = {
     }
 }
 
-// log
-// obj {
-//    message: '' // 日志内容,
-//    override: boolean, // 为true时清空之前的log，重新开始写入
-// }
 function getAppPath() {
     const slash = require('path').sep;
     var logFilePath = __dirname.split(slash);
@@ -67,6 +76,12 @@ Date.prototype.format = function() {
     return `${this.toLocaleDateString()} ${this.toTimeString().split(' ')[0]} ` + 
             ('000' + this.getMilliseconds()).slice(-3);
 }
+
+// log
+// obj {
+//    message: '' // 日志内容,
+//    override: boolean, // 为true时清空之前的log，重新开始写入
+// }
 var log = {
     write(obj) {
         var logFileName = appPath + 'bilimini.log',
@@ -75,6 +90,7 @@ var log = {
             LF = '\r\n' + ' '.repeat(23);
         // 让每个换行前都空出33个字符的距离，这样能让message对齐
         var message = obj.message.replace(/\n/g, LF);
+        console.log(message);
         if( obj.data ) {
             message += `${LF} ${JSON.stringify(obj.data)}`;
         }
@@ -92,6 +108,7 @@ var log = {
 }
 
 module.exports = {
+    setWindownSize,
     config,
     ajax,
     log(message, data, override) {

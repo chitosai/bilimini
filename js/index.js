@@ -269,6 +269,11 @@ const v = new Vue({
       utils.log('主窗口：点击设置');
       ipc.send('toggle-config-window');
     },
+    // 
+    setWindowSize: function(type) {
+      utils.log('主窗口：点击设置窗口大小');
+      ipc.send('set-window-size', type);
+    },
     // 关鸡 - 在osx下仅关闭当前窗口，在windows下直接退出整个程序
     turnOff: function() {
       utils.log('主窗口：点击退出');
@@ -349,6 +354,26 @@ function saveWindowSizeOnResize() {
       utils.config.set(currentWindowType, [window.innerWidth, window.innerHeight]);
     }, 600);
   });
+
+  var div = document.getElementById('dragzone');
+  var disx,
+      disy;
+  div.addEventListener('mousedown',function(e){
+      disx = e.pageX - parseInt(div.style.left);//记录鼠标当前的位置
+      disy = e.pageY - parseInt(div.style.top);
+      document.addEventListener('mousemove',mouseM)
+      function mouseM(e){
+          var event = e||window.event;//兼容了ie浏览器
+          utils.log(e.pageX - disx + "px");
+          utils.log(e.pageY - disy + "px");
+      }
+      div.addEventListener('mouseup',function(){
+          var event = e||event;
+          document.removeEventListener('mousemove',mouseM);
+      })
+  })
+  // document.getElementById('dragzone').addEventListener('mouseup', function(event, args){
+  // });
 }
 
 // 根据用户访问的url决定app窗口尺寸
@@ -359,17 +384,23 @@ function resizeMainWindow() {
   if( url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1 ||
     /\/\/live\.bilibili\.com\/(h5\/)?\d+/.test(url) || url.indexOf('bangumi/play/') > -1 ) {
     targetWindowType = 'windowSizeMini';
+  } if(url.indexOf('majsoul') > -1){
+    targetWindowType = 'majsoulMini';
   } else {
     targetWindowType = 'windowSizeDefault';
   }
   if(targetWindowType != currentWindowType) {
     let mw = remote.getCurrentWindow(),
-      currentSize = mw.getSize(),
-      leftTopPosition = mw.getPosition(),
-      rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
-      targetSize = utils.config.get(targetWindowType),
-      targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
+        currentSize = mw.getSize(),
+        leftTopPosition = mw.getPosition(),
+        rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
+        targetSize = utils.config.get(targetWindowType),
+        targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
 
+    //避免重置窗口大小的时候,窗口跑到屏幕外边无法操作
+    if(targetPosition[0] < 0) targetPosition[0] = 0;
+    if(targetPosition[1] < 0) targetPosition[1] = 0;
+    utils.log("窗口当前位置:"+leftTopPosition[0]+", "+leftTopPosition[1]);
     mw.setBounds({
       x: targetPosition[0],
       y: targetPosition[1],
