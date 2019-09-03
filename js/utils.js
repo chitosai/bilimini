@@ -49,11 +49,6 @@ var ajax = {
     }
 }
 
-// log
-// obj {
-//    message: '' // 日志内容,
-//    override: boolean, // 为true时清空之前的log，重新开始写入
-// }
 function getAppPath() {
     const slash = require('path').sep;
     var logFilePath = __dirname.split(slash);

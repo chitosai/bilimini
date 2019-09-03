@@ -65,10 +65,10 @@ window.addEventListener('DOMContentLoaded', function() {
   if ( /\/\/live\.bilibili\.com\/\d+/.test(window.location.href) ) {
     let playerInitCheck = setInterval(() => {
       // 通过查询 HTML5 播放器 DIV 来判断页面加载
-      if ( document.querySelector('.bp-no-flash-tips') ) {
+      if( document.querySelector('.bp-no-flash-tips') ) {
         // 切换 HTML5 播放器
         window.EmbedPlayer.loader();
-      } else if ( document.querySelector('.bilibili-live-player') ) {
+      } else if( document.querySelector('.bilibili-live-player') ) {
         // 全屏播放器并隐藏聊天栏
         document.getElementsByTagName('body')[0].classList.add('player-full-win', 'hide-aside-area');
         // 隐藏聊天栏显示按钮
@@ -80,7 +80,7 @@ window.addEventListener('DOMContentLoaded', function() {
         // 隐藏全屏播放器（在某些情况下会出现）的滚动条
         document.body.style.overflow = 'hidden';
         clearInterval(playerInitCheck);
-      } else if ( ++checkCount > 1000 ) {
+      } else if( ++checkCount > 1000 ) {
         clearInterval(playerInitCheck);
       }
     }, 100), checkCount = 0;

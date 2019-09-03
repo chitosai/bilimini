@@ -23,7 +23,7 @@ var _history = {
     wrapper.classList.add('loading');
     let m;
     let live;
-    if(m = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/.exec(target)) {
+    if(m = /video\/av(\d+)/.exec(target)) {
       // case 1 普通视频播放页，转跳对应pc页
       wv.loadURL(videoUrlPrefix + m[1], {
         userAgent: userAgent.desktop
@@ -135,8 +135,7 @@ function getPartOfVideo(av) {
         return p.part;
       });
     } catch(e) {
-      utils.log(`解析分p失败：${e}`);
-      utils.log(_m);
+      utils.log(`解析分p失败：${e}`, _m);
     }
     utils.log(`获取 av${av} 的分P数据`, m);
     if( m.length ) {
@@ -311,7 +310,7 @@ function checkUpdateOnInit() {
       lastVersion = lastVersionArr[0] * 10000 + lastVersionArr[1] * 100 + lastVersionArr[2],
       currentVersionArr = appData.version.split('.'),
       currentVersion = currentVersionArr[0] * 10000 + currentVersionArr[1] * 100 + currentVersionArr[2];
-    if(lastVersion > currentVersion) {
+    if( lastVersion > currentVersion ) {
       dialog.showMessageBox(null, {
         buttons: buttons,
         message: `检查到新版本v${data.version}，您正在使用的版本是v${appData.version}，是否打开下载页面？`
@@ -322,7 +321,7 @@ function checkUpdateOnInit() {
       });
     }
     // 显示额外的公告
-    if(data.announcement && data.announcement != '' && !localStorage.getItem(data.announcement)) {
+    if( data.announcement && data.announcement != '' && !localStorage.getItem(data.announcement) ) {
       dialog.showMessageBox(null, {
         buttons: ['了解'],
         message: data.announcement
@@ -355,7 +354,7 @@ function resizeMainWindow() {
   } else {
     targetWindowType = 'windowSizeDefault';
   }
-  if(targetWindowType != currentWindowType) {
+  if( targetWindowType != currentWindowType ) {
     let mw = remote.getCurrentWindow(),
       currentSize = mw.getSize(),
       leftTopPosition = mw.getPosition(),
@@ -392,7 +391,7 @@ function initActionOnWebviewNavigate() {
   // 判断是否能前进/后退
   wv.addEventListener('did-finish-load', function() {
     let url = wv.getURL();
-    utils.log(`触发did-finish-load事件，当前url是: ${url}`);
+    utils.log(`触发 did-finish-load 事件，当前url是: ${url}`);
     v.naviCanGoBack = _history.canGoBack();
     v.naviCanGoForward = _history.canGoForward();
     // 改变窗口尺寸
@@ -402,7 +401,7 @@ function initActionOnWebviewNavigate() {
     // 根据跳转完成后的真实url决定如何抓取分p
     if( !_isLastNavigatePartSelect ) {
       let m;
-      if( m = /video\/av(\d+(?:\/index_\d+\.html)?(?:\/#page=\d+)?)/.exec(url) ) {
+      if( m = /video\/av(\d+)/.exec(url) ) {
         getPartOfVideo(m[1]);
       } else if( url.indexOf('bangumi/play/') > -1 ) {
         getPartOfBangumi(url);
@@ -413,12 +412,12 @@ function initActionOnWebviewNavigate() {
   });
   // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
   wv.addEventListener('will-navigate', function(e) {
-    utils.log(`触发will-navigate事件，目标: ${e.url}`);
+    utils.log(`触发 will-navigate 事件，目标: ${e.url}`);
     _history.go(e.url);
   });
   // webview中点击target="_blank"的链接时在当前webview打开
   wv.addEventListener('new-window', function(e) {
-    utils.log(`触发new-window事件，目标: ${e.url}`);
+    utils.log(`触发 new-window 事件，目标: ${e.url}`);
     _history.go(e.url);
   });
   // 服务端要求302转跳
@@ -426,7 +425,8 @@ function initActionOnWebviewNavigate() {
     // 栗子：请求 http://www.bilibili.com/video/av12718065/ 时，会被302到 http://bangumi.bilibili.com/anime/6301/play#113085
     // 此时并不会触发新的will-navigate，但是我们又需要触发anime/6301/play页面的getPartOfBangumi事件，所以需要在这里catch一下
     let m;
-    if( /av\d+/.test(e.oldURL) && (m = /\/anime\/(\d+)\/play#/.exec(e.newURL)) ) {
+    utils.log(`触发 did-get-redirect-request 事件，目标：${e.newURL}`);
+    if( /av\d+/.test(e.oldURL) && (m = /\/bangumi\/play\/ep(\d+)/.exec(e.newURL)) ) {
       getPartOfBangumi(m[1]);
     }
   });
