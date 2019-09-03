@@ -23,7 +23,7 @@ var _history = {
     wrapper.classList.add('loading');
     let m;
     let live;
-    if(m = /video\/av(\d+)/.exec(target)) {
+    if(m = /video\/av(\d+(?:\/\?p=\d+)?)/.exec(target)) {
       // case 1 普通视频播放页，转跳对应pc页
       wv.loadURL(videoUrlPrefix + m[1], {
         userAgent: userAgent.desktop
@@ -401,7 +401,7 @@ function initActionOnWebviewNavigate() {
     // 根据跳转完成后的真实url决定如何抓取分p
     if( !_isLastNavigatePartSelect ) {
       let m;
-      if( m = /video\/av(\d+)/.exec(url) ) {
+      if( m = /video\/av(\d+(?:\/\?p=\d+)?)/.exec(url) ) {
         getPartOfVideo(m[1]);
       } else if( url.indexOf('bangumi/play/') > -1 ) {
         getPartOfBangumi(url);
