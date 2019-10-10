@@ -256,6 +256,11 @@ const v = new Vue({
       utils.log('主窗口：点击P');
       ipc.send('toggle-select-part-window');
     },
+    // 进入订阅
+    showFeed() {
+      utils.log('主窗口：点击订阅');
+      _history.go('https://www.bilibili.com/account/dynamic');
+    },
     // 设置窗口
     toggleConfig: function() {
       utils.log('主窗口：点击设置');

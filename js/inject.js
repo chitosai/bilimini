@@ -61,7 +61,7 @@ window.addEventListener('DOMContentLoaded', function() {
     }, 50), checkCount = 0;
   }
 
-  // 使用桌面版 HTML5 直播播放器
+  // 直播使用桌面版 HTML5 直播播放器
   if ( /\/\/live\.bilibili\.com\/\d+/.test(window.location.href) ) {
     let playerInitCheck = setInterval(() => {
       // 通过查询 HTML5 播放器 DIV 来判断页面加载
@@ -86,24 +86,26 @@ window.addEventListener('DOMContentLoaded', function() {
     }, 100), checkCount = 0;
   }
 
-  // 移除app广告
-  let appAdCheck, appAdNode;
-  function removeAppAd() {
-    // 第一次check，如果上一次获取到的dom引用还在，我们就假设上一次设定的left: -99999px还有效，不做任何操作
-    if( appAdNode ) {
-      return;
-    }
-    // 如果上一次的引用已经丢失了，就再次去获取元素
-    // 如果获取不到该元素，就假设当前页面没有广告
-    appAdNode = document.querySelector('[class*="-bottomOpenApp-"]');
-    if( !appAdNode ) {
-      return;
-    }
-    // 如果获取成功，就重新设置一次left样式
-    if( window.getComputedStyle(appAdNode)['left'] != '-999999px' ) {
-      appAdNode.style.left = '-999999px';
-    }
+  // 动态页重做样式
+  if( window.location.href.includes('/account/dynamic') ) {
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = '.float_window, .z_top, .index-nav, .footer, .sd, .dyn-tab { display: none !important }' +
+                      'html, body { min-width: 0 !important; }' + 
+                      '.main-inner { width: auto !important; }' + 
+                      '.stm-ly { margin: 0 !important; }' + 
+                      '.stm-ly > .ct { margin-left: 0 !important; }' + 
+                      '.stm-ly .stm-lst li .rside, .stm-ly .stm-tag-push-wrp .rside { padding-left: 0 !important; }' + 
+                      '.stm-ly .stm-lst li .lside, .stm-ly .stm-tag-push-wrp .lside { display: none !important; }';
+    document.head.appendChild(style)
   }
-  appAdCheck = setInterval(removeAppAd, 500);
+
+  // 移除app广告
+  function removeAppAd() {
+    appAdNode = document.querySelectorAll('[class*="OpenApp" i]');
+    appAdNode.forEach((node) => {
+      node.remove();
+    });
+  }
   removeAppAd();
 });

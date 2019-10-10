@@ -126,10 +126,10 @@ body.win .showAbout #topbar {
   background: #fb93ab;
 }
 .icon-btn {
-  border-radius: 14px;
+  border-radius: 15px;
   font-size: 7px;
-  width: 14px;
-  height: 14px;
+  width: 15px;
+  height: 15px;
   text-align: center;
 }
 #navi-back {
@@ -148,20 +148,29 @@ body.win .showAbout #topbar {
   padding: 0 5px;
 }
 #app-danmaku,
-#app-part,
-#app-about {
+#app-part{
   font-size: 10px;
   line-height: 14px;
+}
+#app-about{
+  font-size: 12px;
+  line-height: 14px;
+}
+#app-feed {
+  background-image: url('../images/feed.png');
+  background-position: 2px 2px;
+  background-repeat: no-repeat;
+  background-size: 11px;
 }
 #app-config {
   background-image: url('../images/config.png');
   background-position: 2px 2px;
   background-repeat: no-repeat;
-  background-size: 10px;
+  background-size: 11px;
 }
 #app-close {
-  font-size: 11px;
-  line-height: 13px;
+  font-size: 13px;
+  line-height: 12px;
 }
 #dragzone {
   -webkit-user-select: none;
