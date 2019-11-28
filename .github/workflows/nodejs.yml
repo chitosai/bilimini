@@ -17,12 +17,13 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-    - name: npm install, build, and test
+    - name: build
       run: |
         npm ci
         npm run win64
         npm run win32
       env:
+        GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
         CI: true
     - name: Release Drafter
       uses: toolmantim/release-drafter@v5.2.0
