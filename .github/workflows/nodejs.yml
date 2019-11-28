@@ -5,11 +5,11 @@ on: [push]
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [10.x]
 
     steps:
     - uses: actions/checkout@v1
@@ -22,6 +22,7 @@ jobs:
         npm ci
         npm run win64
         npm run win32
-        npm run mac
       env:
         CI: true
+    - name: Release Drafter
+      uses: toolmantim/release-drafter@v5.2.0
