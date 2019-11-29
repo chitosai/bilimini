@@ -21,7 +21,9 @@ jobs:
       run: |
         npm ci
         npm run win64
+        tar -zvcf ./dist/win-unpack/ ./dist/bilimini-win64-latest.zip
         npm run win32
+        tar -zvcf ./dist/win-ia32-unpacked/ ./dist/bilimini-win32-latest.zip
       env:
         GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
   
