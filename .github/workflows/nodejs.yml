@@ -21,11 +21,12 @@ jobs:
       run: |
         npm ci
         npm run win64
-        tar -zvcf ./dist/bilimini-win64-latest.zip ./dist/win-unpack/
-        npm run win32
-        tar -zvcf ./dist/bilimini-win32-latest.zip ./dist/win-ia32-unpacked/
       env:
         GH_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+    - name: pack
+      uses: juankaram/archive-action@v1.0.0
+      with:
+        args : "tar -zvcf ./dist/bilimini-win64-latest.zip ./dist/win-unpack/"
   
   build-mac:
 
