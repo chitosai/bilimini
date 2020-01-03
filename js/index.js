@@ -534,8 +534,8 @@ function initMouseStateDirtyCheck() {
         }
         // 如果topbar已经下来了，就主动把触发区域变高一点，防止鼠标稍微向下滑动就触发收起
         function getTriggerAreaHeight() {
-            let h = 0.1 * windowSize[1],
-                minHeight = lastStatus == 'IN' ? 120 : 36;
+            let h = 10;//0.1 * windowSize[1],
+                minHeight = lastStatus == 'IN' ? 120 : 10;
             return h > minHeight ? h : minHeight;
         }
         if ((mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0] - getTriggerAreaWidth()) &&
@@ -570,7 +570,7 @@ window.addEventListener('DOMContentLoaded', function () {
     wrapper = document.getElementById('wrapper');
     wv = document.getElementById('wv');
     detectPlatform();
-    checkUpdateOnInit();
+    //checkUpdateOnInit();
     initActionOnWebviewNavigate();
     initActionOnEsc();
     initWebviewVolumeContrlShortcuts();
