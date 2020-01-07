@@ -35,6 +35,19 @@ body {
     top: 36px;
 }
 
+#topbar {
+    transition: all .2s ease;
+    height: 36px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#topbar.showTopBar {
+    top: 0px;
+}
+
 #wrapper.showAbout {
     top: 211px !important;
 }

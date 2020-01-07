@@ -10,7 +10,7 @@ const userAgent = {
 };
 const videoUrlPrefix = 'https://www.bilibili.com/video/av';
 const liveUrlPrefix = 'https://live.bilibili.com/';
-let wv, wrapper;
+let wv, wrapper, topBar;
 let _isLastNavigatePartSelect = false;
 let _isLastestVersionChecked = false;
 
@@ -541,12 +541,12 @@ function initMouseStateDirtyCheck() {
         if ((mousePos.x > windowPos[0]) && (mousePos.x < windowPos[0] + windowSize[0] - getTriggerAreaWidth()) &&
             (mousePos.y > windowPos[1]) && (mousePos.y < windowPos[1] + getTriggerAreaHeight())) {
             if (lastStatus == 'OUT') {
-                wrapper.classList.add('showTopBar');
+                topBar.classList.add('showTopBar');
                 lastStatus = 'IN';
             }
         } else if (lastStatus == 'IN') {
             lastStatus = 'OUT';
-            wrapper.classList.remove('showTopBar');
+            topBar.classList.remove('showTopBar');
         }
     }, 200);
 }
@@ -568,6 +568,7 @@ function logWebviewError() {
 
 window.addEventListener('DOMContentLoaded', function () {
     wrapper = document.getElementById('wrapper');
+    topBar = document.getElementById('topbar');
     wv = document.getElementById('wv');
     detectPlatform();
     //checkUpdateOnInit();

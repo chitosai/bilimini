@@ -10,9 +10,11 @@ body {
 
 #wrapper {
     transition: all .2s ease;
-    height: 100%;
-    position: relative;
+    height: 36px;
+    width: 100%;
+    position: fixed;
     top: 0;
+    left: 0;
 }
 
 #wrapper.showTopBar {
@@ -20,6 +22,19 @@ body {
     /* 不能用transform来做这个动画效果..貌似translate3d不会触发reflow，造成topBar的里的dragzone的
       -webkit-app-region: drag; 没有生效 */
     top: 36px;
+}
+
+#topbar {
+    transition: all .2s ease;
+    height: 36px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+}
+
+#topbar.showTopBar {
+    top: 0px;
 }
 
 #wrapper.showAbout {
