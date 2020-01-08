@@ -46,6 +46,7 @@ body {
 
 #topbar.showTopBar {
     top: 0px;
+    box-shadow: 0 0 10px rgba(1,1,1,0.9);
 }
 
 #wrapper.showAbout {
