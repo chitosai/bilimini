@@ -5,13 +5,14 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "pack": "build --dir",
-    "dist": "build"
+    "win64": "./node_modules/.bin/electron-builder --win --x64",
+    "win32": "./node_modules/.bin/electron-builder --ia32",
+    "mac": "./node_modules/.bin/electron-builder --mac"
   },
   "repository": "https://github.com/chitosai/bilimini",
   "author": "TheC",
   "devDependencies": {
-    "electron": "1.6.2",
+    "electron": "^1.6.2",
     "electron-builder": "next"
   },
   "build": {
