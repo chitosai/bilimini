@@ -58,6 +58,12 @@ function getAppPath() {
 }
 const appPath = getAppPath();
 
+function getVid(url) {
+    let m  = /video\/(av\d+(?:\/\?p=\d+)?)/.exec(url) ||
+             /video\/(BV\w+(?:\/\?p=\d+)?)/.exec(url)
+    return m ? m[1] : null;
+}
+
 Date.prototype.format = function() {
     return `${this.toLocaleDateString()} ${this.toTimeString().split(' ')[0]} ` + 
             ('000' + this.getMilliseconds()).slice(-3);
@@ -89,6 +95,7 @@ var log = {
 module.exports = {
     config,
     ajax,
+    getVid,
     log(message, data, override) {
         log.write({
             message,
