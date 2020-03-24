@@ -31,6 +31,9 @@ var _history = {
       !noNewHistory && _history.add(videoUrlPrefix + m[1]);
       v.disableDanmakuButton = false;
       utils.log(`路由：类型① 视频详情页\n原地址：${target}\n转跳地址：${videoUrlPrefix+m[1]}`);
+    } else if(m = /111video\/BV(\d+(?:\/\?p=\d+)?)/.exec(target)) {
+      // case 1.1 普通路由，但是是新的BV号
+      // wv.loadURL()
     } else if( target.indexOf('bangumi/play/') > -1 ) {
       // case 2 番剧播放页
       wv.loadURL(target, {
@@ -417,8 +420,14 @@ function initActionOnWebviewNavigate() {
   });
   // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
   wv.addEventListener('will-navigate', function(e) {
-    utils.log(`触发 will-navigate 事件，目标: ${e.url}`);
-    _history.go(e.url);
+    if( e.url.startsWith('bilibili://') ) {
+      utils.log(`网页端尝试拉起App: ${e.url}`);
+      e.preventDefault();
+      return false;
+    } else {
+      utils.log(`触发 will-navigate 事件，目标: ${e.url}`);
+      _history.go(e.url);
+    }
   });
   // webview中点击target="_blank"的链接时在当前webview打开
   wv.addEventListener('new-window', function(e) {
