@@ -88,16 +88,12 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   // 动态页重做样式
-  if( window.location.href.includes('/account/dynamic') ) {
+  if( window.location.href.includes('t.bilibili.com/?tab=8') ) {
     const style = document.createElement('style');
     style.type = 'text/css';
-    style.innerHTML = '.float_window, .z_top, .index-nav, .footer, .sd, .dyn-tab { display: none !important }' +
-                      'html, body { min-width: 0 !important; }' + 
-                      '.main-inner { width: auto !important; }' + 
-                      '.stm-ly { margin: 0 !important; }' + 
-                      '.stm-ly > .ct { margin-left: 0 !important; }' + 
-                      '.stm-ly .stm-lst li .rside, .stm-ly .stm-tag-push-wrp .rside { padding-left: 0 !important; }' + 
-                      '.stm-ly .stm-lst li .lside, .stm-ly .stm-tag-push-wrp .lside { display: none !important; }';
+    style.innerHTML = '#bili-header-m, .left-panel, .right-panel, .center-panel > .section-block, .sticky-bar { display: none !important }' +
+                      '.home-content, .center-panel { width: 100% !important; }' +
+                      '.card { min-width: 0 !important;}'
     document.head.appendChild(style)
   }
 
