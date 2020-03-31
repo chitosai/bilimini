@@ -214,6 +214,10 @@ const v = new Vue({
     naviForward: function() {
       _history.goForward();
     },
+    // 回到首页
+    naviGoHome: function() {
+      _history.go('https://m.bilibili.com/index.html');
+    },
     // 通过url或av号跳转
     naviGotoShow: function() {
       this.naviGotoTarget = '';
