@@ -27,6 +27,7 @@ var config = {
         store.delete(key);
     },
     windowSizeMini: [300, 187],
+    windowSizeFeed: [650, 760],
     windowSizeDefault: [375, 500],
     opacity: 1,
     hideShortcut: process.platform == 'darwin' ? 'Alt + W' : 'Ctrl + E',

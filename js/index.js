@@ -271,7 +271,7 @@ const v = new Vue({
     // 进入订阅
     showFeed() {
       utils.log('主窗口：点击订阅');
-      _history.go('https://www.bilibili.com/account/dynamic');
+      _history.go('https://t.bilibili.com/?tab=8');
     },
     // 设置窗口
     toggleConfig: function() {
@@ -368,6 +368,8 @@ function resizeMainWindow() {
   if( url.indexOf('/video/') > -1 || url.indexOf('html5player.html') > -1 ||
     /\/\/live\.bilibili\.com\/(h5\/)?\d+/.test(url) || url.indexOf('bangumi/play/') > -1 ) {
     targetWindowType = 'windowSizeMini';
+  } else if( url.indexOf('t.bilibili.com/?tab=8') > -1 ) {
+    targetWindowType = 'windowSizeFeed';
   } else {
     targetWindowType = 'windowSizeDefault';
   }
