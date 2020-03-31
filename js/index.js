@@ -8,7 +8,7 @@ const userAgent = {
   desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
   mobile: 'bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233'
 };
-const videoUrlPrefix = 'https://www.bilibili.com/video/av';
+const videoUrlPrefix = 'https://www.bilibili.com/video/';
 const liveUrlPrefix  = 'https://live.bilibili.com/';
 let wv, wrapper;
 let _isLastNavigatePartSelect = false;
@@ -21,16 +21,16 @@ var _history = {
   go: function(target, noNewHistory) {
     // 显示loading mask
     wrapper.classList.add('loading');
-    let m;
+    let vid = utils.getVid(target);
     let live;
-    if(m = /video\/av(\d+(?:\/\?p=\d+)?)/.exec(target)) {
+    if( vid ) {
       // case 1 普通视频播放页，转跳对应pc页
-      wv.loadURL(videoUrlPrefix + m[1], {
+      wv.loadURL(videoUrlPrefix + vid, {
         userAgent: userAgent.desktop
       });
-      !noNewHistory && _history.add(videoUrlPrefix + m[1]);
+      !noNewHistory && _history.add(videoUrlPrefix + vid);
       v.disableDanmakuButton = false;
-      utils.log(`路由：类型① 视频详情页\n原地址：${target}\n转跳地址：${videoUrlPrefix+m[1]}`);
+      utils.log(`路由：类型① 视频详情页\n原地址：${target}\n转跳地址：${videoUrlPrefix+vid}`);
     } else if( target.indexOf('bangumi/play/') > -1 ) {
       // case 2 番剧播放页
       wv.loadURL(target, {
@@ -71,9 +71,11 @@ var _history = {
   goPart: function(pid) {
     wrapper.classList.add('loading');
     _isLastNavigatePartSelect = true;
-    let av = /av(\d+)/.exec(wv.getURL());
-    if(av) {
-      let url = `${videoUrlPrefix}${av[1]}/?p=${pid}`;
+    // 因为utils.getVid返回的地址是通用的，里面可能已经带了/?p=，所以这里我们单独获取吧
+    const url = wv.getURL();
+    const m = /av\d+/.exec(url) || /BV\w+/.exec(url);
+    if(m) {
+      let url = `${videoUrlPrefix}${m[0]}/?p=${pid}`;
       wv.loadURL(url, {
         userAgent: userAgent.desktop
       });
@@ -122,8 +124,11 @@ var _history = {
   }
 };
 
-function getPartOfVideo(av) {
-  utils.ajax.get(`http://m.bilibili.com/video/av${av}.html`, (res) => {
+function getPartOfVideo(_vid) {
+  // 这里存一个vid变量是方便下面log时区分用的
+  const vid = _vid.startsWith('BV') ? _vid : `av${_vid}`;
+  const url = videoUrlPrefix + (vid.startsWith('BV') ? vid : `${vid}.html`);
+  utils.ajax.get(url, (res) => {
     let re = /"pages":(\[.+?\])/g,
         _m = re.exec(res), m = [];
     if( _m ) {
@@ -137,7 +142,7 @@ function getPartOfVideo(av) {
     } catch(e) {
       utils.log(`解析分p失败：${e}`, _m);
     }
-    utils.log(`获取 av${av} 的分P数据`, m);
+    utils.log(`获取 ${vid} 的分P数据`, m);
     if( m.length ) {
       ipc.send('update-part', m);
       // 有超过1p时自动开启分p窗口
@@ -225,12 +230,19 @@ const v = new Vue({
       utils.log(`路由：手动输入地址 ${target}`);
       // 包含bilibili.com的字符串和纯数字是合法的跳转目标
       if(target.startsWith('http') && target.indexOf('bilibili.com') > -1) {
+        // 直接输入url
         _history.go(target);
         this.naviGotoHide();
       } else if (lv = /^lv(\d+)$/.exec(target)) {
+        // 直播
         _history.go(liveUrlPrefix + lv[1]);
         this.naviGotoHide();
       } else if(/^(\d+)$/.test(target)) {
+        // 纯数字是av号
+        _history.go(videoUrlPrefix + 'av' + target);
+        this.naviGotoHide();
+      } else if(/^(BV\w+)/.test(target)) {
+        // BV号
         _history.go(videoUrlPrefix + target);
         this.naviGotoHide();
       } else {
@@ -353,7 +365,7 @@ var currentWindowType = 'default';
 
 function resizeMainWindow() {
   let targetWindowType, url = wv.getURL();
-  if( url.indexOf('video/av') > -1 || url.indexOf('html5player.html') > -1 ||
+  if( url.indexOf('/video/') > -1 || url.indexOf('html5player.html') > -1 ||
     /\/\/live\.bilibili\.com\/(h5\/)?\d+/.test(url) || url.indexOf('bangumi/play/') > -1 ) {
     targetWindowType = 'windowSizeMini';
   } else {
@@ -405,9 +417,9 @@ function initActionOnWebviewNavigate() {
     wrapper.classList.remove('loading');
     // 根据跳转完成后的真实url决定如何抓取分p
     if( !_isLastNavigatePartSelect ) {
-      let m;
-      if( m = /video\/av(\d+(?:\/\?p=\d+)?)/.exec(url) ) {
-        getPartOfVideo(m[1]);
+      const vid = utils.getVid(url);
+      if( vid ) {
+        getPartOfVideo(vid);
       } else if( url.indexOf('bangumi/play/') > -1 ) {
         getPartOfBangumi(url);
       }
@@ -417,8 +429,14 @@ function initActionOnWebviewNavigate() {
   });
   // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
   wv.addEventListener('will-navigate', function(e) {
-    utils.log(`触发 will-navigate 事件，目标: ${e.url}`);
-    _history.go(e.url);
+    if( e.url.startsWith('bilibili://') ) {
+      utils.log(`网页端尝试拉起App: ${e.url}`);
+      e.preventDefault();
+      return false;
+    } else {
+      utils.log(`触发 will-navigate 事件，目标: ${e.url}`);
+      _history.go(e.url);
+    }
   });
   // webview中点击target="_blank"的链接时在当前webview打开
   wv.addEventListener('new-window', function(e) {
@@ -431,7 +449,7 @@ function initActionOnWebviewNavigate() {
     // 此时并不会触发新的will-navigate，但是我们又需要触发anime/6301/play页面的getPartOfBangumi事件，所以需要在这里catch一下
     let m;
     utils.log(`触发 did-get-redirect-request 事件，目标：${e.newURL}`);
-    if( /av\d+/.test(e.oldURL) && (m = /\/bangumi\/play\/ep(\d+)/.exec(e.newURL)) ) {
+    if( utils.getVid(e.oldURL) && (m = /\/bangumi\/play\/ep(\d+)/.exec(e.newURL)) ) {
       getPartOfBangumi(m[1]);
     }
   });
