@@ -65,6 +65,21 @@ function getVid(url) {
     return m ? m[1] : null;
 }
 
+function getFirstJsonFromString(text) {
+    const len = text.length;
+    for( let i = 0; i < len; i++ ) {
+        if( text[i] === '}' ) {
+            try {
+                const str = text.substr(0, i+1);
+                return JSON.parse(str);
+            } catch(e) {
+                // 
+            }
+        }
+    }
+    return false;
+}
+
 Date.prototype.format = function() {
     return `${this.toLocaleDateString()} ${this.toTimeString().split(' ')[0]} ` + 
             ('000' + this.getMilliseconds()).slice(-3);
@@ -97,6 +112,7 @@ module.exports = {
     config,
     ajax,
     getVid,
+    getFirstJsonFromString,
     log(message, data, override) {
         log.write({
             message,

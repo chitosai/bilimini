@@ -124,29 +124,28 @@ var _history = {
   }
 };
 
-function getPartOfVideo(_vid) {
-  // 这里存一个vid变量是方便下面log时区分用的
-  const vid = _vid.startsWith('BV') ? _vid : `av${_vid}`;
-  const url = videoUrlPrefix + (vid.startsWith('BV') ? vid : `${vid}.html`);
-  utils.ajax.get(url, (res) => {
-    let re = /"pages":(\[.+?\])/g,
-        _m = re.exec(res), m = [];
-    if( _m ) {
-      _m = _m[1];
+function getPartOfVideo(vid) {
+  utils.ajax.get(videoUrlPrefix + vid, (res) => {
+    // 用window.__INITIAL_STATE__=当标识，找到之后文本中包含的第一个完整json
+    const index = res.indexOf('window.__INITIAL_STATE__=');
+    const text = res.substr(index + 25);
+    const json = utils.getFirstJsonFromString(text);
+    if( !json ) {
+      utils.log('获取分p的JSON失败', res);
+      return false;
     }
-    try{
-      _m = JSON.parse(_m);
-      m = _m.map((p) => {
-        return p.part;
-      });
-    } catch(e) {
-      utils.log(`解析分p失败：${e}`, _m);
+    let pages;
+    try {
+      pages = json.videoData.pages;
+    } catch(err) {
+      utils.log(`解析分p失败：${err}`, json);
+      return false;
     }
-    utils.log(`获取 ${vid} 的分P数据`, m);
-    if( m.length ) {
-      ipc.send('update-part', m);
+    utils.log(`获取 ${vid} 的分P数据`, pages);
+    if( pages.length ) {
+      ipc.send('update-part', pages.map(p => p.part));
       // 有超过1p时自动开启分p窗口
-      if( m.length > 1 ) {
+      if( pages.length > 1 ) {
         ipc.send('show-select-part-window');
         v.disablePartButton = false;
       }

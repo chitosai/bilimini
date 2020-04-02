@@ -10,8 +10,8 @@
 		<span id="close" @click="closeWindow">x</span>
 		<div id="select-part" class="list">
 			<p class="list-title">视频分Part</p>
-			<div class="item part" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span v-show="index == currentPart">● </span>{{ index}}、{{ title }}</div>
-			<div class="item part" v-for="part in bangumiPartList" :title="part.title" @click="selectBangumiPart(part)"><span v-show="part.index == currentPart">● </span>{{ part.index + 1 }}、{{ part.title }}</div>
+			<div class="item part" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span v-show="index == currentPart">● </span>{{ index + 1 }}) {{ title }}</div>
+			<div class="item part" v-for="part in bangumiPartList" :title="part.title" @click="selectBangumiPart(part)"><span v-show="part.index == currentPart">● </span>{{ part.index + 1 }}) {{ part.title }}</div>
 		</div>
 	</div>
 
