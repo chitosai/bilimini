@@ -84,14 +84,9 @@ var _history = {
     }
   },
   goBangumiPart(ep) {
-    wrapper.classList.add('loading');
+    utils.log(`路由：选择番剧分p`);
     _isLastNavigatePartSelect = true;
-    let url = 'https://www.bilibili.com/bangumi/play/ep' + ep;
-    wv.loadURL(url, {
-      userAgent: userAgent.desktop
-    });
-    _history.replace(url);
-    utils.log(`路由：选择番剧分p，epid：${ep}，转跳地址：${url}`);
+    _history.go(videoUrlPrefix + ep.bvid);
   },
   add: function(url) {
     // 丢掉当前位置往后的history
@@ -131,19 +126,19 @@ function getPartOfVideo(vid) {
     const text = res.substr(index + 25);
     const json = utils.getFirstJsonFromString(text);
     if( !json ) {
-      utils.log('获取分p的JSON失败', res);
+      utils.log('获取视频分p数据失败', res);
       return false;
     }
-    let pages;
+    let parts;
     try {
-      pages = json.videoData.pages;
+      parts = json.videoData.parts;
     } catch(err) {
-      utils.log(`解析分p失败：${err}`, json);
+      utils.log(`解析视频分p失败：${err}`, json);
       return false;
     }
-    utils.log(`获取 ${vid} 的分P数据`, pages);
-    if( pages.length ) {
-      ipc.send('update-part', pages.map(p => p.part));
+    utils.log(`获取视频 ${vid} 的分P数据成功`);
+    if( parts.length ) {
+      ipc.send('update-part', parts.map(p => p.part));
       // 有超过1p时自动开启分p窗口
       if( pages.length > 1 ) {
         ipc.send('show-select-part-window');
@@ -153,37 +148,41 @@ function getPartOfVideo(vid) {
       ipc.send('update-part', null);
       v.disablePartButton = true;
     }
-  }, 'mobile');
+  });
 }
 
 function getPartOfBangumi(url) {
   utils.ajax.get(url, (res) => {
-    let re = /"ep_id":(\d+),"episode_status":\d+,"from":"bangumi","index":"(\d+)","index_title":"(.+?)"/g,
-        _m = null, m = [];
-    while( _m = re.exec(res) ) {
-      // 正则抓取的时候会多抓到一条「当前ep」的数据，所以生成完整ep列表的时候要手动去个重
-      if( !m.find((p) => {
-        return p.ep == _m[1];
-      }) ) {
-        m.push({
-          ep: _m[1],
-          index: _m[2] - 1,
-          title: _m[3]
-        });
-      }
+    // 用window.__INITIAL_STATE__=当标识，找到之后文本中包含的第一个完整json
+    const index = res.indexOf('window.__INITIAL_STATE__=');
+    const text = res.substr(index + 25);
+    const json = utils.getFirstJsonFromString(text);
+    if( !json ) {
+      utils.log('获取番剧分p数据失败', res);
+      return false;
     }
-    if( m.length ) {
-      m.sort((a, b) => {
-        return a.index > b.index;
-      });
-      utils.log(`获取番剧 ${url} 分P数据`, m);
-      ipc.send('update-bangumi-part', m);
-      if( m.length > 1 ) {
+    let parts;
+    try {
+      parts = json.epList;
+    } catch(err) {
+      utils.log(`解析番剧分p失败：${err}`, json);
+      return false;
+    }
+    utils.log(`获取番剧 ${url} 的分P数据成功`);
+    if( parts.length ) {
+      ipc.send('update-bangumi-part', parts.map(p => {
+        return {
+          epid: p.i,
+          aid: p.aid,
+          bvid: p.bvid,
+          title: p.longTitle
+        };
+      }));
+      if( parts.length > 1 ) {
         ipc.send('show-select-part-window');
         v.disablePartButton = false;
       }
     } else {
-      utils.error(`分析 ${url} 的分P数据失败`);
       ipc.send('update-part', null);
       v.disablePartButton = true;
     }
@@ -429,6 +428,7 @@ function initActionOnWebviewNavigate() {
         getPartOfBangumi(url);
       }
     } else {
+      ipc.send('toggle-select-part-window');
       _isLastNavigatePartSelect = false;
     }
   });
