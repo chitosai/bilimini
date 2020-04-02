@@ -432,7 +432,6 @@ function initActionOnWebviewNavigate() {
       _isLastNavigatePartSelect = false;
     }
   });
-  // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
   wv.addEventListener('will-navigate', function(e) {
     if( e.url.startsWith('bilibili://') ) {
       utils.log(`网页端尝试拉起App: ${e.url}`);
@@ -447,16 +446,6 @@ function initActionOnWebviewNavigate() {
   wv.addEventListener('new-window', function(e) {
     utils.log(`触发 new-window 事件，目标: ${e.url}`);
     _history.go(e.url);
-  });
-  // 服务端要求302转跳
-  wv.addEventListener('did-get-redirect-request', function(e) {
-    // 栗子：请求 http://www.bilibili.com/video/av12718065/ 时，会被302到 http://bangumi.bilibili.com/anime/6301/play#113085
-    // 此时并不会触发新的will-navigate，但是我们又需要触发anime/6301/play页面的getPartOfBangumi事件，所以需要在这里catch一下
-    let m;
-    utils.log(`触发 did-get-redirect-request 事件，目标：${e.newURL}`);
-    if( utils.getVid(e.oldURL) && (m = /\/bangumi\/play\/ep(\d+)/.exec(e.newURL)) ) {
-      getPartOfBangumi(m[1]);
-    }
   });
 }
 
@@ -489,7 +478,7 @@ function initActionOnEsc() {
   ipc.on('press-esc', (ev) => {
     let url = wv.getURL();
     // 如果在播放页按下esc就触发后退
-    if( /video\/av\d+/.test(url) || url.indexOf('html5player.html') > -1 ) {
+    if( utils.getVid(url) || url.indexOf('bangumi/play') > -1 ) {
       utils.log('在播放器页面按下ESC，后退至上一页');
       _history.goBack();
     }
