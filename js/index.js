@@ -15,6 +15,7 @@ let _isLastNavigatePartSelect = false;
 let _isLastestVersionChecked = false;
 
 // 保存用户浏览记录
+let _lastNavigation = new Date();
 var _history = {
   stack: ['https://m.bilibili.com/index.html'],
   pos: 0,
@@ -23,6 +24,14 @@ var _history = {
     wrapper.classList.add('loading');
     let vid = utils.getVid(target);
     let live;
+    // 如果两次转跳的时间间隔小于3s，就认为是B站发起的redirect
+    // 这时为保证后退时不会陷入循环，手动删除一条历史
+    const now = new Date();
+    if( now - _lastNavigation < 3000 ) {
+      utils.log('两次转跳间隔小于3s，疑似redirect');
+      _history.pop();
+    }
+    _lastNavigation = now;
     if( vid ) {
       // case 1 普通视频播放页，转跳对应pc页
       wv.loadURL(videoUrlPrefix + vid, {
@@ -47,23 +56,13 @@ var _history = {
       v.disableDanmakuButton = false;
       utils.log(`路由：类型③ 直播页面\n原地址：${target}\n转跳地址：${liveUrlPrefix+live[2]}`);
     } else {
-      // 我们假设html5player的页面都是通过inject.js转跳进入的，所以删除上一条历史记录来保证goBack操作的正确
-      // 如果用户自己输入一个html5player的播放地址，那就管不了了
-      if(target.indexOf('html5player.html') > -1) {
-        // html5player.html有防盗链验证，ua似乎必须是桌面浏览器
-        wv.loadURL(target, {
-          userAgent: userAgent.desktop
-        });
-        _history.replace(target);
-      } else {
-        // 其他链接不做操作直接打开
-        wv.loadURL(target, {
-          userAgent: userAgent.mobile
-        });
-        !noNewHistory && _history.add(target);
-        // 清除分p
-        ipc.send('update-part', null);
-      }
+      // 其他链接不做操作直接打开
+      wv.loadURL(target, {
+        userAgent: userAgent.mobile
+      });
+      !noNewHistory && _history.add(target);
+      // 清除分p
+      ipc.send('update-part', null);
       v.disableDanmakuButton = true;
       utils.log(`路由：类型④ 未归类\n原地址：${target}\n转跳地址：${target}`);
     }
@@ -96,6 +95,10 @@ var _history = {
   },
   replace: function(url) {
     _history.stack[_history.stack.length - 1] = url;
+  },
+  pop: function() {
+    _history.stack.pop();
+    _history.pos--;
   },
   goBack: function() {
     if(!_history.canGoBack()) {
@@ -131,7 +134,7 @@ function getPartOfVideo(vid) {
     }
     let parts;
     try {
-      parts = json.videoData.parts;
+      parts = json.videoData.pages;
     } catch(err) {
       utils.log(`解析视频分p失败：${err}`, json);
       return false;
@@ -140,7 +143,7 @@ function getPartOfVideo(vid) {
     if( parts.length ) {
       ipc.send('update-part', parts.map(p => p.part));
       // 有超过1p时自动开启分p窗口
-      if( pages.length > 1 ) {
+      if( parts.length > 1 ) {
         ipc.send('show-select-part-window');
         v.disablePartButton = false;
       }
@@ -162,22 +165,27 @@ function getPartOfBangumi(url) {
       return false;
     }
     let parts;
+    let currentPartId = 0;
     try {
       parts = json.epList;
+      currentPartId = json.epInfo.i;
     } catch(err) {
       utils.log(`解析番剧分p失败：${err}`, json);
       return false;
     }
     utils.log(`获取番剧 ${url} 的分P数据成功`);
     if( parts.length ) {
-      ipc.send('update-bangumi-part', parts.map(p => {
-        return {
-          epid: p.i,
-          aid: p.aid,
-          bvid: p.bvid,
-          title: p.longTitle
-        };
-      }));
+      ipc.send('update-bangumi-part', {
+        currentPartId,
+        parts: parts.map(p => {
+          return {
+            epid: p.i,
+            aid: p.aid,
+            bvid: p.bvid,
+            title: p.longTitle
+          };
+        })
+      });
       if( parts.length > 1 ) {
         ipc.send('show-select-part-window');
         v.disablePartButton = false;
@@ -428,7 +436,6 @@ function initActionOnWebviewNavigate() {
         getPartOfBangumi(url);
       }
     } else {
-      ipc.send('toggle-select-part-window');
       _isLastNavigatePartSelect = false;
     }
   });

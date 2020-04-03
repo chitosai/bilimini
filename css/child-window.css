@@ -50,6 +50,10 @@ body {
 .item-range:hover {
   background: #f25d8e;
 }
+.current-ep {
+  color: #fff;
+  font-weight: bold;
+}
 .btn-submit {
   padding: 3px 5px 3px 10px;
 }
