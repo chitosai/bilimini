@@ -365,7 +365,11 @@ function saveWindowSizeOnResize() {
   window.addEventListener('resize', function() {
     clearTimeout(saveWindowSizeTimer);
     saveWindowSizeTimer = setTimeout(function() {
-      utils.config.set(currentWindowType, [window.innerWidth, window.innerHeight]);
+      const currentSize = utils.config.get(currentWindowType);
+      const newSize = [window.innerWidth, window.innerHeight];
+      if( (currentSize[0] != newSize[0]) || (currentSize[1] != newSize[1]) ) {
+        utils.config.set(currentWindowType, newSize);
+      }
     }, 600);
   });
 }
@@ -390,6 +394,10 @@ function resizeMainWindow() {
       rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
       targetSize = utils.config.get(targetWindowType),
       targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
+    
+    // 以窗口右下角为基点变换尺寸，但是要保证左上角不会到屏幕外去
+    targetPosition[0] = targetPosition[0] > 10 ? targetPosition[0] : 10;
+    targetPosition[1] = targetPosition[1] > 10 ? targetPosition[1] : 10;
 
     mw.setBounds({
       x: targetPosition[0],
