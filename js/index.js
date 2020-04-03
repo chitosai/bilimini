@@ -15,6 +15,7 @@ let _isLastNavigatePartSelect = false;
 let _isLastestVersionChecked = false;
 
 // 保存用户浏览记录
+let _lastNavigation = new Date();
 var _history = {
   stack: ['https://m.bilibili.com/index.html'],
   pos: 0,
@@ -23,6 +24,14 @@ var _history = {
     wrapper.classList.add('loading');
     let vid = utils.getVid(target);
     let live;
+    // 如果两次转跳的时间间隔小于3s，就认为是B站发起的redirect
+    // 这时为保证后退时不会陷入循环，手动删除一条历史
+    const now = new Date();
+    if( now - _lastNavigation < 3000 ) {
+      utils.log('两次转跳间隔小于3s，疑似redirect');
+      _history.pop();
+    }
+    _lastNavigation = now;
     if( vid ) {
       // case 1 普通视频播放页，转跳对应pc页
       wv.loadURL(videoUrlPrefix + vid, {
@@ -47,23 +56,13 @@ var _history = {
       v.disableDanmakuButton = false;
       utils.log(`路由：类型③ 直播页面\n原地址：${target}\n转跳地址：${liveUrlPrefix+live[2]}`);
     } else {
-      // 我们假设html5player的页面都是通过inject.js转跳进入的，所以删除上一条历史记录来保证goBack操作的正确
-      // 如果用户自己输入一个html5player的播放地址，那就管不了了
-      if(target.indexOf('html5player.html') > -1) {
-        // html5player.html有防盗链验证，ua似乎必须是桌面浏览器
-        wv.loadURL(target, {
-          userAgent: userAgent.desktop
-        });
-        _history.replace(target);
-      } else {
-        // 其他链接不做操作直接打开
-        wv.loadURL(target, {
-          userAgent: userAgent.mobile
-        });
-        !noNewHistory && _history.add(target);
-        // 清除分p
-        ipc.send('update-part', null);
-      }
+      // 其他链接不做操作直接打开
+      wv.loadURL(target, {
+        userAgent: userAgent.mobile
+      });
+      !noNewHistory && _history.add(target);
+      // 清除分p
+      ipc.send('update-part', null);
       v.disableDanmakuButton = true;
       utils.log(`路由：类型④ 未归类\n原地址：${target}\n转跳地址：${target}`);
     }
@@ -84,14 +83,9 @@ var _history = {
     }
   },
   goBangumiPart(ep) {
-    wrapper.classList.add('loading');
+    utils.log(`路由：选择番剧分p`);
     _isLastNavigatePartSelect = true;
-    let url = 'https://www.bilibili.com/bangumi/play/ep' + ep;
-    wv.loadURL(url, {
-      userAgent: userAgent.desktop
-    });
-    _history.replace(url);
-    utils.log(`路由：选择番剧分p，epid：${ep}，转跳地址：${url}`);
+    _history.go(videoUrlPrefix + ep.bvid);
   },
   add: function(url) {
     // 丢掉当前位置往后的history
@@ -101,6 +95,10 @@ var _history = {
   },
   replace: function(url) {
     _history.stack[_history.stack.length - 1] = url;
+  },
+  pop: function() {
+    _history.stack.pop();
+    _history.pos--;
   },
   goBack: function() {
     if(!_history.canGoBack()) {
@@ -124,29 +122,28 @@ var _history = {
   }
 };
 
-function getPartOfVideo(_vid) {
-  // 这里存一个vid变量是方便下面log时区分用的
-  const vid = _vid.startsWith('BV') ? _vid : `av${_vid}`;
-  const url = videoUrlPrefix + (vid.startsWith('BV') ? vid : `${vid}.html`);
-  utils.ajax.get(url, (res) => {
-    let re = /"pages":(\[.+?\])/g,
-        _m = re.exec(res), m = [];
-    if( _m ) {
-      _m = _m[1];
+function getPartOfVideo(vid) {
+  utils.ajax.get(videoUrlPrefix + vid, (res) => {
+    // 用window.__INITIAL_STATE__=当标识，找到之后文本中包含的第一个完整json
+    const index = res.indexOf('window.__INITIAL_STATE__=');
+    const text = res.substr(index + 25);
+    const json = utils.getFirstJsonFromString(text);
+    if( !json ) {
+      utils.log('获取视频分p数据失败', res);
+      return false;
     }
-    try{
-      _m = JSON.parse(_m);
-      m = _m.map((p) => {
-        return p.part;
-      });
-    } catch(e) {
-      utils.log(`解析分p失败：${e}`, _m);
+    let parts;
+    try {
+      parts = json.videoData.pages;
+    } catch(err) {
+      utils.log(`解析视频分p失败：${err}`, json);
+      return false;
     }
-    utils.log(`获取 ${vid} 的分P数据`, m);
-    if( m.length ) {
-      ipc.send('update-part', m);
+    utils.log(`获取视频 ${vid} 的分P数据成功`);
+    if( parts.length ) {
+      ipc.send('update-part', parts.map(p => p.part));
       // 有超过1p时自动开启分p窗口
-      if( m.length > 1 ) {
+      if( parts.length > 1 ) {
         ipc.send('show-select-part-window');
         v.disablePartButton = false;
       }
@@ -154,37 +151,46 @@ function getPartOfVideo(_vid) {
       ipc.send('update-part', null);
       v.disablePartButton = true;
     }
-  }, 'mobile');
+  });
 }
 
 function getPartOfBangumi(url) {
   utils.ajax.get(url, (res) => {
-    let re = /"ep_id":(\d+),"episode_status":\d+,"from":"bangumi","index":"(\d+)","index_title":"(.+?)"/g,
-        _m = null, m = [];
-    while( _m = re.exec(res) ) {
-      // 正则抓取的时候会多抓到一条「当前ep」的数据，所以生成完整ep列表的时候要手动去个重
-      if( !m.find((p) => {
-        return p.ep == _m[1];
-      }) ) {
-        m.push({
-          ep: _m[1],
-          index: _m[2] - 1,
-          title: _m[3]
-        });
-      }
+    // 用window.__INITIAL_STATE__=当标识，找到之后文本中包含的第一个完整json
+    const index = res.indexOf('window.__INITIAL_STATE__=');
+    const text = res.substr(index + 25);
+    const json = utils.getFirstJsonFromString(text);
+    if( !json ) {
+      utils.log('获取番剧分p数据失败', res);
+      return false;
     }
-    if( m.length ) {
-      m.sort((a, b) => {
-        return a.index > b.index;
+    let parts;
+    let currentPartId = 0;
+    try {
+      parts = json.epList;
+      currentPartId = json.epInfo.i;
+    } catch(err) {
+      utils.log(`解析番剧分p失败：${err}`, json);
+      return false;
+    }
+    utils.log(`获取番剧 ${url} 的分P数据成功`);
+    if( parts.length ) {
+      ipc.send('update-bangumi-part', {
+        currentPartId,
+        parts: parts.map(p => {
+          return {
+            epid: p.i,
+            aid: p.aid,
+            bvid: p.bvid,
+            title: p.longTitle
+          };
+        })
       });
-      utils.log(`获取番剧 ${url} 分P数据`, m);
-      ipc.send('update-bangumi-part', m);
-      if( m.length > 1 ) {
+      if( parts.length > 1 ) {
         ipc.send('show-select-part-window');
         v.disablePartButton = false;
       }
     } else {
-      utils.error(`分析 ${url} 的分P数据失败`);
       ipc.send('update-part', null);
       v.disablePartButton = true;
     }
@@ -359,7 +365,11 @@ function saveWindowSizeOnResize() {
   window.addEventListener('resize', function() {
     clearTimeout(saveWindowSizeTimer);
     saveWindowSizeTimer = setTimeout(function() {
-      utils.config.set(currentWindowType, [window.innerWidth, window.innerHeight]);
+      const currentSize = utils.config.get(currentWindowType);
+      const newSize = [window.innerWidth, window.innerHeight];
+      if( (currentSize[0] != newSize[0]) || (currentSize[1] != newSize[1]) ) {
+        utils.config.set(currentWindowType, newSize);
+      }
     }, 600);
   });
 }
@@ -384,6 +394,10 @@ function resizeMainWindow() {
       rightBottomPosition = [leftTopPosition[0] + currentSize[0], leftTopPosition[1] + currentSize[1]],
       targetSize = utils.config.get(targetWindowType),
       targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
+    
+    // 以窗口右下角为基点变换尺寸，但是要保证左上角不会到屏幕外去
+    targetPosition[0] = targetPosition[0] > 10 ? targetPosition[0] : 10;
+    targetPosition[1] = targetPosition[1] > 10 ? targetPosition[1] : 10;
 
     mw.setBounds({
       x: targetPosition[0],
@@ -433,7 +447,6 @@ function initActionOnWebviewNavigate() {
       _isLastNavigatePartSelect = false;
     }
   });
-  // 当用户点到视频播放页时跳到桌面版页面，桌面版的h5播放器弹幕效果清晰一点
   wv.addEventListener('will-navigate', function(e) {
     if( e.url.startsWith('bilibili://') ) {
       utils.log(`网页端尝试拉起App: ${e.url}`);
@@ -448,16 +461,6 @@ function initActionOnWebviewNavigate() {
   wv.addEventListener('new-window', function(e) {
     utils.log(`触发 new-window 事件，目标: ${e.url}`);
     _history.go(e.url);
-  });
-  // 服务端要求302转跳
-  wv.addEventListener('did-get-redirect-request', function(e) {
-    // 栗子：请求 http://www.bilibili.com/video/av12718065/ 时，会被302到 http://bangumi.bilibili.com/anime/6301/play#113085
-    // 此时并不会触发新的will-navigate，但是我们又需要触发anime/6301/play页面的getPartOfBangumi事件，所以需要在这里catch一下
-    let m;
-    utils.log(`触发 did-get-redirect-request 事件，目标：${e.newURL}`);
-    if( utils.getVid(e.oldURL) && (m = /\/bangumi\/play\/ep(\d+)/.exec(e.newURL)) ) {
-      getPartOfBangumi(m[1]);
-    }
   });
 }
 
@@ -490,7 +493,7 @@ function initActionOnEsc() {
   ipc.on('press-esc', (ev) => {
     let url = wv.getURL();
     // 如果在播放页按下esc就触发后退
-    if( /video\/av\d+/.test(url) || url.indexOf('html5player.html') > -1 ) {
+    if( utils.getVid(url) || url.indexOf('bangumi/play') > -1 ) {
       utils.log('在播放器页面按下ESC，后退至上一页');
       _history.goBack();
     }
