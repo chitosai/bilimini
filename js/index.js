@@ -5,11 +5,11 @@ const shell = require('electron').shell;
 const appData = require('./package.json');
 const utils = require('./js/utils.js');
 const userAgent = {
-  desktop: 'bilimini Desktop like Mozilla/233 (Chrome and Safari)',
+  desktop: 'bilimini Desktop like Mozilla/233 (Windows NT or OSX) AppleWebKit like Gecko or not (Chrome and Safari both OK)',
   mobile: 'bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233'
 };
 const videoUrlPrefix = 'https://www.bilibili.com/video/';
-const liveUrlPrefix  = 'https://live.bilibili.com/';
+const liveUrlPrefix  = 'https://live.bilibili.com/blanc/';
 let wv, wrapper;
 let _isLastNavigatePartSelect = false;
 let _isLastestVersionChecked = false;
@@ -48,7 +48,7 @@ var _history = {
       !noNewHistory && _history.add(target);
       v.disableDanmakuButton = false;
       utils.log(`路由：类型② 番剧播放页\n地址：${target}`);
-    } else if ( live = /live\.bilibili\.com\/(h5\/)?(\d+).*/.exec(target) ) {
+    } else if ( live = /live\.bilibili\.com\/(h5\/||blanc\/)?(\d+).*/.exec(target) ) {
       wv.loadURL(liveUrlPrefix + live[2], {
         userAgent: userAgent.desktop
       });
@@ -380,7 +380,7 @@ var currentWindowType = 'default';
 function resizeMainWindow() {
   let targetWindowType, url = wv.getURL();
   if( url.indexOf('/video/') > -1 || url.indexOf('html5player.html') > -1 ||
-    /\/\/live\.bilibili\.com\/(h5\/)?\d+/.test(url) || url.indexOf('bangumi/play/') > -1 ) {
+    /\/\/live\.bilibili\.com\/blanc\/\d+/.test(url) || url.indexOf('bangumi/play/') > -1 ) {
     targetWindowType = 'windowSizeMini';
   } else if( url.indexOf('t.bilibili.com/?tab=8') > -1 ) {
     targetWindowType = 'windowSizeFeed';
