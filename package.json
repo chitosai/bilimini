@@ -23,6 +23,6 @@
   "dependencies": {
     "electron-is-accelerator": "^0.1.2",
     "electron-store": "^1.1.0",
-    "graceful-fs": "^4.1.11"
+    "graceful-fs": "^4.2.3"
   }
 }
