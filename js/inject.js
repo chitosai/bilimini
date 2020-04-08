@@ -18,7 +18,8 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   // 普通视频页：自动最大化播放器
-  if( window.location.href.indexOf('video/av') > -1 || 
+  else if( window.location.href.indexOf('video/av') > -1 || 
+      window.location.href.indexOf('video/BV') > -1 ||
       window.location.href.indexOf('html5player.html') > -1 ||
       window.location.href.indexOf('bangumi/play/') > -1 ) {
     let playerInitCheck = setInterval(() => {
@@ -47,7 +48,7 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   // 番剧页：获取播放器iframe地址并转跳
-  if( /anime\/\d+\/play/.test(window.location.href) ) {
+  else if( /anime\/\d+\/play/.test(window.location.href) ) {
     var playerInitCheck = setInterval(() => {
       let ifr;
       if( ifr = document.querySelector('iframe') ) {
@@ -61,8 +62,25 @@ window.addEventListener('DOMContentLoaded', function() {
     }, 50), checkCount = 0;
   }
 
+  // 动态页重做样式
+  else if( window.location.href.includes('t.bilibili.com/?tab=8') ) {
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = '#bili-header-m, .left-panel, .right-panel, .center-panel > .section-block, .sticky-bar { display: none !important }' +
+                      '.home-content, .center-panel { width: 100% !important; }' +
+                      '.card { min-width: 0 !important;}'
+    document.head.appendChild(style)
+  }
+
+  // /blanc/:id才是真正的直播播放器所在页面
+  // 它有时会作为iframe嵌入到直播间里，此时无法直接操作到播放器，所以转跳到实际播放器所在页面
+  const liveId = /\/\/live\.bilibili\.com\/(\d+)/.exec(window.location.href);
+  if ( liveId ) {
+    window.location.href = `https://live.bilibili.com/blanc/${liveId[1]}?liteVersion=true`;
+  }
+
   // 直播使用桌面版 HTML5 直播播放器
-  if ( /\/\/live\.bilibili\.com\/\d+/.test(window.location.href) ) {
+  else if ( /\/\/live\.bilibili\.com\/blanc\/\d+/.test(window.location.href) ) {
     let playerInitCheck = setInterval(() => {
       // 通过查询 HTML5 播放器 DIV 来判断页面加载
       if( document.querySelector('.bp-no-flash-tips') ) {
@@ -84,20 +102,6 @@ window.addEventListener('DOMContentLoaded', function() {
         clearInterval(playerInitCheck);
       }
     }, 100), checkCount = 0;
-  }
-
-  // 动态页重做样式
-  if( window.location.href.includes('/account/dynamic') ) {
-    const style = document.createElement('style');
-    style.type = 'text/css';
-    style.innerHTML = '.float_window, .z_top, .index-nav, .footer, .sd, .dyn-tab { display: none !important }' +
-                      'html, body { min-width: 0 !important; }' + 
-                      '.main-inner { width: auto !important; }' + 
-                      '.stm-ly { margin: 0 !important; }' + 
-                      '.stm-ly > .ct { margin-left: 0 !important; }' + 
-                      '.stm-ly .stm-lst li .rside, .stm-ly .stm-tag-push-wrp .rside { padding-left: 0 !important; }' + 
-                      '.stm-ly .stm-lst li .lside, .stm-ly .stm-tag-push-wrp .lside { display: none !important; }';
-    document.head.appendChild(style)
   }
 
   // 移除app广告

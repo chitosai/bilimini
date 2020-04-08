@@ -141,6 +141,12 @@ body.win .showAbout #topbar {
   text-indent: -1px;
   transform: rotate(180deg);
 }
+#navi-home {
+  background-image: url('../images/home.png');
+  background-position: 2px 2px;
+  background-repeat: no-repeat;
+  background-size: 11px;
+}
 #navi-goto {
   border-radius: 3px;
   font-size: 14px;

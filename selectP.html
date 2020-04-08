@@ -10,8 +10,8 @@
 		<span id="close" @click="closeWindow">x</span>
 		<div id="select-part" class="list">
 			<p class="list-title">视频分Part</p>
-			<div class="item part" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span v-show="index == currentPart">● </span>{{ index}}、{{ title }}</div>
-			<div class="item part" v-for="part in bangumiPartList" :title="part.title" @click="selectBangumiPart(part)"><span v-show="part.index == currentPart">● </span>{{ part.index + 1 }}、{{ part.title }}</div>
+			<div class="item part" :class="{'current-ep': index === currentPartId}" v-for="(title, index) in partList" :title="title" @click="selectPart(index)"><span v-show="index == currentPartId">● </span>{{ index + 1 }}) {{ title }}</div>
+			<div class="item part" :class="{'current-ep': part.epid === currentPartId}" v-for="part in bangumiPartList" :title="part.title" @click="selectBangumiPart(part)"><span v-show="part.epid == currentPartId">● </span>{{ part.epid + 1 }}) {{ part.title }}</div>
 		</div>
 	</div>
 
@@ -24,16 +24,16 @@
 			data: {
 				partList: null,
 				bangumiPartList: null,
-				currentPart: 0
+				currentPartId: 0
 			},
 			methods: {
 				selectPart(index) {
-					this.currentPart = index;
+					this.currentPartId = index;
 					ipc.send('select-part', index + 1);
 				},
 				selectBangumiPart(part) {
-					this.currentPart = part.index;
-					ipc.send('select-bangumi-part', part.ep);
+					this.currentPartId = part.epid;
+					ipc.send('select-bangumi-part', part);
 				},
 				closeWindow() {
 				  remote.getCurrentWindow().hide();
@@ -43,15 +43,15 @@
 
 		// 更新分p列表
 		ipc.on('update-part', (ev, partList) => {
-			v.currentPart = 0;
+			v.currentPartId = 0;
 			v.partList = partList;
 			v.bangumiPartList = null;
 		});
 		// 番剧分p
-		ipc.on('update-bangumi-part', (ev, partList) => {
-			v.currentPart = 0;
+		ipc.on('update-bangumi-part', (ev, data) => {
+			v.currentPartId = data.currentPartId;
 			v.partList = null;
-			v.bangumiPartList = partList;
+			v.bangumiPartList = data.parts;
 		});
 
 		window.onerror = function(err, f, line) {
