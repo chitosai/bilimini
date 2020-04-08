@@ -2,9 +2,8 @@ name: auto-build
 
 on: 
   push:
-    branches:
-      - master
-      - ci
+    tags:
+      - v*
 
 jobs:
   release:
