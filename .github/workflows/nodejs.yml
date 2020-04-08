@@ -1,9 +1,10 @@
 name: auto-build
 
-on: push
-  branches:
-    - master
-    - ci
+on: 
+  push
+    branches:
+      - master
+      - ci
 
 jobs:
   release:
