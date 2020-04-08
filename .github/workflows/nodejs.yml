@@ -1,6 +1,9 @@
 name: auto-build
 
 on: push
+  branches:
+    - master
+    - ci
 
 jobs:
   release:
