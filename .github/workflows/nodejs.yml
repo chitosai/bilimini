@@ -1,7 +1,7 @@
 name: auto-build
 
 on: 
-  push
+  push:
     branches:
       - master
       - ci
