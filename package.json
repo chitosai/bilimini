@@ -12,7 +12,7 @@
   "repository": "https://github.com/chitosai/bilimini",
   "author": "TheC",
   "devDependencies": {
-    "electron": "^1.6.2",
+    "electron": "^7.2.4",
     "electron-builder": "next"
   },
   "build": {
