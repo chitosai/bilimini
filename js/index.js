@@ -457,19 +457,27 @@ function initActionOnWebviewNavigate() {
       _history.go(e.url);
     }
   });
+  // b站mobile版看起来是改用pushstate做单页应用了，没法从webview上监听到will-navigate事件了
+  // 只能祭出古老的dirty check了
+  let lastUrl = '';
+  setInterval(function() {
+    const nowUrl = wv.getURL();
+    if( nowUrl != lastUrl ) {
+      if( nowUrl.startsWith('bilibili://') ) {
+        utils.log(`网页端尝试拉起App: ${nowUrl}，已取消`);
+      } else {
+        utils.log(`Dirty-check检测到Webview的url改变，目标: ${nowUrl}`);
+        _history.go(nowUrl);
+      }
+      lastUrl = nowUrl;
+    }
+  }, 200);
   // webview中点击target="_blank"的链接时在当前webview打开
   wv.addEventListener('new-window', function(e) {
     utils.log(`触发 new-window 事件，目标: ${e.url}`);
     _history.go(e.url);
   });
 }
-
-// 无法正常打开页面时显示错误页面
-// function displayErrorPageWhenLoadFail() {
-//     wv.addEventListener('did-fail-load', () => {
-//         wv.loadURL('file://' + __dirname + '/error.html');
-//     });
-// }
 
 // 点击菜单「webview console」时打开webview
 function openWebviewConsoleOnMenuClick() {
