@@ -258,7 +258,7 @@ function initMenu() {
   utils.log('菜单：初始化');
   // 本来我们是不需要菜单的，但是因为mac上app必须有菜单，所以只在mac上做一下
   var template = [{
-      label: app.getName(),
+      label: app.name,
       submenu: [
         { role: 'hide' },
         { role: 'hideothers' },

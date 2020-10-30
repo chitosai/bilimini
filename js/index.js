@@ -12,7 +12,6 @@ const videoUrlPrefix = 'https://www.bilibili.com/video/';
 const liveUrlPrefix  = 'https://live.bilibili.com/blanc/';
 let wv, wrapper;
 let _isLastNavigatePartSelect = false;
-let _isLastestVersionChecked = false;
 
 // 保存用户浏览记录
 let _lastNavigation = new Date();
@@ -308,10 +307,10 @@ const v = new Vue({
 
 // 给body加上platform flag
 function detectPlatform() {
-  if(process.platform.startsWith('win')) {
+  if( process.platform.startsWith('win') ) {
     window.platform = 'win';
     document.body.classList.add('win');
-  } else if(process.platform == 'darwin') {
+  } else if( process.platform == 'darwin' ) {
     window.platform = 'darwin';
     document.body.classList.add('macos');
   }
@@ -319,15 +318,18 @@ function detectPlatform() {
 
 // 检查更新
 function checkUpdateOnInit() {
-  if( _isLastestVersionChecked ) {
+  const now = new Date();
+  const today = `${now.getFullYear()}/${now.getMonth()}/${now.getDate()}`; // 每一天只检查一次更新
+  const lastCheckUpdateDate = utils.config.get('lastCheckUpdateDate');
+  if( today == lastCheckUpdateDate ) {
     return;
-  } else {
-    _isLastestVersionChecked = true;
   }
   utils.ajax.get('http://rakuen.thec.me/bilimini/beacon?_t=' + new Date().getTime(), (res) => {
     var data = JSON.parse(res),
       order = 1,
       buttons = ['取消', '去下载'];
+    // already checked today
+    utils.config.set('lastCheckUpdateDate', today);
     if(window.platform == 'win') {
       order = 0;
       buttons = ['去下载', '取消'];
