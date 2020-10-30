@@ -34,6 +34,14 @@ function openMainWindow() {
   if( opacity < 1 ) {
     windowParams.transparent = true;
   }
+  // 新增两个参数，第一是electron 5.0的安全性要求 ↓
+  // https://www.electronjs.org/docs/tutorial/security#2-do-not-enable-nodejs-integration-for-remote-content
+  // 但是这个参数对架构改动实在太大了，根本不想改。而且bilimini限制了代码只访问b站域名的内容，大体上不会有太多安全问题，所以直接把这个安全要求忽略掉了
+  // 第二个参数是webview在5.0里默认被禁用了，又是个breaking change。。我人都傻了
+  windowParams.webPreferences = {
+    nodeIntegration: true,
+    webviewTag: true
+  }
   mainWindow = new electron.BrowserWindow(windowParams);
   mainWindow.loadURL('file://' + __dirname + '/index.html');
   mainWindow.setAlwaysOnTop(true, 'torn-off-menu');
