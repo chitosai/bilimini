@@ -10,7 +10,7 @@
 
 ![demo](https://github.com/chitosai/bilimini/blob/master/images/demo.gif)
 
-下载地址：[百度网盘](https://pan.baidu.com/s/1jIHnRk6)
+下载地址：[百度网盘](https://pan.baidu.com/s/1jIHnRk6) / [Github](https://github.com/chitosai/bilimini/releases)
 
 
 ## For Developers
@@ -25,6 +25,7 @@ npm start
 ```
 npm run dist
 ```
+
 
 ## 关于功能需求
 
