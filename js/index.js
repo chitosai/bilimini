@@ -566,8 +566,8 @@ function openExternalLink(url) {
 // 把webview里的报错信息log下来
 function logWebviewError() {
   wv.addEventListener('console-message', (err) => {
-    // 我看console.error的level是2，那>1的就都log下来吧
-    if(err.level > 1) {
+    // 目测 0 = verbose 1 = info 2 = warning 3 = error
+    if(err.level > 2) {
       utils.error(`Webview报错\nLine ${err.line}: ${err.message}\nwebview当前url: ${wv.getURL()}`)
     }
   });
