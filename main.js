@@ -89,7 +89,10 @@ var selectPartWindow = null;
 function initSelectPartWindow() {
   utils.log('选p窗口：开始创建');
   selectPartWindow = new electron.BrowserWindow({
-    width: 200, height: 300, frame: false, show: false
+    width: 200, height: 300, frame: false, show: false,
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
   selectPartWindow.loadURL('file://' + __dirname + '/selectP.html');
   selectPartWindow.setAlwaysOnTop(true, 'modal-panel');
@@ -127,7 +130,10 @@ var configWindow = null;
 function initConfigWindow() {
   utils.log('设置窗口：开始创建');
   configWindow = new electron.BrowserWindow({
-    width: 200, height: 200, frame: false, show: false
+    width: 200, height: 200, frame: false, show: false,
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
   configWindow.loadURL('file://' + __dirname + '/config.html');
   configWindow.setAlwaysOnTop(true, 'modal-panel');
