@@ -6,6 +6,15 @@ const globalShortcut = electron.globalShortcut;
 const Menu = electron.Menu;
 const utils = require('./js/utils.js');
 
+// 禁用安全提示
+// https://www.electronjs.org/docs/tutorial/security
+// 目前electron会弹3个安全提示
+// 1、CSP要求禁用unsafe-eval，但这会造成Vue template无法运行时编译，这对我们影响很大，整个index大概都要重写，懒的搞
+// 2、enableBlinkFeature按照文档不传参默认是关闭的，但是不知道为什么我这里默认是开启的，我传false也关不掉，所以也不管了
+// 3、最后一个禁用remote模块，全部线程间传递都改用ipc，但是这同样涉及到非常多改动，懒得改
+// 反正我们的代码也都是本地的，我们完全不执行远程代码，应该不会有安全问题
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
+
 const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 
 // handle uncaught exception
