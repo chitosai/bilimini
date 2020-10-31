@@ -6,6 +6,15 @@ const globalShortcut = electron.globalShortcut;
 const Menu = electron.Menu;
 const utils = require('./js/utils.js');
 
+// 禁用安全提示
+// https://www.electronjs.org/docs/tutorial/security
+// 目前electron会弹3个安全提示
+// 1、CSP要求禁用unsafe-eval，但这会造成Vue template无法运行时编译，这对我们影响很大，整个index大概都要重写，懒的搞
+// 2、enableBlinkFeature按照文档不传参默认是关闭的，但是不知道为什么我这里默认是开启的，我传false也关不掉，所以也不管了
+// 3、最后一个禁用remote模块，全部线程间传递都改用ipc，但是这同样涉及到非常多改动，懒得改
+// 反正我们的代码也都是本地的，我们完全不执行远程代码，应该不会有安全问题
+process.env.ELECTRON_DISABLE_SECURITY_WARNINGS = true;
+
 const platform = process.platform.startsWith('win') ? 'win' : process.platform;
 
 // handle uncaught exception
@@ -33,6 +42,14 @@ function openMainWindow() {
       windowParams = {width: 375, height: 500, frame: false};
   if( opacity < 1 ) {
     windowParams.transparent = true;
+  }
+  // 新增两个参数，第一是electron 5.0的安全性要求 ↓
+  // https://www.electronjs.org/docs/tutorial/security#2-do-not-enable-nodejs-integration-for-remote-content
+  // 但是这个参数对架构改动实在太大了，根本不想改。而且bilimini限制了代码只访问b站域名的内容，大体上不会有太多安全问题，所以直接把这个安全要求忽略掉了
+  // 第二个参数是webview在5.0里默认被禁用了，又是个breaking change。。我人都傻了
+  windowParams.webPreferences = {
+    nodeIntegration: true,
+    webviewTag: true
   }
   mainWindow = new electron.BrowserWindow(windowParams);
   mainWindow.loadURL('file://' + __dirname + '/index.html');
@@ -72,7 +89,10 @@ var selectPartWindow = null;
 function initSelectPartWindow() {
   utils.log('选p窗口：开始创建');
   selectPartWindow = new electron.BrowserWindow({
-    width: 200, height: 300, frame: false, show: false
+    width: 200, height: 300, frame: false, show: false,
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
   selectPartWindow.loadURL('file://' + __dirname + '/selectP.html');
   selectPartWindow.setAlwaysOnTop(true, 'modal-panel');
@@ -110,7 +130,10 @@ var configWindow = null;
 function initConfigWindow() {
   utils.log('设置窗口：开始创建');
   configWindow = new electron.BrowserWindow({
-    width: 200, height: 200, frame: false, show: false
+    width: 200, height: 200, frame: false, show: false,
+    webPreferences: {
+      nodeIntegration: true
+    }
   });
   configWindow.loadURL('file://' + __dirname + '/config.html');
   configWindow.setAlwaysOnTop(true, 'modal-panel');
@@ -250,7 +273,7 @@ function initMenu() {
   utils.log('菜单：初始化');
   // 本来我们是不需要菜单的，但是因为mac上app必须有菜单，所以只在mac上做一下
   var template = [{
-      label: app.getName(),
+      label: app.name,
       submenu: [
         { role: 'hide' },
         { role: 'hideothers' },

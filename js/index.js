@@ -12,14 +12,21 @@ const videoUrlPrefix = 'https://www.bilibili.com/video/';
 const liveUrlPrefix  = 'https://live.bilibili.com/blanc/';
 let wv, wrapper;
 let _isLastNavigatePartSelect = false;
-let _isLastestVersionChecked = false;
 
 // 保存用户浏览记录
 let _lastNavigation = new Date();
 var _history = {
   stack: ['https://m.bilibili.com/index.html'],
   pos: 0,
+  lastTarget: '', // 这是最后一次传入go方法的url
+  lastLoadedUrl: '', // 这是最后一次webview实际加载完成的url，这个是在下面webview的did-finish-load事件的时候更新的
   go: function(target, noNewHistory) {
+    // 防止重复加载同页面
+    if( target == _history.lastTarget ) {
+      // utils.log(`代码尝试重复加载页面：${target}`);
+      return false;
+    }
+    _history.lastTarget = target;
     // 显示loading mask
     wrapper.classList.add('loading');
     let vid = utils.getVid(target);
@@ -308,10 +315,10 @@ const v = new Vue({
 
 // 给body加上platform flag
 function detectPlatform() {
-  if(process.platform.startsWith('win')) {
+  if( process.platform.startsWith('win') ) {
     window.platform = 'win';
     document.body.classList.add('win');
-  } else if(process.platform == 'darwin') {
+  } else if( process.platform == 'darwin' ) {
     window.platform = 'darwin';
     document.body.classList.add('macos');
   }
@@ -319,15 +326,18 @@ function detectPlatform() {
 
 // 检查更新
 function checkUpdateOnInit() {
-  if( _isLastestVersionChecked ) {
+  const now = new Date();
+  const today = `${now.getFullYear()}/${now.getMonth()}/${now.getDate()}`; // 每一天只检查一次更新
+  const lastCheckUpdateDate = utils.config.get('lastCheckUpdateDate');
+  if( today == lastCheckUpdateDate ) {
     return;
-  } else {
-    _isLastestVersionChecked = true;
   }
   utils.ajax.get('http://rakuen.thec.me/bilimini/beacon?_t=' + new Date().getTime(), (res) => {
     var data = JSON.parse(res),
       order = 1,
       buttons = ['取消', '去下载'];
+    // already checked today
+    utils.config.set('lastCheckUpdateDate', today);
     if(window.platform == 'win') {
       order = 0;
       buttons = ['去下载', '取消'];
@@ -431,6 +441,8 @@ function initActionOnWebviewNavigate() {
     utils.log(`触发 did-finish-load 事件，当前url是: ${url}`);
     v.naviCanGoBack = _history.canGoBack();
     v.naviCanGoForward = _history.canGoForward();
+    // 把当前webview的实际url记录下来
+    _history.lastLoadedUrl = url;
     // 改变窗口尺寸
     resizeMainWindow();
     // 关闭loading遮罩
@@ -457,19 +469,24 @@ function initActionOnWebviewNavigate() {
       _history.go(e.url);
     }
   });
+  // b站mobile版看起来是改用pushstate做单页应用了，没法从webview上监听到will-navigate事件了
+  // 只能祭出古老的dirty check了
+  setInterval(function() {
+    const nowUrl = wv.getURL();
+    // 用新url和history堆栈的最后一个记录作对比，如果不同就说明webview里加载了新页面
+    // lastLoadedUrl是为了防止在后退操作时，_history中的堆栈已经改变了，但是webview因为还没有加载完成，被dirtycheck检测到url和_history
+    // 的最后一条数据对不上，而再次调用_history.go方法造成无法后退的情况
+    if( nowUrl != _history.stack[_history.pos] && nowUrl != _history.lastLoadedUrl ) {
+      utils.log(`Dirty-check检测到Webview的url改变，目标: ${nowUrl}`);
+      _history.go(nowUrl);
+    }
+  }, 500);
   // webview中点击target="_blank"的链接时在当前webview打开
   wv.addEventListener('new-window', function(e) {
     utils.log(`触发 new-window 事件，目标: ${e.url}`);
     _history.go(e.url);
   });
 }
-
-// 无法正常打开页面时显示错误页面
-// function displayErrorPageWhenLoadFail() {
-//     wv.addEventListener('did-fail-load', () => {
-//         wv.loadURL('file://' + __dirname + '/error.html');
-//     });
-// }
 
 // 点击菜单「webview console」时打开webview
 function openWebviewConsoleOnMenuClick() {
@@ -549,8 +566,8 @@ function openExternalLink(url) {
 // 把webview里的报错信息log下来
 function logWebviewError() {
   wv.addEventListener('console-message', (err) => {
-    // 我看console.error的level是2，那>1的就都log下来吧
-    if(err.level > 1) {
+    // 目测 0 = verbose 1 = info 2 = warning 3 = error
+    if(err.level > 2) {
       utils.error(`Webview报错\nLine ${err.line}: ${err.message}\nwebview当前url: ${wv.getURL()}`)
     }
   });

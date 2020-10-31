@@ -92,9 +92,6 @@ window.addEventListener('DOMContentLoaded', function() {
         // 隐藏聊天栏显示按钮
         let aside = document.getElementsByClassName('aside-area-toggle-btn')[0];
         aside.style.display = 'none';
-        // 隐藏 haruna
-        let haruna = document.getElementsByClassName('haruna-ctnr')[0];
-        haruna.style.display = 'none';
         // 隐藏全屏播放器（在某些情况下会出现）的滚动条
         document.body.style.overflow = 'hidden';
         clearInterval(playerInitCheck);
