@@ -308,7 +308,7 @@ const v = new Vue({
       }
       utils.log('主窗口：点击弹幕开关');
       // 2018-12-05 适配最新B站弹幕开关
-      wv.executeJavaScript(`document.querySelector('.bilibili-player-video-danmaku-switch .bui-checkbox').click()`);
+      wv.executeJavaScript(`document.querySelector('.bilibili-player-video-danmaku-switch .bui-switch-input').click()`);
     }
   }
 });
