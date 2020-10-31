@@ -18,7 +18,15 @@ let _lastNavigation = new Date();
 var _history = {
   stack: ['https://m.bilibili.com/index.html'],
   pos: 0,
+  lastTarget: '', // 这是最后一次传入go方法的url
+  lastLoadedUrl: '', // 这是最后一次webview实际加载完成的url，这个是在下面webview的did-finish-load事件的时候更新的
   go: function(target, noNewHistory) {
+    // 防止重复加载同页面
+    if( target == _history.lastTarget ) {
+      // utils.log(`代码尝试重复加载页面：${target}`);
+      return false;
+    }
+    _history.lastTarget = target;
     // 显示loading mask
     wrapper.classList.add('loading');
     let vid = utils.getVid(target);
@@ -433,6 +441,8 @@ function initActionOnWebviewNavigate() {
     utils.log(`触发 did-finish-load 事件，当前url是: ${url}`);
     v.naviCanGoBack = _history.canGoBack();
     v.naviCanGoForward = _history.canGoForward();
+    // 把当前webview的实际url记录下来
+    _history.lastLoadedUrl = url;
     // 改变窗口尺寸
     resizeMainWindow();
     // 关闭loading遮罩
@@ -461,19 +471,16 @@ function initActionOnWebviewNavigate() {
   });
   // b站mobile版看起来是改用pushstate做单页应用了，没法从webview上监听到will-navigate事件了
   // 只能祭出古老的dirty check了
-  let lastUrl = '';
   setInterval(function() {
     const nowUrl = wv.getURL();
-    if( nowUrl != lastUrl ) {
-      if( nowUrl.startsWith('bilibili://') ) {
-        utils.log(`网页端尝试拉起App: ${nowUrl}，已取消`);
-      } else {
-        utils.log(`Dirty-check检测到Webview的url改变，目标: ${nowUrl}`);
-        _history.go(nowUrl);
-      }
-      lastUrl = nowUrl;
+    // 用新url和history堆栈的最后一个记录作对比，如果不同就说明webview里加载了新页面
+    // lastLoadedUrl是为了防止在后退操作时，_history中的堆栈已经改变了，但是webview因为还没有加载完成，被dirtycheck检测到url和_history
+    // 的最后一条数据对不上，而再次调用_history.go方法造成无法后退的情况
+    if( nowUrl != _history.stack[_history.pos] && nowUrl != _history.lastLoadedUrl ) {
+      utils.log(`Dirty-check检测到Webview的url改变，目标: ${nowUrl}`);
+      _history.go(nowUrl);
     }
-  }, 200);
+  }, 500);
   // webview中点击target="_blank"的链接时在当前webview打开
   wv.addEventListener('new-window', function(e) {
     utils.log(`触发 new-window 事件，目标: ${e.url}`);
