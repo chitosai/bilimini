@@ -23,7 +23,9 @@ npm start
 使用electron-builder打包：
 
 ```
-npm run dist
+npm run win64
+npm run win32
+npm run mac
 ```
 
 
