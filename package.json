@@ -12,8 +12,8 @@
   "repository": "https://github.com/chitosai/bilimini",
   "author": "TheC",
   "devDependencies": {
-    "electron": "^9.4.0",
-    "electron-builder": "next"
+    "electron": "^9.4.4",
+    "electron-builder": "^22.10.5"
   },
   "build": {
     "mac": {
@@ -23,6 +23,6 @@
   "dependencies": {
     "electron-is-accelerator": "^0.1.2",
     "electron-store": "^1.1.0",
-    "graceful-fs": "^4.2.3"
+    "graceful-fs": "^4.2.6"
   }
 }

@@ -49,7 +49,8 @@ function openMainWindow() {
   // 第二个参数是webview在5.0里默认被禁用了，又是个breaking change。。我人都傻了
   windowParams.webPreferences = {
     nodeIntegration: true,
-    webviewTag: true
+    webviewTag: true,
+    enableRemoteModule: true
   }
   mainWindow = new electron.BrowserWindow(windowParams);
   mainWindow.loadURL('file://' + __dirname + '/index.html');
