@@ -65,7 +65,6 @@ window.addEventListener('DOMContentLoaded', function() {
   // 动态页重做样式
   else if( window.location.href.includes('t.bilibili.com/?tab=8') ) {
     const style = document.createElement('style');
-    style.type = 'text/css';
     style.innerHTML = '#bili-header-m, .left-panel, .right-panel, .center-panel > .section-block, .sticky-bar { display: none !important }' +
                       '.home-content, .center-panel { width: 100% !important; }' +
                       '.card { min-width: 0 !important;}'
@@ -86,7 +85,7 @@ window.addEventListener('DOMContentLoaded', function() {
       if( document.querySelector('.bp-no-flash-tips') ) {
         // 切换 HTML5 播放器
         window.EmbedPlayer.loader();
-      } else if( document.querySelector('.bilibili-live-player') ) {
+      } else if( window.__PlayerInitialized ) {
         // 全屏播放器并隐藏聊天栏
         document.getElementsByTagName('body')[0].classList.add('player-full-win', 'hide-aside-area');
         // 隐藏聊天栏显示按钮
