@@ -130,15 +130,14 @@ var _history = {
 };
 
 function getPartOfVideo(vid) {
-  utils.ajax.get(videoUrlPrefix + vid, (res) => {
-    // 用window.__INITIAL_STATE__=当标识，找到之后文本中包含的第一个完整json
-    const index = res.indexOf('window.__INITIAL_STATE__=');
-    const text = res.substr(index + 25);
-    const json = utils.getFirstJsonFromString(text);
-    if( !json ) {
-      utils.log('获取视频分p数据失败', res);
+  utils.ajax.get(videoUrlPrefix + vid, (res = '') => {
+    // 分 P 信息存储在 window.__INITIAL_STATE__= 中 根据 object 类型的特性最后一个 } 后面不会有 , ] } 使用正则匹配
+    const match = res.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\})[^,\]\}]/m)
+    if (!match[1]) {
+      utils.log('获取番剧分p数据失败', res);
       return false;
     }
+    const json = JSON.parse(match[1]);
     let parts;
     try {
       parts = json.videoData.pages;
@@ -162,15 +161,14 @@ function getPartOfVideo(vid) {
 }
 
 function getPartOfBangumi(url) {
-  utils.ajax.get(url, (res) => {
-    // 用window.__INITIAL_STATE__=当标识，找到之后文本中包含的第一个完整json
-    const index = res.indexOf('window.__INITIAL_STATE__=');
-    const text = res.substr(index + 25);
-    const json = utils.getFirstJsonFromString(text);
-    if( !json ) {
+  utils.ajax.get(url, (res = '') => {
+    // 分 P 信息存储在 window.__INITIAL_STATE__= 中 根据 object 类型的特性最后一个 } 后面不会有 , ] } 使用正则匹配
+    const match = res.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\})[^,\]\}]/m)
+    if (!match[1]) {
       utils.log('获取番剧分p数据失败', res);
       return false;
     }
+    const json = JSON.parse(match[1]);
     let parts;
     let currentPartId = 0;
     try {
