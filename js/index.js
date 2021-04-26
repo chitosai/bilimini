@@ -351,7 +351,7 @@ function checkUpdateOnInit() {
         message: `检查到新版本v${data.version}，您正在使用的版本是v${appData.version}，是否打开下载页面？`
       }, (res, checkboxChecked) => {
         if(res == order) {
-          shell.openExternal(`https://pan.baidu.com/s/1jIHnRk6#list/path=%2Fbilimini%2Fv${data.version}`);
+          shell.openExternal(`https://github.com/chitosai/bilimini/releases/tag/v${data.version}`);
         }
       });
     }
