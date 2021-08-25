@@ -13,7 +13,7 @@
   "author": "TheC",
   "devDependencies": {
     "electron": "^9.4.4",
-    "electron-builder": "^22.10.5"
+    "electron-builder": "^22.9.1"
   },
   "build": {
     "mac": {
