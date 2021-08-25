@@ -92,7 +92,8 @@ function initSelectPartWindow() {
   selectPartWindow = new electron.BrowserWindow({
     width: 200, height: 300, frame: false, show: false,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true
     }
   });
   selectPartWindow.loadURL('file://' + __dirname + '/selectP.html');
@@ -179,6 +180,10 @@ function initExchangeMessageForRenderers() {
   // 转发番剧分p消息，这俩的格式是不一样的，番剧的分p里带了playurl
   ipc.on('update-bangumi-part', (ev, args) => {
     selectPartWindow && selectPartWindow.webContents.send('update-bangumi-part', args);
+  });
+  // 转发当前webview的url地址给分p页面，方便分p页面判断当前位置
+  ipc.on('url-changed', (ev, args) => {
+    selectPartWindow && selectPartWindow.send('url-changed', args);
   });
   // 转发选p消息
   ipc.on('select-part', (ev, args) => {

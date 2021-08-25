@@ -11,7 +11,6 @@ const userAgent = {
 const videoUrlPrefix = 'https://www.bilibili.com/video/';
 const liveUrlPrefix  = 'https://live.bilibili.com/blanc/';
 let wv, wrapper;
-let _isLastNavigatePartSelect = false;
 
 // 保存用户浏览记录
 let _lastNavigation = new Date();
@@ -29,7 +28,7 @@ var _history = {
     _history.lastTarget = target;
     // 显示loading mask
     wrapper.classList.add('loading');
-    let vid = utils.getVid(target);
+    let vid = utils.getVidWithP(target);
     let live;
     // 如果两次转跳的时间间隔小于3s，就认为是B站发起的redirect
     // 这时为保证后退时不会陷入循环，手动删除一条历史
@@ -76,12 +75,10 @@ var _history = {
   },
   goPart: function(pid) {
     wrapper.classList.add('loading');
-    _isLastNavigatePartSelect = true;
-    // 因为utils.getVid返回的地址是通用的，里面可能已经带了/?p=，所以这里我们单独获取吧
-    const url = wv.getURL();
-    const m = /av\d+/.exec(url) || /BV\w+/.exec(url);
-    if(m) {
-      let url = `${videoUrlPrefix}${m[0]}/?p=${pid}`;
+    // 因为utils.getVidWithP返回的地址是通用的，里面可能已经带了/?p=，所以这里我们单独获取吧
+    const vid = utils.getVid(wv.getURL());
+    if(vid) {
+      let url = `${videoUrlPrefix}${vid}/?p=${pid}`;
       wv.loadURL(url, {
         userAgent: userAgent.desktop
       });
@@ -91,7 +88,6 @@ var _history = {
   },
   goBangumiPart(ep) {
     utils.log(`路由：选择番剧分p`);
-    _isLastNavigatePartSelect = true;
     _history.go(videoUrlPrefix + ep.bvid);
   },
   add: function(url) {
@@ -433,6 +429,7 @@ function initSetBodyOpacity() {
 
 // webview跳转相关
 function initActionOnWebviewNavigate() {
+  let _lastVid = 0;
   // 判断是否能前进/后退
   wv.addEventListener('did-finish-load', function() {
     let url = wv.getURL();
@@ -445,17 +442,18 @@ function initActionOnWebviewNavigate() {
     resizeMainWindow();
     // 关闭loading遮罩
     wrapper.classList.remove('loading');
-    // 根据跳转完成后的真实url决定如何抓取分p
-    if( !_isLastNavigatePartSelect ) {
-      const vid = utils.getVid(url);
-      if( vid ) {
+    // 根据url格式判断是获取普通分p还是番剧分p
+    const vid = utils.getVid(url);
+    if( vid ) {
+      // 现在存在同一个视频自动跳下一p的可能，这时也会触发路由重新加载页面，但是这时不应该重新获取分p数据
+      if (vid !== _lastVid) {
         getPartOfVideo(vid);
-      } else if( url.indexOf('bangumi/play/') > -1 ) {
-        getPartOfBangumi(url);
+        _lastVid = vid;
       }
-    } else {
-      _isLastNavigatePartSelect = false;
+    } else if( url.indexOf('bangumi/play/') > -1 ) {
+      getPartOfBangumi(url);
     }
+    ipc.send('url-changed', url);
   });
   wv.addEventListener('will-navigate', function(e) {
     if( e.url.startsWith('bilibili://') ) {
@@ -508,7 +506,7 @@ function initActionOnEsc() {
   ipc.on('press-esc', (ev) => {
     let url = wv.getURL();
     // 如果在播放页按下esc就触发后退
-    if( utils.getVid(url) || url.indexOf('bangumi/play') > -1 ) {
+    if( utils.getVidWithP(url) || url.indexOf('bangumi/play') > -1 ) {
       utils.log('在播放器页面按下ESC，后退至上一页');
       _history.goBack();
     }

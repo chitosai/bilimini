@@ -59,9 +59,14 @@ function getAppPath() {
 }
 const appPath = getAppPath();
 
+function getVidWithP(url) {
+    const m  = /video\/(av\d+(?:\/?\?p=\d+)?)/.exec(url) ||
+             /video\/(BV\w+(?:\/?\?p=\d+)?)/.exec(url)
+    return m ? m[1] : null;
+}
+
 function getVid(url) {
-    let m  = /video\/(av\d+(?:\/\?p=\d+)?)/.exec(url) ||
-             /video\/(BV\w+(?:\/\?p=\d+)?)/.exec(url)
+    const m = /video\/(av\d+)/.exec(url) || /video\/(BV\w+)/.exec(url);
     return m ? m[1] : null;
 }
 
@@ -112,6 +117,7 @@ module.exports = {
     config,
     ajax,
     getVid,
+    getVidWithP,
     getFirstJsonFromString,
     log(message, data, override) {
         log.write({
