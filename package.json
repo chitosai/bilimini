@@ -7,7 +7,8 @@
     "start": "electron .",
     "win64": "./node_modules/.bin/electron-builder --x64",
     "win32": "./node_modules/.bin/electron-builder --ia32",
-    "mac": "./node_modules/.bin/electron-builder --mac"
+    "mac": "./node_modules/.bin/electron-builder --mac",
+    "linux": "./node_modules/.bin/electron-builder --linux appimage"
   },
   "repository": "https://github.com/chitosai/bilimini",
   "author": "TheC",
@@ -18,6 +19,10 @@
   "build": {
     "mac": {
       "category": "Network"
+    },
+    "linux": {
+      "category": "Network",
+      "icon": "build/icon256.png"
     }
   },
   "dependencies": {
