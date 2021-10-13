@@ -134,7 +134,8 @@ function initConfigWindow() {
   configWindow = new electron.BrowserWindow({
     width: 200, height: 200, frame: false, show: false,
     webPreferences: {
-      nodeIntegration: true
+      nodeIntegration: true,
+      enableRemoteModule: true,
     }
   });
   configWindow.loadURL('file://' + __dirname + '/config.html');
