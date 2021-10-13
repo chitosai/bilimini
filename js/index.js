@@ -417,16 +417,6 @@ function resizeMainWindow() {
   }
 }
 
-// 根据设置调整页面的透明度
-function initSetBodyOpacity() {
-  function update() {
-    var opacity = utils.config.get('opacity');
-    document.body.style.opacity = opacity;
-  }
-  ipc.on('set-opacity', update);
-  update();
-}
-
 // webview跳转相关
 function initActionOnWebviewNavigate() {
   let _lastVid = 0;
@@ -581,7 +571,6 @@ window.addEventListener('DOMContentLoaded', function() {
   initMouseStateDirtyCheck();
   openWebviewConsoleOnMenuClick();
   redirectOnSelectPart();
-  initSetBodyOpacity();
   logWebviewError();
 });
 

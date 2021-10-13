@@ -42,6 +42,7 @@ function openMainWindow() {
       windowParams = {width: 375, height: 500, frame: false};
   if( opacity < 1 ) {
     windowParams.transparent = true;
+    windowParams.opacity = opacity;
   }
   // 新增两个参数，第一是electron 5.0的安全性要求 ↓
   // https://www.electronjs.org/docs/tutorial/security#2-do-not-enable-nodejs-integration-for-remote-content
@@ -196,7 +197,8 @@ function initExchangeMessageForRenderers() {
   });
   // 设置主窗口透明度
   ipc.on('set-opacity', () => {
-    mainWindow && mainWindow.webContents.send('set-opacity');
+    const opacity = utils.config.get('opacity');
+    mainWindow && mainWindow.setOpacity(Number(opacity));
   });
 }
 
