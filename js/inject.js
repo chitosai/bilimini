@@ -86,6 +86,9 @@ window.addEventListener('DOMContentLoaded', function() {
         aside.style.display = 'none';
         // 隐藏全屏播放器（在某些情况下会出现）的滚动条
         document.body.style.overflow = 'hidden';
+        // 移除haruna
+        const haruna = document.getElementById('my-dear-haruna-vm');
+        haruna?.remove();
         clearInterval(playerInitCheck);
       } else if( ++checkCount > 1000 ) {
         clearInterval(playerInitCheck);
