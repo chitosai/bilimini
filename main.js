@@ -356,6 +356,7 @@ function bindGlobalShortcut(isUpdate) {
     if( mainWindow ) {
       if( mainWindow.isVisible() ) {
         mainWindow.hide();
+        mainWindow.webContents.send('hide-hide-hide');
         selectPartWindow && selectPartWindow.isVisible() && selectPartWindow.hide();
         configWindow && configWindow.isVisible() && configWindow.hide();
       } else {

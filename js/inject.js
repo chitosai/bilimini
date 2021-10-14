@@ -40,6 +40,15 @@ window.addEventListener('DOMContentLoaded', function() {
           let volume = document.querySelector('.bilibili-player-iconfont-volume-max');
           volume.dispatchEvent(event);
         });
+        // 用户按了老板键，停止播放视频
+        ipc.on('hide-hide-hide', () => {
+          const player = document.querySelector('.bilibili-player-video');
+          const playButton = document.querySelector('.bilibili-player-video-btn-start');
+          // 只有当视频处在播放状态时才click一下来停止播放，如果本来就停止了就别点了
+          if (player && !Array.from(playButton.classList).includes('video-state-pause')) {
+            player.click();
+          }
+        });
         clearInterval(playerInitCheck);
       } else if( ++checkCount > 100 ) {
         clearInterval(playerInitCheck);

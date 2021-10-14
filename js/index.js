@@ -510,6 +510,13 @@ function initWebviewVolumeContrlShortcuts() {
   });
 }
 
+// 用户按老板键触发隐藏时自动停止播放视频
+function initActionOnBossButtonPressed() {
+  ipc.on('hide-hide-hide', () => {
+    wv.send('hide-hide-hide');
+  });
+}
+
 // windows下frameless window没法正确检测到mouseout事件，只能根据光标位置做个dirtyCheck了
 function initMouseStateDirtyCheck() {
   // 统一改为由js判断，一旦鼠标进入主窗口的上较近才显示topbar
@@ -566,6 +573,7 @@ window.addEventListener('DOMContentLoaded', function() {
   checkUpdateOnInit();
   initActionOnWebviewNavigate();
   initActionOnEsc();
+  initActionOnBossButtonPressed();
   initWebviewVolumeContrlShortcuts();
   saveWindowSizeOnResize();
   initMouseStateDirtyCheck();
