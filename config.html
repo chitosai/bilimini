@@ -12,6 +12,11 @@
       <!-- 不透明度 -->
       <p class="list-title">窗口不透明度</p>
       <div class="item item-range"><input type="range" class="range" v-model="opacity" min="0.1" max="1" step="0.01"></div>
+      <!-- 按下老板键时是否暂停 -->
+      <p class="list-title">按下老板键时自动暂停</p>
+      <label class="item" :class="{active: autoPause}">
+          <input type="checkbox" class="checkbox" v-model="autoPause" /> <span style="vertical-align: middle;">自动暂停</span>
+      </label>
       <!-- 老板键 -->
       <p class="list-title">老板键</p>
       <div class="item">
@@ -42,7 +47,8 @@
       data: {
         opacity: 1,
         hideShortcut: '',
-        proxy: ''
+        proxy: '',
+        autoPause: false,
       },
       watch: {
         opacity(val) {
@@ -54,6 +60,9 @@
           }
           lastOpacity = val;
           config.set('opacity', val);
+        },
+        autoPause(val) {
+          config.set('autoPause', val);
         }
       },
       methods: {
@@ -89,6 +98,7 @@
         this.opacity = lastOpacity = config.get('opacity');
         this.hideShortcut = config.get('hideShortcut');
         this.proxy = config.get('proxy');
+        this.autoPause = config.get('autoPause');
       }
     });
 

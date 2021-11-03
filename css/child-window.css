@@ -37,6 +37,7 @@ body {
 .item {
   border-radius: 3px;
   cursor: pointer;
+  display: block;
   line-height: 2.4em;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -98,4 +99,9 @@ body {
 }
 .input::-webkit-input-placeholder {
   color: #999;
+}
+.checkbox {
+  background-color: rgba(255, 255, 255, .5);
+  border: 5px solid black;
+  vertical-align: middle;
 }

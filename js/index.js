@@ -513,7 +513,9 @@ function initWebviewVolumeContrlShortcuts() {
 // 用户按老板键触发隐藏时自动停止播放视频
 function initActionOnBossButtonPressed() {
   ipc.on('hide-hide-hide', () => {
-    wv.send('hide-hide-hide');
+    if (utils.config.get('autoPause')) {
+      wv.send('hide-hide-hide');
+    }
   });
 }
 

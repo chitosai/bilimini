@@ -30,6 +30,7 @@ var config = {
     windowSizeFeed: [650, 760],
     windowSizeDefault: [375, 500],
     opacity: 1,
+    autoPause: false,
     hideShortcut: process.platform == 'darwin' ? 'Alt + W' : 'Ctrl + E',
     proxy: ''
 }

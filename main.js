@@ -133,7 +133,7 @@ var configWindow = null;
 function initConfigWindow() {
   utils.log('设置窗口：开始创建');
   configWindow = new electron.BrowserWindow({
-    width: 200, height: 200, frame: false, show: false,
+    width: 200, height: 260, frame: false, show: false,
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
