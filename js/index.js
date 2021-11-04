@@ -363,7 +363,7 @@ function checkUpdateOnInit() {
   });
 }
 
-// 当用户拖拽窗口时保存窗口尺寸
+// 当用户缩放窗口时保存窗口尺寸
 function saveWindowSizeOnResize() {
   var saveWindowSizeTimer;
   window.addEventListener('resize', function() {
@@ -399,8 +399,12 @@ function resizeMainWindow() {
       targetSize = utils.config.get(targetWindowType),
       targetPosition = [rightBottomPosition[0] - targetSize[0], rightBottomPosition[1] - targetSize[1]];
     
-    // 以窗口右下角为基点变换尺寸，但是要保证左上角不会到屏幕外去
-    targetPosition[0] = targetPosition[0] > 10 ? targetPosition[0] : 10;
+    // 原先只考虑了一块屏幕的情况，其实有副屏时x轴是有可能为负数的
+    // 所以我们取一个简单的方法，只有一块屏幕时鼠标最小坐标是0，窗口不可能被拖到x<-width的位置上。所以如果这个窗口的x小于-width，那一定是被拖到副屏上了
+    // 只有在他的x处于[-width, 10]之间时，此时窗口应该横跨在左右两块屏幕的交界上，这时我们强行把窗口挪到主屏的x=10位置
+    if (targetPosition[0] > -targetSize[0] && targetPosition[0] < 10) {
+      targetPosition[0] = 10;
+    }
     targetPosition[1] = targetPosition[1] > 10 ? targetPosition[1] : 10;
 
     mw.setBounds({
