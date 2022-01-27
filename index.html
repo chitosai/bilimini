@@ -12,7 +12,7 @@
 
 		<!-- webview -->
 		<!-- 直播有几率会跨域请求 acgvideo.com 的视频资源，为了看直播只好 disablewebsecurity 了，不知道会不会有安全问题？ -->
-	    <webview id="wv" src="https://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233" preload="./js/inject.js" disablewebsecurity></webview>
+	    <webview id="wv" src="https://m.bilibili.com/index.html" useragent="bilimini Mobile like (iPhone or Android) whatever AppleWebKit/124.50 Mobile/BI233" preload="./js/inject.js" disablewebsecurity webpreferences="allowRunningInsecureContent"></webview>
 
 		<!-- loading -->
 		<div id="loading"></div>
