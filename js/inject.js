@@ -8,7 +8,9 @@ window.addEventListener('DOMContentLoaded', function() {
       window.location.href.indexOf('bangumi/play/') > -1 ) {
     let playerInitCheck = setInterval(() => {
       let wideScreenButton;
-      if( wideScreenButton = document.querySelector('[class*="bilibili-player-iconfont-web-fullscreen"]') ) {
+      if( wideScreenButton = document.querySelector(
+        '[class*="bilibili-player-iconfont-web-fullscreen"],[class*="squirtle-video-pagefullscreen"]'
+      ) ) {
         wideScreenButton.click();
         // 隐藏全屏播放器（在某些情况下会出现）的滚动条
         document.body.style.overflow = 'hidden';
@@ -96,12 +98,15 @@ window.addEventListener('DOMContentLoaded', function() {
     }, 100), checkCount = 0;
   }
 
+});
+
+window.addEventListener("load", function () {
   // 移除app广告
   function removeAppAd() {
-    appAdNode = document.querySelectorAll('[class*="OpenApp" i]');
+    const appAdNode = document.querySelectorAll('[class*="launch-app-btn" i]');
     appAdNode.forEach((node) => {
       node.remove();
     });
   }
   removeAppAd();
-});
+})
