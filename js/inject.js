@@ -96,6 +96,22 @@ window.addEventListener('DOMContentLoaded', function() {
         clearInterval(playerInitCheck);
       }
     }, 100), checkCount = 0;
+  } else if (/m\.bilibili\.com\/search/.test(window.location.href)) {
+    // 搜索页打开app弹窗自动点击取消
+    const style = document.createElement("style");
+    style.innerHTML = ".v-dialog{display: none!important}";
+    document.head.appendChild(style);
+    const observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.addedNodes[0].className === "v-dialog") {
+          document.querySelector(".open-app-dialog-btn.cancel").click();
+          observer.disconnect();
+        }
+      });
+    });
+    observer.observe(document.body, {
+      childList: true,
+    });
   }
 
 });

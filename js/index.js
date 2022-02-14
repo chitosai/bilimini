@@ -371,7 +371,7 @@ function saveWindowSizeOnResize() {
     saveWindowSizeTimer = setTimeout(function() {
       const currentSize = utils.config.get(currentWindowType);
       const newSize = [window.innerWidth, window.innerHeight];
-      if( (currentSize[0] != newSize[0]) || (currentSize[1] != newSize[1]) ) {
+      if(currentSize !== newSize) {
         utils.config.set(currentWindowType, newSize);
       }
     }, 600);
