@@ -459,18 +459,24 @@ function initActionOnWebviewNavigate() {
       _history.go(e.url);
     }
   });
+  wv.addEventListener("did-navigate-in-page", ({ url }) => {
+    if( url != _history.stack[_history.pos] && url != _history.lastLoadedUrl ) {
+      utils.log(`触发 did-navigate-in-page 事件，目标: ${url}`);
+      _history.go(url);
+    }
+  });
   // b站mobile版看起来是改用pushstate做单页应用了，没法从webview上监听到will-navigate事件了
   // 只能祭出古老的dirty check了
-  setInterval(function() {
-    const nowUrl = wv.getURL();
-    // 用新url和history堆栈的最后一个记录作对比，如果不同就说明webview里加载了新页面
-    // lastLoadedUrl是为了防止在后退操作时，_history中的堆栈已经改变了，但是webview因为还没有加载完成，被dirtycheck检测到url和_history
-    // 的最后一条数据对不上，而再次调用_history.go方法造成无法后退的情况
-    if( nowUrl != _history.stack[_history.pos] && nowUrl != _history.lastLoadedUrl ) {
-      utils.log(`Dirty-check检测到Webview的url改变，目标: ${nowUrl}`);
-      _history.go(nowUrl);
-    }
-  }, 500);
+  // setInterval(function() {
+  //   const nowUrl = wv.getURL();
+  //   // 用新url和history堆栈的最后一个记录作对比，如果不同就说明webview里加载了新页面
+  //   // lastLoadedUrl是为了防止在后退操作时，_history中的堆栈已经改变了，但是webview因为还没有加载完成，被dirtycheck检测到url和_history
+  //   // 的最后一条数据对不上，而再次调用_history.go方法造成无法后退的情况
+  //   if( nowUrl != _history.stack[_history.pos] && nowUrl != _history.lastLoadedUrl ) {
+  //     utils.log(`Dirty-check检测到Webview的url改变，目标: ${nowUrl}`);
+  //     _history.go(nowUrl);
+  //   }
+  // }, 500);
   // webview中点击target="_blank"的链接时在当前webview打开
   wv.addEventListener('new-window', function(e) {
     utils.log(`触发 new-window 事件，目标: ${e.url}`);
