@@ -51,7 +51,8 @@ function openMainWindow() {
   windowParams.webPreferences = {
     nodeIntegration: true,
     webviewTag: true,
-    enableRemoteModule: true
+    enableRemoteModule: true,
+    contextIsolation: false,
   }
   mainWindow = new electron.BrowserWindow(windowParams);
   mainWindow.loadURL('file://' + __dirname + '/index.html');
@@ -69,7 +70,7 @@ function openMainWindow() {
   });
   clearTimeout(mainWindowIsClosed);
   utils.log('主窗口：已创建');
-  // mainWindow.webContents.openDevTools();
+  mainWindow.webContents.openDevTools();
 }
 
 function initMainWindow() {
@@ -94,7 +95,8 @@ function initSelectPartWindow() {
     width: 200, height: 300, frame: false, show: false,
     webPreferences: {
       nodeIntegration: true,
-      enableRemoteModule: true
+      enableRemoteModule: true,
+      contextIsolation: false,
     }
   });
   selectPartWindow.loadURL('file://' + __dirname + '/selectP.html');
@@ -137,6 +139,7 @@ function initConfigWindow() {
     webPreferences: {
       nodeIntegration: true,
       enableRemoteModule: true,
+      contextIsolation: false,
     }
   });
   configWindow.loadURL('file://' + __dirname + '/config.html');

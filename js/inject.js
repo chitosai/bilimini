@@ -9,7 +9,7 @@ window.addEventListener('DOMContentLoaded', function() {
     let playerInitCheck = setInterval(() => {
       let wideScreenButton;
       if( wideScreenButton = document.querySelector(
-        '[class*="bilibili-player-iconfont-web-fullscreen"],[class*="squirtle-video-pagefullscreen"]'
+        '[class*="bpx-player-ctrl-web-enter"],[class*="bpx-player-ctrl-full"]'
       ) ) {
         wideScreenButton.click();
         // 隐藏全屏播放器（在某些情况下会出现）的滚动条

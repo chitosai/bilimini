@@ -61,6 +61,11 @@ var _history = {
       !noNewHistory && _history.add(liveUrlPrefix + live[2]);
       v.disableDanmakuButton = false;
       utils.log(`路由：类型③ 直播页面\n原地址：${target}\n转跳地址：${liveUrlPrefix+live[2]}`);
+    } else if(target.indexOf("/channel/v") > -1) {
+      utils.log(`路由：类型③ 频道\n原地址：${target}\n转跳地址：${target}`);
+      wv.loadURL(target, {
+        userAgent: userAgent.mobile
+      });
     } else {
       // 其他链接不做操作直接打开
       wv.loadURL(target, {
@@ -128,7 +133,7 @@ var _history = {
 function getPartOfVideo(vid) {
   utils.ajax.get(videoUrlPrefix + vid, (res = '') => {
     // 分 P 信息存储在 window.__INITIAL_STATE__= 中 根据 object 类型的特性最后一个 } 后面不会有 , ] } 使用正则匹配
-    const match = res.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\})[^,\]\}]/m)
+    const match = res.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\})[^,\]\}]/m) ?? []
     if (!match[1]) {
       utils.log('获取番剧分p数据失败', res);
       return false;
@@ -159,7 +164,7 @@ function getPartOfVideo(vid) {
 function getPartOfBangumi(url) {
   utils.ajax.get(url, (res = '') => {
     // 分 P 信息存储在 window.__INITIAL_STATE__= 中 根据 object 类型的特性最后一个 } 后面不会有 , ] } 使用正则匹配
-    const match = res.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\})[^,\]\}]/m)
+    const match = res.match(/window\.__INITIAL_STATE__\s*=\s*(\{.*?\})[^,\]\}]/m) ?? []
     if (!match[1]) {
       utils.log('获取番剧分p数据失败', res);
       return false;
@@ -466,7 +471,7 @@ function initActionOnWebviewNavigate() {
     // 用新url和history堆栈的最后一个记录作对比，如果不同就说明webview里加载了新页面
     // lastLoadedUrl是为了防止在后退操作时，_history中的堆栈已经改变了，但是webview因为还没有加载完成，被dirtycheck检测到url和_history
     // 的最后一条数据对不上，而再次调用_history.go方法造成无法后退的情况
-    if( nowUrl != _history.stack[_history.pos] && nowUrl != _history.lastLoadedUrl ) {
+    if( nowUrl != _history.stack[_history.pos] && nowUrl != _history.lastLoadedUrl && nowUrl.indexOf("/channel/v") === -1) {
       utils.log(`Dirty-check检测到Webview的url改变，目标: ${nowUrl}`);
       _history.go(nowUrl);
     }
