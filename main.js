@@ -70,7 +70,7 @@ function openMainWindow() {
   });
   clearTimeout(mainWindowIsClosed);
   utils.log('主窗口：已创建');
-  mainWindow.webContents.openDevTools();
+  // mainWindow.webContents.openDevTools();
 }
 
 function initMainWindow() {
